@@ -9,7 +9,7 @@ namespace Chlorine
 			Rejected
 		}
 
-		private readonly WeakList<Future> _futures = new WeakList<Future>();
+		private WeakList<Future> _futures;
 
 		private PromiseStatus _status = PromiseStatus.Pending;
 		private Error _reason;
@@ -41,6 +41,10 @@ namespace Chlorine
 			switch (_status)
 			{
 				case PromiseStatus.Pending:
+					if (_futures == null)
+					{
+						_futures = new WeakList<Future>();
+					}
 					_futures.Add(future);
 					break;
 				case PromiseStatus.Resolved:
@@ -54,12 +58,12 @@ namespace Chlorine
 
 		public void Revoke(Future future)
 		{
-			_futures.Remove(future);
+			_futures?.Remove(future);
 		}
 
 		public virtual void RevokeAll()
 		{
-			_futures.Clear();
+			_futures?.Clear();
 		}
 
 		public void Reject(Error reason)
@@ -75,17 +79,23 @@ namespace Chlorine
 
 		protected virtual void HandleResolve()
 		{
-			foreach (Future future in _futures)
+			if (_futures != null)
 			{
-				future.Resolve();
+				foreach (Future future in _futures)
+				{
+					future.Resolve();
+				}
 			}
 		}
 
 		private void HandleReject()
 		{
-			foreach (Future future in _futures)
+			if (_futures != null && _futures.Count > 0)
 			{
-				future.Reject(_reason);
+				foreach (Future future in _futures)
+				{
+					future.Reject(_reason);
+				}
 			}
 		}
 	}

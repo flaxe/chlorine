@@ -10,6 +10,8 @@ namespace Chlorine
 		private readonly Pool<WeakReference<T>> _referencePool = new Pool<WeakReference<T>>();
 		private readonly List<WeakReference<T>> _references = new List<WeakReference<T>>();
 
+		public int Count => _references.Count;
+
 		public Enumerator GetEnumerator()
 		{
 			return new Enumerator(_references.GetEnumerator());

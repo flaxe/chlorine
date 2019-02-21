@@ -15,7 +15,7 @@ namespace Chlorine
 
 	public class Promise<TResult> : AbstractPromise, IPromise<TResult>
 	{
-		private readonly WeakList<Future<TResult>> _resultFutures = new WeakList<Future<TResult>>();
+		private WeakList<Future<TResult>> _resultFutures;
 
 		private TResult _result;
 
@@ -32,6 +32,10 @@ namespace Chlorine
 			switch (Status)
 			{
 				case PromiseStatus.Pending:
+					if (_resultFutures == null)
+					{
+						_resultFutures = new WeakList<Future<TResult>>();
+					}
 					_resultFutures.Add(future);
 					break;
 				case PromiseStatus.Resolved:
@@ -45,13 +49,13 @@ namespace Chlorine
 
 		public void Revoke(Future<TResult> future)
 		{
-			_resultFutures.Remove(future);
+			_resultFutures?.Remove(future);
 		}
 
 		public override void RevokeAll()
 		{
 			base.RevokeAll();
-			_resultFutures.Clear();
+			_resultFutures?.Clear();
 		}
 
 		public void Resolve(TResult result)
@@ -68,9 +72,12 @@ namespace Chlorine
 		protected override void HandleResolve()
 		{
 			base.HandleResolve();
-			foreach (Future<TResult> resultFuture in _resultFutures)
+			if (_resultFutures != null && _resultFutures.Count > 0)
 			{
-				resultFuture.Resolve(_result);
+				foreach (Future<TResult> resultFuture in _resultFutures)
+				{
+					resultFuture.Resolve(_result);
+				}
 			}
 		}
 	}
