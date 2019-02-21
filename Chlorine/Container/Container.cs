@@ -6,17 +6,22 @@ namespace Chlorine
 	{
 		private readonly Container _parentContainer;
 
-		private readonly Injector _injector;
 		private readonly Binder _binder;
+		private readonly Injector _injector;
 
 		public Container(Container parentContainer = null)
 		{
 			_parentContainer = parentContainer;
 
-			_injector = new Injector(this);
-
 			_binder = new Binder();
-			_binder.Bind(typeof(IContainer), null, new InstanceProvider<Container>(this));
+			_binder.Bind(typeof(IContainer), null, new InstanceProvider<IContainer>(this));
+
+			if (parentContainer == null)
+			{
+				_binder.Bind(typeof(InjectAnalyzer), null, new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
+			}
+
+			_injector = new Injector(this);
 		}
 
 		public void Install<TInstaller>(object[] arguments = null) where TInstaller : Installer
@@ -29,9 +34,9 @@ namespace Chlorine
 			installer.Install(this);
 		}
 
-		public BindingWithId<T> Bind<T>() where T : class
+		public Binding<T> Bind<T>() where T : class
 		{
-			return new BindingWithId<T>(_binder, this);
+			return new Binding<T>(_binder, this);
 		}
 
 		public T Resolve<T>(object id = null) where T : class

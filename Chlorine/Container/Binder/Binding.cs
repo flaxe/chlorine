@@ -6,38 +6,40 @@ namespace Chlorine
 		private readonly Binder _binder;
 		private readonly Container _container;
 
-		private readonly object _id;
-
-		internal Binding(Binder binder, Container container, object id)
+		internal Binding(Binder binder, Container container)
 		{
 			_binder = binder;
 			_container = container;
-			_id = id;
 		}
 
-		public BindingScope<TContract> To<TConcrete>() where TConcrete : class, TContract
+		public BindingWithId<TContract> WithId(object id)
 		{
-			return new BindingScope<TContract>(_binder, _id, new ConcreteProvider<TConcrete, TContract>(_container));
+			return new BindingWithId<TContract>(_binder, _container, id);
 		}
 
-		public BindingScope<TContract> FromFactory<TFactory>() where TFactory : class, IFactory<TContract>
+		public BindingWithProvider<TContract> To<TConcrete>() where TConcrete : class, TContract
 		{
-			return new BindingScope<TContract>(_binder, _id, new FromFactoryProvider<TFactory, TContract>(_container));
+			return new BindingWithProvider<TContract>(_binder, null, new ConcreteProvider<TConcrete,TContract>(_container));
+		}
+
+		public BindingWithProvider<TContract> FromFactory<TFactory>() where TFactory : class, IFactory<TContract>
+		{
+			return new BindingWithProvider<TContract>(_binder, null, new FromFactoryProvider<TFactory, TContract>(_container));
 		}
 
 		public void ToInstance(TContract instance)
 		{
-			_binder.Bind(typeof(TContract), _id, new InstanceProvider<TContract>(instance));
+			_binder.Bind(typeof(TContract), null, new InstanceProvider<TContract>(instance));
 		}
 
 		public void AsSingleton()
 		{
-			_binder.Bind(typeof(TContract), _id, new SingletonProvider<TContract>(new ConcreteProvider<TContract, TContract>(_container)));
+			_binder.Bind(typeof(TContract), null, new SingletonProvider<TContract>(new ConcreteProvider<TContract, TContract>(_container)));
 		}
 
 		public void AsTransient()
 		{
-			_binder.Bind(typeof(TContract), _id, new TransientProvider<TContract>(new ConcreteProvider<TContract, TContract>(_container)));
+			_binder.Bind(typeof(TContract), null, new TransientProvider<TContract>(new ConcreteProvider<TContract, TContract>(_container)));
 		}
 	}
 }

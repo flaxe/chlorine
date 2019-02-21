@@ -7,22 +7,24 @@ namespace Chlorine
 	{
 		private static readonly Type ObjectType = typeof(object);
 
-		private static readonly InjectAnalyzer Analyzer = new InjectAnalyzer();
-
-		private static readonly ArrayPool<object> ParametersPool = new ArrayPool<object>();
-		private static readonly ArrayPool<TypedArgument> ArgumentsPool = new ArrayPool<TypedArgument>();
+		private readonly ArrayPool<object> _parametersPool = new ArrayPool<object>();
+		private readonly ArrayPool<TypedArgument> _argumentsPool = new ArrayPool<TypedArgument>();
 
 		private readonly Container _container;
+
+		private InjectAnalyzer _analyzer;
 
 		public Injector(Container container)
 		{
 			_container = container;
 		}
 
+		private InjectAnalyzer GetAnalyzer() => _analyzer ?? (_analyzer = _container.Resolve<InjectAnalyzer>());
+
 		public object Instantiate(Type type, object[] arguments)
 		{
 			object instance;
-			InjectInfo info = Analyzer.GetInfo(type, InjectFlag.Construct | InjectFlag.Inject);
+			InjectInfo info = GetAnalyzer().GetInfo(type, InjectFlag.Construct | InjectFlag.Inject);
 			if (arguments != null && arguments.Length > 0)
 			{
 				TypedArgument[] typedArguments = CreateArguments(arguments);
@@ -32,7 +34,7 @@ namespace Chlorine
 				}
 				finally
 				{
-					ArgumentsPool.Release(typedArguments);
+					_argumentsPool.Release(typedArguments);
 				}
 			}
 			else
@@ -44,7 +46,7 @@ namespace Chlorine
 
 		public void Inject(object instance, object[] arguments)
 		{
-			InjectInfo info = Analyzer.GetInfo(instance.GetType(), InjectFlag.Inject);
+			InjectInfo info = GetAnalyzer().GetInfo(instance.GetType(), InjectFlag.Inject);
 			if (arguments != null && arguments.Length > 0)
 			{
 				TypedArgument[] typedArguments = CreateArguments(arguments);
@@ -54,7 +56,7 @@ namespace Chlorine
 				}
 				finally
 				{
-					ArgumentsPool.Release(typedArguments);
+					_argumentsPool.Release(typedArguments);
 				}
 			}
 			else
@@ -78,7 +80,7 @@ namespace Chlorine
 			}
 			finally
 			{
-				ParametersPool.Release(parameters);
+				_parametersPool.Release(parameters);
 			}
 			InjectInternal(instance, info, arguments);
 			return instance;
@@ -89,7 +91,7 @@ namespace Chlorine
 			Type baseType = info.Type.BaseType;
 			if (baseType != null && baseType != ObjectType)
 			{
-				InjectInternal(instance, Analyzer.GetInfo(baseType, InjectFlag.Inject), arguments);
+				InjectInternal(instance, GetAnalyzer().GetInfo(baseType, InjectFlag.Inject), arguments);
 			}
 			List<InjectFieldInfo> fieldsInfo = info.Fields;
 			if (fieldsInfo != null && fieldsInfo.Count > 0)
@@ -119,7 +121,7 @@ namespace Chlorine
 					}
 					finally
 					{
-						ParametersPool.Release(parameters);
+						_parametersPool.Release(parameters);
 					}
 				}
 			}
@@ -140,10 +142,10 @@ namespace Chlorine
 			object[] parameters;
 			if (parametersInfo != null && parametersInfo.Count > 0)
 			{
-				parameters = ParametersPool.Pull(parametersInfo.Count) ?? new object[parametersInfo.Count];
+				parameters = _parametersPool.Pull(parametersInfo.Count) ?? new object[parametersInfo.Count];
 				if (arguments != null && arguments.Length > 0)
 				{
-					TypedArgument[] unusedArguments = ArgumentsPool.Pull(arguments.Length) ?? new TypedArgument[arguments.Length];
+					TypedArgument[] unusedArguments = _argumentsPool.Pull(arguments.Length) ?? new TypedArgument[arguments.Length];
 					arguments.CopyTo(unusedArguments, 0);
 					try
 					{
@@ -166,7 +168,7 @@ namespace Chlorine
 					}
 					finally
 					{
-						ArgumentsPool.Release(unusedArguments);
+						_argumentsPool.Release(unusedArguments);
 					}
 				}
 				else
@@ -181,16 +183,16 @@ namespace Chlorine
 			}
 			else
 			{
-				parameters = ParametersPool.Pull(0) ?? new object[0];
+				parameters = _parametersPool.Pull(0) ?? new object[0];
 			}
 			return parameters;
 		}
 
-		private static TypedArgument[] CreateArguments(object[] arguments)
+		private TypedArgument[] CreateArguments(object[] arguments)
 		{
 			if (arguments != null && arguments.Length > 0)
 			{
-				TypedArgument[] typedArguments = ArgumentsPool.Pull(arguments.Length) ?? new TypedArgument[arguments.Length];
+				TypedArgument[] typedArguments = _argumentsPool.Pull(arguments.Length) ?? new TypedArgument[arguments.Length];
 				for (int i = 0; i < arguments.Length; i++)
 				{
 					object value = arguments[i];

@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	public struct BindingScope<TContract>
+	public struct BindingWithProvider<TContract>
 			where TContract : class
 	{
 		private readonly Binder _binder;
@@ -8,7 +8,7 @@ namespace Chlorine
 		private readonly object _id;
 		private readonly IProvider<TContract> _provider;
 
-		internal BindingScope(Binder binder, object id, IProvider<TContract> provider)
+		internal BindingWithProvider(Binder binder, object id, IProvider<TContract> provider)
 		{
 			_binder = binder;
 			_id = id;

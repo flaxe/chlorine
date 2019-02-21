@@ -1,55 +1,56 @@
+using System;
 using System.Collections.Generic;
 
 namespace Chlorine
 {
 	public class ArrayPool<T>
 	{
-		private readonly List<Pool<T[]>> _poolByLength = new List<Pool<T[]>>();
+		private readonly List<Stack<T[]>> _stackByLength = new List<Stack<T[]>>();
 
 		public T[] Pull(int length)
 		{
-			return ResolvePool(length).Pull();
+			Stack<T[]> stack = ResolveStack(length);
+			return stack.Count > 0 ? stack.Pop() : default;
 		}
 
-		public void Release(T[] array)
+		public void Release(T[] array, bool clear = true)
 		{
 			int length = array.Length;
-			for (int i = 0; i < length; i++)
+			if (clear)
 			{
-				array[i] = default;
+				Array.Clear(array, 0, length);
 			}
-			ResolvePool(length).Release(array);
+			ResolveStack(length).Push(array);
 		}
 
-		private Pool<T[]> ResolvePool(int length)
+		private Stack<T[]> ResolveStack(int length)
 		{
-			Pool<T[]> pool;
-			int poolCapacity = length + 1;
-			if (_poolByLength.Count < poolCapacity)
+			Stack<T[]> stack;
+			int capacity = length + 1;
+			if (_stackByLength.Count < capacity)
 			{
-				_poolByLength.Capacity = poolCapacity;
-				for (int i = _poolByLength.Count; i < poolCapacity; i++)
+				_stackByLength.Capacity = capacity;
+				for (int i = _stackByLength.Count; i < capacity; i++)
 				{
 					if (i == length)
 					{
-						pool = new Pool<T[]>();
-						_poolByLength.Add(pool);
-						return pool;
+						stack = new Stack<T[]>();
+						_stackByLength.Add(stack);
+						return stack;
 					}
-
-					_poolByLength.Add(null);
+					_stackByLength.Add(null);
 				}
 			}
 
-			pool = _poolByLength[length];
-			if (pool != null)
+			stack = _stackByLength[length];
+			if (stack != null)
 			{
-				return pool;
+				return stack;
 			}
 
-			pool = new Pool<T[]>();
-			_poolByLength[length] = pool;
-			return pool;
+			stack = new Stack<T[]>();
+			_stackByLength[length] = stack;
+			return stack;
 		}
 	}
 }

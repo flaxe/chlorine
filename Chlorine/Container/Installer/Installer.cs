@@ -12,7 +12,7 @@ namespace Chlorine
 
 		protected abstract void InstallBindings();
 
-		protected BindingWithId<T> Bind<T>() where T : class
+		protected Binding<T> Bind<T>() where T : class
 		{
 			return _container.Bind<T>();
 		}
