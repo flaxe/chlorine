@@ -7,70 +7,45 @@ namespace Chlorine
 	{
 		private static readonly Type ObjectType = typeof(object);
 
+		private readonly ArrayPool<Argument> _argumentsPool = new ArrayPool<Argument>();
 		private readonly ArrayPool<object> _parametersPool = new ArrayPool<object>();
-		private readonly ArrayPool<TypedArgument> _argumentsPool = new ArrayPool<TypedArgument>();
 
-		private readonly Container _container;
+		private readonly Binder _binder;
 
 		private InjectAnalyzer _analyzer;
 
-		public Injector(Container container)
+		public Injector(Binder binder)
 		{
-			_container = container;
+			_binder = binder;
 		}
 
-		private InjectAnalyzer GetAnalyzer() => _analyzer ?? (_analyzer = _container.Resolve<InjectAnalyzer>());
-
-		public object Instantiate(Type type, object[] arguments)
+		public object Instantiate(Type type, Argument[] arguments)
 		{
-			object instance;
 			InjectInfo info = GetAnalyzer().GetInfo(type, InjectFlag.Construct | InjectFlag.Inject);
-			if (arguments != null && arguments.Length > 0)
-			{
-				TypedArgument[] typedArguments = CreateArguments(arguments);
-				try
-				{
-					instance = InstantiateInternal(info, typedArguments);
-				}
-				finally
-				{
-					_argumentsPool.Release(typedArguments);
-				}
-			}
-			else
-			{
-				instance = InstantiateInternal(info, null);
-			}
-			return instance;
+			return InstantiateInternal(info, arguments);
 		}
 
-		public void Inject(object instance, object[] arguments)
+		public void Inject(object instance, Argument[] arguments)
 		{
 			InjectInfo info = GetAnalyzer().GetInfo(instance.GetType(), InjectFlag.Inject);
-			if (arguments != null && arguments.Length > 0)
-			{
-				TypedArgument[] typedArguments = CreateArguments(arguments);
-				try
-				{
-					InjectInternal(instance, info, typedArguments);
-				}
-				finally
-				{
-					_argumentsPool.Release(typedArguments);
-				}
-			}
-			else
-			{
-				InjectInternal(instance, info, null);
-			}
+			InjectInternal(instance, info, arguments);
 		}
 
-		private object InstantiateInternal(InjectInfo info, TypedArgument[] arguments)
+		private InjectAnalyzer GetAnalyzer()
+		{
+			if (_analyzer == null && !_binder.TryResolveType(null, out _analyzer))
+			{
+				throw new InjectException("Unable to resolve 'InjectAnalyzer'");
+			}
+			return _analyzer;
+		}
+
+		private object InstantiateInternal(InjectInfo info, Argument[] arguments)
 		{
 			InjectConstructorInfo constructorInfo = info.Constructor;
 			if (constructorInfo == null)
 			{
-				throw new ArgumentException($"Can't instantiate '{info.Type}'. Type has no constructor.");
+				throw new ArgumentException($"Can't instantiate '{info.Type.Name}'. Has no constructor.");
 			}
 			object instance;
 			object[] parameters = ResolveParameters(info, constructorInfo.Parameters, arguments);
@@ -86,7 +61,7 @@ namespace Chlorine
 			return instance;
 		}
 
-		private void InjectInternal(object instance, InjectInfo info, TypedArgument[] arguments)
+		private void InjectInternal(object instance, InjectInfo info, Argument[] arguments)
 		{
 			Type baseType = info.Type.BaseType;
 			if (baseType != null && baseType != ObjectType)
@@ -129,15 +104,14 @@ namespace Chlorine
 
 		private object ResolveType(InjectInfo info, Type type, InjectAttributeInfo attributeInfo)
 		{
-			object instance = _container.Resolve(type, attributeInfo?.Id);
-			if (instance == null && (attributeInfo == null || !attributeInfo.Optional))
+			if (!_binder.TryResolveType(type, attributeInfo?.Id, out object instance) && (attributeInfo == null || !attributeInfo.Optional))
 			{
-				throw new InjectException($"Unable to resolve type '{type.Name}' while processing '{info.Type.Name}'.");
+				throw new InjectException($"Unable to resolve '{type.Name}' while processing '{info.Type.Name}'.");
 			}
 			return instance;
 		}
 
-		private object[] ResolveParameters(InjectInfo info, List<InjectParameterInfo> parametersInfo, TypedArgument[] arguments)
+		private object[] ResolveParameters(InjectInfo info, List<InjectParameterInfo> parametersInfo, Argument[] arguments)
 		{
 			object[] parameters;
 			if (parametersInfo != null && parametersInfo.Count > 0)
@@ -145,7 +119,7 @@ namespace Chlorine
 				parameters = _parametersPool.Pull(parametersInfo.Count) ?? new object[parametersInfo.Count];
 				if (arguments != null && arguments.Length > 0)
 				{
-					TypedArgument[] unusedArguments = _argumentsPool.Pull(arguments.Length) ?? new TypedArgument[arguments.Length];
+					Argument[] unusedArguments = _argumentsPool.Pull(arguments.Length) ?? new Argument[arguments.Length];
 					arguments.CopyTo(unusedArguments, 0);
 					try
 					{
@@ -156,10 +130,10 @@ namespace Chlorine
 							object parameter = null;
 							for (int j = 0; j < unusedArguments.Length; j++)
 							{
-								TypedArgument typedArgument = unusedArguments[j];
-								if (typedArgument.Type == parameterType)
+								Argument argument = unusedArguments[j];
+								if (argument.Type == parameterType)
 								{
-									parameter = typedArgument.Value;
+									parameter = argument.Value;
 									unusedArguments[j] = default;
 								}
 							}
@@ -186,33 +160,6 @@ namespace Chlorine
 				parameters = _parametersPool.Pull(0) ?? new object[0];
 			}
 			return parameters;
-		}
-
-		private TypedArgument[] CreateArguments(object[] arguments)
-		{
-			if (arguments != null && arguments.Length > 0)
-			{
-				TypedArgument[] typedArguments = _argumentsPool.Pull(arguments.Length) ?? new TypedArgument[arguments.Length];
-				for (int i = 0; i < arguments.Length; i++)
-				{
-					object value = arguments[i];
-					typedArguments[i] = new TypedArgument(value.GetType(), value);
-				}
-				return typedArguments;
-			}
-			return null;
-		}
-
-		private struct TypedArgument
-		{
-			public readonly Type Type;
-			public readonly object Value;
-
-			public TypedArgument(Type type, object value)
-			{
-				Type = type;
-				Value = value;
-			}
 		}
 	}
 }

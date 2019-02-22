@@ -4,62 +4,82 @@ namespace Chlorine
 {
 	public class Container : IContainer
 	{
-		private readonly Container _parentContainer;
-
 		private readonly Binder _binder;
 		private readonly Injector _injector;
 
 		public Container(Container parentContainer = null)
 		{
-			_parentContainer = parentContainer;
+			_binder = new Binder(parentContainer?._binder);
+			_injector = new Injector(_binder);
 
-			_binder = new Binder();
-			_binder.Bind(typeof(IContainer), null, new InstanceProvider<IContainer>(this));
+			_binder.Bind<IContainer>(new InstanceProvider<IContainer>(this));
+			_binder.Bind<IController>(new InstanceProvider<IController>(new Controller(_binder)));
 
 			if (parentContainer == null)
 			{
-				_binder.Bind(typeof(InjectAnalyzer), null, new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
+				_binder.Bind<InjectAnalyzer>(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
 			}
-
-			_injector = new Injector(this);
 		}
 
-		public void Install<TInstaller>(object[] arguments = null) where TInstaller : Installer
+		public void Install<TInstaller>(Argument[] arguments = null) where TInstaller : class, IInstaller
 		{
 			Instantiate<TInstaller>(arguments).Install(this);
 		}
 
-		public void Install(Installer installer)
+		public void Install(IInstaller installer)
 		{
 			installer.Install(this);
 		}
 
-		public Binding<T> Bind<T>() where T : class
+		public BindingType<T> Bind<T>() where T : class
 		{
-			return new Binding<T>(_binder, this);
+			return new BindingType<T>(this, _binder);
+		}
+
+		public BindingAction<T> BindAction<T>() where T : struct
+		{
+			return new BindingAction<T>(this, _binder);
 		}
 
 		public T Resolve<T>(object id = null) where T : class
 		{
-			return (T)_binder.Resolve(typeof(T), id) ?? _parentContainer?.Resolve<T>(id);
+			if (_binder.TryResolveType(id, out T instance))
+			{
+				return instance;
+			}
+			throw new ContainerException($"Unable to resolve '{typeof(T).Name}'{(id != null ? $" with id {id}" : "")}");
 		}
 
 		public object Resolve(Type type, object id = null)
 		{
-			return _binder.Resolve(type, id) ?? _parentContainer?.Resolve(type, id);
+			if (_binder.TryResolveType(type, id, out object instance))
+			{
+				return instance;
+			}
+			throw new ContainerException($"Unable to resolve '{type.Name}'{(id != null ? $" with id {id}" : "")}");
 		}
 
-		public T Instantiate<T>(object[] arguments = null)
+		public T TryResolve<T>(object id = null) where T : class
+		{
+			return _binder.TryResolveType(id, out T instance) ? instance : default;
+		}
+
+		public object TryResolve(Type type, object id = null)
+		{
+			return _binder.TryResolveType(type, id, out object instance) ? instance : default;
+		}
+
+		public T Instantiate<T>(Argument[] arguments = null)
 		{
 			return (T)_injector.Instantiate(typeof(T), arguments);
 		}
 
-		public object Instantiate(Type type, object[] arguments = null)
+		public object Instantiate(Type type, Argument[] arguments = null)
 		{
 			return _injector.Instantiate(type, arguments);
 		}
 
-		public void Inject(object instance, object[] arguments = null)
+		public void Inject(object instance, Argument[] arguments = null)
 		{
 			_injector.Inject(instance, arguments);
 		}

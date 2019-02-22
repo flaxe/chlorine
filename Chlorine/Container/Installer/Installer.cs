@@ -1,10 +1,14 @@
 namespace Chlorine
 {
-	public abstract class Installer
+	public abstract class Installer : IInstaller
 	{
 		private Container _container;
 
-		internal void Install(Container container)
+		protected Installer()
+		{
+		}
+
+		public void Install(Container container)
 		{
 			_container = container;
 			InstallBindings();
@@ -12,9 +16,14 @@ namespace Chlorine
 
 		protected abstract void InstallBindings();
 
-		protected Binding<T> Bind<T>() where T : class
+		protected BindingType<T> Bind<T>() where T : class
 		{
 			return _container.Bind<T>();
+		}
+
+		protected BindingAction<T> BindAction<T>() where T : struct
+		{
+			return _container.BindAction<T>();
 		}
 	}
 }

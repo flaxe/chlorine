@@ -4,6 +4,13 @@ using System.Reflection;
 
 namespace Chlorine
 {
+	[Flags]
+	internal enum InjectFlag
+	{
+		Construct = 1,
+		Inject = 2
+	}
+
 	internal class InjectAnalyzer
 	{
 		private static readonly Type UnityComponentType = typeof(UnityEngine.Component);

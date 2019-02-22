@@ -8,14 +8,26 @@ namespace Chlorine
 		private readonly Dictionary<Type, IBindingProvider> _providerByType;
 		private readonly Dictionary<Type, Dictionary<object, IBindingProvider>> _providerByTypeAndId;
 
-		public Binder()
+		private readonly Dictionary<Type, IBindingProvider> _actionDelegateProviderByType;
+
+		private readonly Binder _parentBinder;
+
+		public Binder(Binder parentBinder)
 		{
+			_parentBinder = parentBinder;
 			_providerByType = new Dictionary<Type, IBindingProvider>();
 			_providerByTypeAndId = new Dictionary<Type, Dictionary<object, IBindingProvider>>();
+			_actionDelegateProviderByType = new Dictionary<Type, IBindingProvider>();
 		}
 
-		public void Bind(Type type, object id, IBindingProvider provider)
+		public void Bind<T>(IBindingProvider provider) where T : class
 		{
+			Bind<T>(null, provider);
+		}
+
+		public void Bind<T>(object id, IBindingProvider provider) where T : class
+		{
+			Type type = typeof(T);
 			if (id == null)
 			{
 				if (_providerByType.ContainsKey(type))
@@ -39,16 +51,57 @@ namespace Chlorine
 			}
 		}
 
-		public object Resolve(Type type, object id)
+		public void BindAction<TAction>(IBindingProvider provider) where TAction : struct
 		{
-			if (TryGetProvider(type, id, out IBindingProvider provider))
+			Type actionType = typeof(TAction);
+			if (_actionDelegateProviderByType.ContainsKey(actionType))
+			{
+				throw new ArgumentException($"Action with type '{actionType.Name}' already registered.");
+			}
+			_actionDelegateProviderByType.Add(actionType, provider);
+		}
+
+		public bool TryResolveType<T>(object id, out T instance) where T : class
+		{
+			if (TryResolveType(typeof(T), id, out object value))
+			{
+				instance = value as T;
+				return true;
+			}
+			instance = default;
+			return false;
+		}
+
+		public bool TryResolveType(Type type, object id, out object instance)
+		{
+			if (TryGetTypeProvider(type, id, out IBindingProvider provider))
+			{
+				instance = provider.Provide();
+				return true;
+			}
+			if (_parentBinder != null && _parentBinder.TryResolveType(type, id, out instance))
+			{
+				return true;
+			}
+			instance = default;
+			return false;
+		}
+
+		public IActionDelegate<TAction> ResolveActionDelegate<TAction>() where TAction : struct
+		{
+			return ResolveActionDelegate(typeof(TAction)) as IActionDelegate<TAction>;
+		}
+
+		public object ResolveActionDelegate(Type actionType)
+		{
+			if (_actionDelegateProviderByType.TryGetValue(actionType, out IBindingProvider provider))
 			{
 				return provider.Provide();
 			}
-			return null;
+			return _parentBinder?.ResolveActionDelegate(actionType);
 		}
 
-		private bool TryGetProvider(Type type, object id, out IBindingProvider provider)
+		private bool TryGetTypeProvider(Type type, object id, out IBindingProvider provider)
 		{
 			if (id == null)
 			{
