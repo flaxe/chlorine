@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	internal class SingletonProvider<T> : IBindingProvider
+	internal class SingletonProvider<T> : IProvider<T>
 			where T : class
 	{
 		private readonly IProvider<T> _provider;
@@ -11,9 +11,14 @@ namespace Chlorine
 			_provider = provider;
 		}
 
-		public object Provide()
+		public T Provide()
 		{
 			return _instance ?? (_instance = _provider.Provide());
+		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
 		}
 	}
 }

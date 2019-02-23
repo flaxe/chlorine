@@ -15,7 +15,7 @@ namespace Chlorine
 
 		public void AsTransient()
 		{
-			_binder.BindAction<TAction>(new TransientProvider<IActionDelegate<TAction>>(_provider));
+			_binder.BindAction(new TransientProvider<IActionDelegate<TAction>>(_provider));
 		}
 	}
 }

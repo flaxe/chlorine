@@ -15,5 +15,10 @@ namespace Chlorine
 		{
 			return _container.Instantiate<TConcrete>();
 		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
+		}
 	}
 }

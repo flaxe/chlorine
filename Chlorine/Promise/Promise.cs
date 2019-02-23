@@ -15,7 +15,7 @@ namespace Chlorine
 
 	public class Promise<TResult> : AbstractPromise, IPromise<TResult>
 	{
-		private WeakList<Future<TResult>> _resultFutures;
+		private WeakReferenceList<Future<TResult>> _resultFutures;
 
 		private TResult _result;
 
@@ -34,7 +34,7 @@ namespace Chlorine
 				case PromiseStatus.Pending:
 					if (_resultFutures == null)
 					{
-						_resultFutures = new WeakList<Future<TResult>>();
+						_resultFutures = new WeakReferenceList<Future<TResult>>();
 					}
 					_resultFutures.Add(future);
 					break;

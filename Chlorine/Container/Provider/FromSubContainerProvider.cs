@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	internal class FromSubContainerProvider<TInstaller, T> : IBindingProvider
+	internal class FromSubContainerProvider<TInstaller, T> : IProvider<T>
 			where TInstaller : class, IInstaller
 			where T : class
 	{
@@ -15,7 +15,7 @@ namespace Chlorine
 			_id = id;
 		}
 
-		public object Provide()
+		public T Provide()
 		{
 			if (_subContainer == null)
 			{
@@ -23,6 +23,11 @@ namespace Chlorine
 				_subContainer.Install<TInstaller>();
 			}
 			return _subContainer.Resolve<T>(_id);
+		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
 		}
 	}
 }

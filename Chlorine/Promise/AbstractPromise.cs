@@ -9,7 +9,7 @@ namespace Chlorine
 			Rejected
 		}
 
-		private WeakList<Future> _futures;
+		private WeakReferenceList<Future> _futures;
 
 		private PromiseStatus _status = PromiseStatus.Pending;
 		private Error _reason;
@@ -43,7 +43,7 @@ namespace Chlorine
 				case PromiseStatus.Pending:
 					if (_futures == null)
 					{
-						_futures = new WeakList<Future>();
+						_futures = new WeakReferenceList<Future>();
 					}
 					_futures.Add(future);
 					break;

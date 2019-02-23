@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	public interface IActionDelegate<in TAction>
+	public interface IActionDelegate<in TAction> : IExecutable
 			where TAction : struct
 	{
 		bool Init(TAction action);

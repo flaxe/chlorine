@@ -35,7 +35,7 @@ namespace Chlorine
 		{
 			if (_analyzer == null && !_binder.TryResolveType(null, out _analyzer))
 			{
-				throw new InjectException("Unable to resolve 'InjectAnalyzer'");
+				throw new InjectException("Unable to resolve 'InjectAnalyzer'.");
 			}
 			return _analyzer;
 		}

@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	internal class TransientProvider<T> : IBindingProvider
+	internal class TransientProvider<T> : IProvider<T>
 			where T : class
 	{
 		private readonly IProvider<T> _provider;
@@ -10,9 +10,14 @@ namespace Chlorine
 			_provider = provider;
 		}
 
-		public object Provide()
+		public T Provide()
 		{
 			return _provider.Provide();
+		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
 		}
 	}
 }

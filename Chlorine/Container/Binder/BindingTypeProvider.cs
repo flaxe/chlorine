@@ -1,14 +1,14 @@
 namespace Chlorine
 {
-	public struct BindingTypeProvider<TContract>
-			where TContract : class
+	public struct BindingTypeProvider<T>
+			where T : class
 	{
 		private readonly Binder _binder;
 
 		private readonly object _id;
-		private readonly IProvider<TContract> _provider;
+		private readonly IProvider<T> _provider;
 
-		internal BindingTypeProvider(Binder binder, object id, IProvider<TContract> provider)
+		internal BindingTypeProvider(Binder binder, object id, IProvider<T> provider)
 		{
 			_binder = binder;
 			_id = id;
@@ -17,12 +17,12 @@ namespace Chlorine
 
 		public void AsSingleton()
 		{
-			_binder.Bind<TContract>(_id, new SingletonProvider<TContract>(_provider));
+			_binder.Bind(_id, new SingletonProvider<T>(_provider));
 		}
 
 		public void AsTransient()
 		{
-			_binder.Bind<TContract>(_id, new TransientProvider<TContract>(_provider));
+			_binder.Bind(_id, new TransientProvider<T>(_provider));
 		}
 	}
 }

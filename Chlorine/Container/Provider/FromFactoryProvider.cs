@@ -20,5 +20,10 @@ namespace Chlorine
 			}
 			return _factory.Create();
 		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
+		}
 	}
 }

@@ -20,5 +20,15 @@ namespace Chlorine
 		{
 			throw new NotImplementedException();
 		}
+
+		public IFuture TryPerform<TAction>(TAction action) where TAction : struct
+		{
+			throw new NotImplementedException();
+		}
+
+		public IFuture<TResult> TryPerform<TAction, TResult>(TAction action) where TAction : struct
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

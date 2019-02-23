@@ -44,11 +44,11 @@ namespace Chlorine
 			Type type = info.Type;
 			if (type.IsEnum)
 			{
-				throw new ArgumentException("Enum types not supported");
+				throw new ArgumentException("Enum types not supported.");
 			}
 			if (type.IsArray)
 			{
-				throw new ArgumentException("Array types not supported");
+				throw new ArgumentException("Array types not supported.");
 			}
 			if ((flags & InjectFlag.Construct) == InjectFlag.Construct)
 			{

@@ -36,9 +36,14 @@ namespace Chlorine
 			return new BindingType<T>(this, _binder);
 		}
 
-		public BindingAction<T> BindAction<T>() where T : struct
+		public BindingAction<TAction> BindAction<TAction>() where TAction : struct
 		{
-			return new BindingAction<T>(this, _binder);
+			return new BindingAction<TAction>(this, _binder);
+		}
+
+		public BindingExecutable<TExecutable> BindExecutable<TExecutable>() where TExecutable : class, IExecutable
+		{
+			return new BindingExecutable<TExecutable>(this, _binder);
 		}
 
 		public T Resolve<T>(object id = null) where T : class
@@ -47,7 +52,7 @@ namespace Chlorine
 			{
 				return instance;
 			}
-			throw new ContainerException($"Unable to resolve '{typeof(T).Name}'{(id != null ? $" with id {id}" : "")}");
+			throw new ContainerException($"Unable to resolve '{typeof(T).Name}'{(id != null ? $" with id {id}." : ".")}");
 		}
 
 		public object Resolve(Type type, object id = null)
@@ -56,7 +61,7 @@ namespace Chlorine
 			{
 				return instance;
 			}
-			throw new ContainerException($"Unable to resolve '{type.Name}'{(id != null ? $" with id {id}" : "")}");
+			throw new ContainerException($"Unable to resolve '{type.Name}'{(id != null ? $" with id {id}." : ".")}");
 		}
 
 		public T TryResolve<T>(object id = null) where T : class
