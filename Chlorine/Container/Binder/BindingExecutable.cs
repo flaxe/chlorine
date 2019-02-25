@@ -26,7 +26,7 @@ namespace Chlorine
 
 		public void ToInstance(IExecutor<TExecutable> executor)
 		{
-			_binder.BindExecutable(new ExecutionWorker<TExecutable>(new InstanceProvider<IExecutor<TExecutable>>(executor)));
+			_binder.BindExecutable(new ExecutionDelegate<TExecutable>(new InstanceProvider<IExecutor<TExecutable>>(executor)));
 		}
 	}
 }

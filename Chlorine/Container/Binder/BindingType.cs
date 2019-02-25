@@ -27,9 +27,9 @@ namespace Chlorine
 			return new BindingTypeProvider<T>(_binder, null, new FromFactoryProvider<TFactory, T>(_container));
 		}
 
-		public void FromSubContainer<TInstaller>() where TInstaller : class, IInstaller
+		public void FromContainer(Container container)
 		{
-			_binder.Bind(new FromSubContainerProvider<TInstaller, T>(_container));
+			_binder.Bind(new FromContainerProvider<T>(container));
 		}
 
 		public void ToInstance(T instance)

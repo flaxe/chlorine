@@ -11,7 +11,7 @@ namespace Chlorine
 		private Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
 		private Dictionary<Type, IProvider> _actionDelegateProviderByType;
-		private Dictionary<Type, IExecutionWorker> _executionWorkerByType;
+		private Dictionary<Type, IExecutionDelegate> _executionDelegateByType;
 
 		public Binder(Binder parentBinder)
 		{
@@ -52,20 +52,17 @@ namespace Chlorine
 							{type, new Dictionary<object, IProvider>{{id, provider}}}
 					};
 				}
+				else if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
+				{
+					if (providerById.ContainsKey(id))
+					{
+						throw new ArgumentException($"Type '{type.Name}' with id '{id}' is already registered.");
+					}
+					providerById.Add(id, provider);
+				}
 				else
 				{
-					if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
-					{
-						if (providerById.ContainsKey(id))
-						{
-							throw new ArgumentException($"Type '{type.Name}' with id '{id}' is already registered.");
-						}
-						providerById.Add(id, provider);
-					}
-					else
-					{
-						_providerByTypeAndId.Add(type, new Dictionary<object, IProvider>{{id, provider}});
-					}
+					_providerByTypeAndId.Add(type, new Dictionary<object, IProvider>{{id, provider}});
 				}
 			}
 		}
@@ -88,21 +85,21 @@ namespace Chlorine
 			}
 		}
 
-		public void BindExecutable<TExecutable>(IExecutionWorker<TExecutable> executionWorker)
+		public void BindExecutable<TExecutable>(ExecutionDelegate<TExecutable> executionDelegate)
 				where TExecutable : class, IExecutable
 		{
 			Type executableType = typeof(TExecutable);
-			if (_executionWorkerByType == null)
+			if (_executionDelegateByType == null)
 			{
-				_executionWorkerByType = new Dictionary<Type, IExecutionWorker>{{executableType, executionWorker}};
+				_executionDelegateByType = new Dictionary<Type, IExecutionDelegate>{{executableType, executionDelegate}};
 			}
-			else if (_executionWorkerByType.ContainsKey(executableType))
+			else if (_executionDelegateByType.ContainsKey(executableType))
 			{
 				throw new ArgumentException($"Executable with type '{executableType.Name}' is already registered.");
 			}
 			else
 			{
-				_executionWorkerByType.Add(executableType, executionWorker);
+				_executionDelegateByType.Add(executableType, executionDelegate);
 			}
 		}
 
@@ -132,34 +129,34 @@ namespace Chlorine
 			return false;
 		}
 
-		public bool TryResolveActionDelegate<TAction>(Type type, out IActionDelegate<TAction> instance)
+		public bool TryResolveActionDelegate<TAction>(Type type, out IActionDelegate<TAction> actionDelegate)
 				where TAction : struct
 		{
 			if (_actionDelegateProviderByType != null && _actionDelegateProviderByType.TryGetValue(type, out IProvider provider))
 			{
-				instance = provider.Provide() as IActionDelegate<TAction>;
+				actionDelegate = provider.Provide() as IActionDelegate<TAction>;
 				return true;
 			}
-			if (_parentBinder != null && _parentBinder.TryResolveActionDelegate(type, out instance))
+			if (_parentBinder != null && _parentBinder.TryResolveActionDelegate(type, out actionDelegate))
 			{
 				return true;
 			}
-			instance = default;
+			actionDelegate = default;
 			return false;
 		}
 
-		public bool TryResolveExecutionWorker(IExecutable executable, out IExecutionWorker executionWorker)
+		public bool TryResolveExecutionDelegate(IExecutable executable, out IExecutionDelegate executionDelegate)
 		{
 			Type executableType = executable.GetType();
-			foreach (KeyValuePair<Type,IExecutionWorker> pair in _executionWorkerByType)
+			foreach (KeyValuePair<Type,IExecutionDelegate> pair in _executionDelegateByType)
 			{
-				if (executableType.DerivesFromOrEqual(pair.Key))
+				if (executableType.IsEqualOrDerivesFrom(pair.Key))
 				{
-					executionWorker = pair.Value;
+					executionDelegate = pair.Value;
 					return true;
 				}
 			}
-			executionWorker = default;
+			executionDelegate = default;
 			return false;
 		}
 
@@ -167,17 +164,15 @@ namespace Chlorine
 		{
 			if (id == null)
 			{
-				if (_providerByType != null && _providerByType.TryGetValue(type, out IProvider bindingProvider))
+				if (_providerByType != null && _providerByType.TryGetValue(type, out provider))
 				{
-					provider = bindingProvider;
 					return true;
 				}
 			}
 			else if (_providerByTypeAndId != null && _providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
 			{
-				if (providerById.TryGetValue(id, out IProvider bindingProvider))
+				if (providerById.TryGetValue(id, out provider))
 				{
-					provider = bindingProvider;
 					return true;
 				}
 			}

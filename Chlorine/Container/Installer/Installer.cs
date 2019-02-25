@@ -21,9 +21,14 @@ namespace Chlorine
 			return _container.Bind<T>();
 		}
 
-		protected BindingAction<T> BindAction<T>() where T : struct
+		protected BindingAction<TAction> BindAction<TAction>() where TAction : struct
 		{
-			return _container.BindAction<T>();
+			return _container.BindAction<TAction>();
+		}
+
+		protected BindingExecutable<TExecutable> BindExecutable<TExecutable>() where TExecutable : class, IExecutable
+		{
+			return _container.BindExecutable<TExecutable>();
 		}
 	}
 }

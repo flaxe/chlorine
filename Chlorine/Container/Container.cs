@@ -12,12 +12,12 @@ namespace Chlorine
 			_binder = new Binder(parentContainer?._binder);
 			_injector = new Injector(_binder);
 
-			_binder.Bind<IContainer>(new InstanceProvider<IContainer>(this));
-			_binder.Bind<IController>(new InstanceProvider<IController>(new Controller(_binder)));
+			_binder.Bind(new InstanceProvider<IContainer>(this));
+			_binder.Bind(new InstanceProvider<IController>(new Controller(_binder)));
 
 			if (parentContainer == null)
 			{
-				_binder.Bind<InjectAnalyzer>(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
+				_binder.Bind(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
 			}
 		}
 

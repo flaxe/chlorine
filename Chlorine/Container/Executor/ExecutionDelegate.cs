@@ -2,26 +2,21 @@ using System;
 
 namespace Chlorine
 {
-	internal class ExecutionWorker<TExecutable> : IExecutionWorker<TExecutable>
+	internal class ExecutionDelegate<TExecutable> : IExecutionDelegate
 			where TExecutable : class, IExecutable
 	{
 		private readonly IProvider<IExecutor<TExecutable>> _provider;
 
-		public ExecutionWorker(IProvider<IExecutor<TExecutable>> provider)
+		public ExecutionDelegate(IProvider<IExecutor<TExecutable>> provider)
 		{
 			_provider = provider;
 		}
 
-		public void Execute(TExecutable executable)
-		{
-			_provider.Provide().Execute(executable);
-		}
-
-		public void Execute(IExecutable executable)
+		public void Execute(IExecutable executable, IExecuteHandler handler)
 		{
 			if (executable is TExecutable instance)
 			{
-				Execute(instance);
+				_provider.Provide().Execute(instance, handler);
 			}
 			else
 			{

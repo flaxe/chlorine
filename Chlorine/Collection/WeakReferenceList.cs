@@ -165,8 +165,7 @@ namespace Chlorine
 			{
 				while (_enumerator.MoveNext())
 				{
-					WeakReference<T> current = _enumerator.Current;
-					if (current.TryGetTarget(out _current))
+					if (_enumerator.Current.TryGetTarget(out _current))
 					{
 						return true;
 					}

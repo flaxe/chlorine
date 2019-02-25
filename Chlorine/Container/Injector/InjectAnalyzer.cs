@@ -52,7 +52,7 @@ namespace Chlorine
 			}
 			if ((flags & InjectFlag.Construct) == InjectFlag.Construct)
 			{
-				if (type.DerivesFromOrEqual(UnityComponentType))
+				if (type.IsEqualOrDerivesFrom(UnityComponentType))
 				{
 					throw new ArgumentException($"Can't construct UnityEngine component '{type.Name}'.");
 				}
