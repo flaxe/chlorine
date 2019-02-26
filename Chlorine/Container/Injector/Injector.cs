@@ -7,7 +7,7 @@ namespace Chlorine
 	{
 		private static readonly Type ObjectType = typeof(object);
 
-		private readonly ArrayPool<Argument> _argumentsPool = new ArrayPool<Argument>();
+		private readonly ArrayPool<TypeValue> _argumentsPool = new ArrayPool<TypeValue>();
 		private readonly ArrayPool<object> _parametersPool = new ArrayPool<object>();
 
 		private readonly Binder _binder;
@@ -19,13 +19,13 @@ namespace Chlorine
 			_binder = binder;
 		}
 
-		public object Instantiate(Type type, Argument[] arguments)
+		public object Instantiate(Type type, TypeValue[] arguments)
 		{
 			InjectInfo info = GetAnalyzer().GetInfo(type, InjectFlag.Construct | InjectFlag.Inject);
 			return InstantiateInternal(info, arguments);
 		}
 
-		public void Inject(object instance, Argument[] arguments)
+		public void Inject(object instance, TypeValue[] arguments)
 		{
 			InjectInfo info = GetAnalyzer().GetInfo(instance.GetType(), InjectFlag.Inject);
 			InjectInternal(instance, info, arguments);
@@ -40,7 +40,7 @@ namespace Chlorine
 			return _analyzer;
 		}
 
-		private object InstantiateInternal(InjectInfo info, Argument[] arguments)
+		private object InstantiateInternal(InjectInfo info, TypeValue[] arguments)
 		{
 			InjectConstructorInfo constructorInfo = info.Constructor;
 			if (constructorInfo == null)
@@ -61,7 +61,7 @@ namespace Chlorine
 			return instance;
 		}
 
-		private void InjectInternal(object instance, InjectInfo info, Argument[] arguments)
+		private void InjectInternal(object instance, InjectInfo info, TypeValue[] arguments)
 		{
 			Type baseType = info.Type.BaseType;
 			if (baseType != null && baseType != ObjectType)
@@ -111,7 +111,7 @@ namespace Chlorine
 			return instance;
 		}
 
-		private object[] ResolveParameters(InjectInfo info, List<InjectParameterInfo> parametersInfo, Argument[] arguments)
+		private object[] ResolveParameters(InjectInfo info, List<InjectParameterInfo> parametersInfo, TypeValue[] arguments)
 		{
 			object[] parameters;
 			if (parametersInfo != null && parametersInfo.Count > 0)
@@ -119,7 +119,7 @@ namespace Chlorine
 				parameters = _parametersPool.Pull(parametersInfo.Count) ?? new object[parametersInfo.Count];
 				if (arguments != null && arguments.Length > 0)
 				{
-					Argument[] unusedArguments = _argumentsPool.Pull(arguments.Length) ?? new Argument[arguments.Length];
+					TypeValue[] unusedArguments = _argumentsPool.Pull(arguments.Length) ?? new TypeValue[arguments.Length];
 					arguments.CopyTo(unusedArguments, 0);
 					try
 					{
@@ -130,7 +130,7 @@ namespace Chlorine
 							object parameter = null;
 							for (int j = 0; j < unusedArguments.Length; j++)
 							{
-								Argument argument = unusedArguments[j];
+								TypeValue argument = unusedArguments[j];
 								if (argument.Type == parameterType)
 								{
 									parameter = argument.Value;

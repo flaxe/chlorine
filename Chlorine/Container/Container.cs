@@ -21,7 +21,7 @@ namespace Chlorine
 			}
 		}
 
-		public void Install<TInstaller>(Argument[] arguments = null) where TInstaller : class, IInstaller
+		public void Install<TInstaller>(TypeValue[] arguments = null) where TInstaller : class, IInstaller
 		{
 			Instantiate<TInstaller>(arguments).Install(this);
 		}
@@ -74,17 +74,17 @@ namespace Chlorine
 			return _binder.TryResolveType(type, id, out object instance) ? instance : default;
 		}
 
-		public T Instantiate<T>(Argument[] arguments = null)
+		public T Instantiate<T>(TypeValue[] arguments = null)
 		{
 			return (T)_injector.Instantiate(typeof(T), arguments);
 		}
 
-		public object Instantiate(Type type, Argument[] arguments = null)
+		public object Instantiate(Type type, TypeValue[] arguments = null)
 		{
 			return _injector.Instantiate(type, arguments);
 		}
 
-		public void Inject(object instance, Argument[] arguments = null)
+		public void Inject(object instance, TypeValue[] arguments = null)
 		{
 			_injector.Inject(instance, arguments);
 		}

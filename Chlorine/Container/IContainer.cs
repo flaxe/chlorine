@@ -10,9 +10,9 @@ namespace Chlorine
 		T TryResolve<T>(object id = null) where T : class;
 		object TryResolve(Type type, object id = null);
 
-		T Instantiate<T>(Argument[] arguments = null);
-		object Instantiate(Type type, Argument[] arguments = null);
+		T Instantiate<T>(TypeValue[] arguments = null);
+		object Instantiate(Type type, TypeValue[] arguments = null);
 
-		void Inject(object instance, Argument[] arguments = null);
+		void Inject(object instance, TypeValue[] arguments = null);
 	}
 }

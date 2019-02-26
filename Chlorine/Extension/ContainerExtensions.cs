@@ -4,7 +4,7 @@ namespace Chlorine
 {
 	public static class ContainerExtensions
 	{
-		private static readonly ArrayPool<Argument> ArgumentsPool = new ArrayPool<Argument>();
+		private static readonly ArrayPool<TypeValue> ArgumentsPool = new ArrayPool<TypeValue>();
 
 		public static T Instantiate<T, T1>(this IContainer container, T1 argument1)
 		{
@@ -66,7 +66,7 @@ namespace Chlorine
 			Inject(container, instance, CreateArguments(arguments));
 		}
 
-		private static T Instantiate<T>(IContainer container, Argument[] arguments)
+		private static T Instantiate<T>(IContainer container, TypeValue[] arguments)
 		{
 			T instance;
 			try
@@ -80,7 +80,7 @@ namespace Chlorine
 			return instance;
 		}
 
-		private static object Instantiate(IContainer container, Type type, Argument[] arguments)
+		private static object Instantiate(IContainer container, Type type, TypeValue[] arguments)
 		{
 			object instance;
 			try
@@ -94,7 +94,7 @@ namespace Chlorine
 			return instance;
 		}
 
-		private static void Inject(IContainer container, object instance, Argument[] arguments)
+		private static void Inject(IContainer container, object instance, TypeValue[] arguments)
 		{
 			try
 			{
@@ -106,37 +106,37 @@ namespace Chlorine
 			}
 		}
 
-		private static Argument[] CreateArguments<T1>(T1 argument1)
+		private static TypeValue[] CreateArguments<T1>(T1 argument1)
 		{
-			Argument[] arguments = ArgumentsPool.Pull(1) ?? new Argument[1];
-			arguments[0] = new Argument(typeof(T1), argument1);
+			TypeValue[] arguments = ArgumentsPool.Pull(1) ?? new TypeValue[1];
+			arguments[0] = new TypeValue(typeof(T1), argument1);
 			return arguments;
 		}
 
-		private static Argument[] CreateArguments<T1, T2>(T1 argument1, T2 argument2)
+		private static TypeValue[] CreateArguments<T1, T2>(T1 argument1, T2 argument2)
 		{
-			Argument[] arguments = ArgumentsPool.Pull(2) ?? new Argument[2];
-			arguments[0] = new Argument(typeof(T1), argument1);
-			arguments[1] = new Argument(typeof(T2), argument2);
+			TypeValue[] arguments = ArgumentsPool.Pull(2) ?? new TypeValue[2];
+			arguments[0] = new TypeValue(typeof(T1), argument1);
+			arguments[1] = new TypeValue(typeof(T2), argument2);
 			return arguments;
 		}
 
-		private static Argument[] CreateArguments<T1, T2, T3>(T1 argument1, T2 argument2, T3 argument3)
+		private static TypeValue[] CreateArguments<T1, T2, T3>(T1 argument1, T2 argument2, T3 argument3)
 		{
-			Argument[] arguments = ArgumentsPool.Pull(3) ?? new Argument[3];
-			arguments[0] = new Argument(typeof(T1), argument1);
-			arguments[1] = new Argument(typeof(T2), argument2);
-			arguments[2] = new Argument(typeof(T3), argument3);
+			TypeValue[] arguments = ArgumentsPool.Pull(3) ?? new TypeValue[3];
+			arguments[0] = new TypeValue(typeof(T1), argument1);
+			arguments[1] = new TypeValue(typeof(T2), argument2);
+			arguments[2] = new TypeValue(typeof(T3), argument3);
 			return arguments;
 		}
 
-		private static Argument[] CreateArguments(object[] values)
+		private static TypeValue[] CreateArguments(object[] values)
 		{
-			Argument[] arguments = ArgumentsPool.Pull(values.Length) ?? new Argument[values.Length];
+			TypeValue[] arguments = ArgumentsPool.Pull(values.Length) ?? new TypeValue[values.Length];
 			for (int i = 0; i < values.Length; i++)
 			{
 				object argument = values[i];
-				arguments[i] = new Argument(argument.GetType(), argument);
+				arguments[i] = new TypeValue(argument.GetType(), argument);
 			}
 			return arguments;
 		}

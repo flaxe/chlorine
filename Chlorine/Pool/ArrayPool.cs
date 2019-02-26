@@ -7,6 +7,14 @@ namespace Chlorine
 	{
 		private readonly List<Stack<T[]>> _stackByLength = new List<Stack<T[]>>();
 
+		public void Clear()
+		{
+			if (_stackByLength.Count > 0)
+			{
+				_stackByLength.Clear();
+			}
+		}
+
 		public T[] Pull(int length)
 		{
 			Stack<T[]> stack = ResolveStack(length);

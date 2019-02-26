@@ -8,6 +8,14 @@ namespace Chlorine
 
 		public bool IsEmpty => _stack.Count == 0;
 
+		public void Clear()
+		{
+			if (_stack.Count > 0)
+			{
+				_stack.Clear();
+			}
+		}
+
 		public T Pull()
 		{
 			return _stack.Count > 0 ? _stack.Pop() : default;
