@@ -5,17 +5,14 @@ namespace Chlorine
 {
 	internal class Binder
 	{
-		private readonly Binder _parentBinder;
+		private readonly Binder _parent;
 
 		private Dictionary<Type, IProvider> _providerByType;
 		private Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
-		private Dictionary<Type, IProvider> _actionDelegateProviderByType;
-		private Dictionary<Type, IExecutionDelegate> _executionDelegateByType;
-
-		public Binder(Binder parentBinder)
+		public Binder(Binder parent = null)
 		{
-			_parentBinder = parentBinder;
+			_parent = parent;
 		}
 
 		public void Bind<T>(IProvider<T> provider)
@@ -67,47 +64,11 @@ namespace Chlorine
 			}
 		}
 
-		public void BindAction<TAction>(IProvider<IActionDelegate<TAction>> provider)
-				where TAction : struct
-		{
-			Type actionType = typeof(TAction);
-			if (_actionDelegateProviderByType == null)
-			{
-				_actionDelegateProviderByType = new Dictionary<Type, IProvider>{{actionType, provider}};
-			}
-			else if (_actionDelegateProviderByType.ContainsKey(actionType))
-			{
-				throw new ArgumentException($"Action with type '{actionType.Name}' is already registered.");
-			}
-			else
-			{
-				_actionDelegateProviderByType.Add(actionType, provider);
-			}
-		}
-
-		public void BindExecutable<TExecutable>(ExecutionDelegate<TExecutable> executionDelegate)
-				where TExecutable : class, IExecutable
-		{
-			Type executableType = typeof(TExecutable);
-			if (_executionDelegateByType == null)
-			{
-				_executionDelegateByType = new Dictionary<Type, IExecutionDelegate>{{executableType, executionDelegate}};
-			}
-			else if (_executionDelegateByType.ContainsKey(executableType))
-			{
-				throw new ArgumentException($"Executable with type '{executableType.Name}' is already registered.");
-			}
-			else
-			{
-				_executionDelegateByType.Add(executableType, executionDelegate);
-			}
-		}
-
 		public bool TryResolveType<T>(object id, out T instance) where T : class
 		{
-			if (TryResolveType(typeof(T), id, out object value))
+			if (TryResolveType(typeof(T), id, out object value) && value is T concreteValue)
 			{
-				instance = value as T;
+				instance = concreteValue;
 				return true;
 			}
 			instance = default;
@@ -121,42 +82,11 @@ namespace Chlorine
 				instance = provider.Provide();
 				return true;
 			}
-			if (_parentBinder != null && _parentBinder.TryResolveType(type, id, out instance))
+			if (_parent != null && _parent.TryResolveType(type, id, out instance))
 			{
 				return true;
 			}
 			instance = default;
-			return false;
-		}
-
-		public bool TryResolveActionDelegate<TAction>(Type type, out IActionDelegate<TAction> actionDelegate)
-				where TAction : struct
-		{
-			if (_actionDelegateProviderByType != null && _actionDelegateProviderByType.TryGetValue(type, out IProvider provider))
-			{
-				actionDelegate = provider.Provide() as IActionDelegate<TAction>;
-				return true;
-			}
-			if (_parentBinder != null && _parentBinder.TryResolveActionDelegate(type, out actionDelegate))
-			{
-				return true;
-			}
-			actionDelegate = default;
-			return false;
-		}
-
-		public bool TryResolveExecutionDelegate(IExecutable executable, out IExecutionDelegate executionDelegate)
-		{
-			Type executableType = executable.GetType();
-			foreach (KeyValuePair<Type,IExecutionDelegate> pair in _executionDelegateByType)
-			{
-				if (executableType.IsEqualOrDerivesFrom(pair.Key))
-				{
-					executionDelegate = pair.Value;
-					return true;
-				}
-			}
-			executionDelegate = default;
 			return false;
 		}
 

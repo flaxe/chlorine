@@ -1,12 +1,12 @@
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	public struct BindingExecutable<TExecutable>
 			where TExecutable : class, IExecutable
 	{
 		private readonly Container _container;
-		private readonly Binder _binder;
+		private readonly ControllerBinder _binder;
 
-		internal BindingExecutable(Container container, Binder binder)
+		internal BindingExecutable(Container container, ControllerBinder binder)
 		{
 			_container = container;
 			_binder = binder;

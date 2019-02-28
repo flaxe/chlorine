@@ -1,12 +1,12 @@
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	public struct BindingAction<TAction>
 			where TAction : struct
 	{
 		private readonly Container _container;
-		private readonly Binder _binder;
+		private readonly ControllerBinder _binder;
 
-		internal BindingAction(Container container, Binder binder)
+		internal BindingAction(Container container, ControllerBinder binder)
 		{
 			_container = container;
 			_binder = binder;

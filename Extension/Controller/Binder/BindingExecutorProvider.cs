@@ -1,12 +1,13 @@
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	public struct BindingExecutorProvider<TExecutable>
 			where TExecutable : class, IExecutable
 	{
-		private readonly Binder _binder;
+		private readonly ControllerBinder _binder;
+
 		private readonly IProvider<IExecutor<TExecutable>> _provider;
 
-		internal BindingExecutorProvider(Binder binder, IProvider<IExecutor<TExecutable>> provider)
+		internal BindingExecutorProvider(ControllerBinder binder, IProvider<IExecutor<TExecutable>> provider)
 		{
 			_binder = binder;
 			_provider = provider;

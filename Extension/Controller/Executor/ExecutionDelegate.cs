@@ -1,6 +1,6 @@
 using System;
 
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	internal class ExecutionDelegate<TExecutable> : IExecutionDelegate
 			where TExecutable : class, IExecutable

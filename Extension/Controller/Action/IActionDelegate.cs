@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	public interface IActionDelegate<in TAction> : IExecutable
 			where TAction : struct

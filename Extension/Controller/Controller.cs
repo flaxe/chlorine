@@ -1,12 +1,12 @@
 using System;
 
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	internal class Controller : IController
 	{
-		private readonly Binder _binder;
+		private readonly ControllerBinder _binder;
 
-		public Controller(Binder binder)
+		public Controller(ControllerBinder binder)
 		{
 			_binder = binder;
 		}

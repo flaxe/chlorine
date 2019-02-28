@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Chlorine
 {
@@ -7,43 +8,80 @@ namespace Chlorine
 		private readonly Binder _binder;
 		private readonly Injector _injector;
 
-		public Container(Container parentContainer = null)
+		private List<IContainerExtension> _extensions;
+
+		public Container() : this(null)
 		{
-			_binder = new Binder(parentContainer?._binder);
+			_binder.Bind(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
+		}
+
+		private Container(Container parent)
+		{
+			_binder = new Binder(parent?._binder);
 			_injector = new Injector(_binder);
 
-			_binder.Bind(new InstanceProvider<IContainer>(this));
-			_binder.Bind(new InstanceProvider<IController>(new Controller(_binder)));
+			_binder.Bind(new InstanceProvider<Binder>(_binder));
+			_binder.Bind(new InstanceProvider<Injector>(_injector));
 
-			if (parentContainer == null)
+			_binder.Bind(new InstanceProvider<IContainer>(this));
+		}
+
+		public Container CreateSubContainer()
+		{
+			Container container = new Container(this);
+			if (_extensions != null && _extensions.Count > 0)
 			{
-				_binder.Bind(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
+				foreach (IContainerExtension extension in _extensions)
+				{
+					container.Extend(extension);
+				}
 			}
+			return container;
+		}
+
+		public void Extend(IContainerExtension extension)
+		{
+			if (extension == null)
+			{
+				throw new ArgumentNullException(nameof(extension));
+			}
+			if (_extensions == null)
+			{
+				_extensions = new List<IContainerExtension>{extension};
+			}
+			else if (_extensions.Contains(extension))
+			{
+				throw new ArgumentException("Extension is already registered");
+			}
+			else
+			{
+				_extensions.Add(extension);
+			}
+			extension.Extend(this);
 		}
 
 		public void Install<TInstaller>(TypeValue[] arguments = null) where TInstaller : class, IInstaller
 		{
-			Instantiate<TInstaller>(arguments).Install(this);
+			Install(Instantiate<TInstaller>(arguments));
+		}
+
+		public void Install(Type type, TypeValue[] arguments = null)
+		{
+			Install(Instantiate(type, arguments) as IInstaller);
 		}
 
 		public void Install(IInstaller installer)
 		{
+			if (installer == null)
+			{
+				throw new ArgumentNullException(nameof(installer));
+			}
 			installer.Install(this);
 		}
 
 		public BindingType<T> Bind<T>() where T : class
 		{
 			return new BindingType<T>(this, _binder);
-		}
-
-		public BindingAction<TAction> BindAction<TAction>() where TAction : struct
-		{
-			return new BindingAction<TAction>(this, _binder);
-		}
-
-		public BindingExecutable<TExecutable> BindExecutable<TExecutable>() where TExecutable : class, IExecutable
-		{
-			return new BindingExecutable<TExecutable>(this, _binder);
 		}
 
 		public T Resolve<T>(object id = null) where T : class
