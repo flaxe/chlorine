@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	internal class InstanceProvider<T> : IProvider<T>
+	public class InstanceProvider<T> : IProvider<T>
 			where T : class
 	{
 		private readonly T _instance;

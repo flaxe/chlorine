@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	internal class FromFactoryProvider<TFactory, T> : IProvider<T>
+	public class FromFactoryProvider<TFactory, T> : IProvider<T>
 			where TFactory : class, IFactory<T>
 			where T : class
 	{

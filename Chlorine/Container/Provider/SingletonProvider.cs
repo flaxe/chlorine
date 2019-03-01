@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	internal class SingletonProvider<T> : IProvider<T>
+	public class SingletonProvider<T> : IProvider<T>
 			where T : class
 	{
 		private readonly IProvider<T> _provider;

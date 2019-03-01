@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	internal class FromContainerProvider<T> : IProvider<T>
+	public class FromContainerProvider<T> : IProvider<T>
 			where T : class
 	{
 		private readonly Container _container;

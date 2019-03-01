@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	internal class TransientProvider<T> : IProvider<T>
+	public class TransientProvider<T> : IProvider<T>
 			where T : class
 	{
 		private readonly IProvider<T> _provider;

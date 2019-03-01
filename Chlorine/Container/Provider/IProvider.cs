@@ -1,11 +1,11 @@
 namespace Chlorine
 {
-	internal interface IProvider
+	public interface IProvider
 	{
 		object Provide();
 	}
 
-	internal interface IProvider<out T> : IProvider
+	public interface IProvider<out T> : IProvider
 	{
 		new T Provide();
 	}
