@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Provider
 {
 	public class FromContainerProvider<T> : IProvider<T>
 			where T : class

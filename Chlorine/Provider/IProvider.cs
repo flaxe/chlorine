@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Provider
 {
 	public interface IProvider
 	{

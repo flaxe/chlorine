@@ -1,14 +1,16 @@
-namespace Chlorine
+using Chlorine.Provider;
+
+namespace Chlorine.Binder
 {
 	public struct BindingTypeId<T>
 			where T : class
 	{
-		private readonly Binder _binder;
+		private readonly ContainerBinder _binder;
 		private readonly Container _container;
 
 		private readonly object _id;
 
-		internal BindingTypeId(Container container, Binder binder, object id)
+		internal BindingTypeId(Container container, ContainerBinder binder, object id)
 		{
 			_container = container;
 			_binder = binder;

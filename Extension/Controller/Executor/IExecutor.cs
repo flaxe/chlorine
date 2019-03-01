@@ -1,4 +1,4 @@
-namespace Chlorine.Controller
+namespace Chlorine.Executor
 {
 	public interface IExecutor<in TExecutable> where TExecutable : class, IExecutable
 	{

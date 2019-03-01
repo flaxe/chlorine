@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Provider
 {
 	public class ConcreteProvider<TConcrete, T> : IProvider<T>
 			where TConcrete : class, T

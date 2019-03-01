@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Chlorine
+namespace Chlorine.Injector
 {
 	[Flags]
 	internal enum InjectFlag

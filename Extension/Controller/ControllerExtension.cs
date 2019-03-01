@@ -1,4 +1,6 @@
-namespace Chlorine.Controller
+using Chlorine.Binder;
+
+namespace Chlorine
 {
 	public class ControllerExtension : IExtension
 	{

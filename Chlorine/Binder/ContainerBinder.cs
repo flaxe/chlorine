@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
+using Chlorine.Provider;
 
-namespace Chlorine
+namespace Chlorine.Binder
 {
-	internal class Binder
+	internal class ContainerBinder
 	{
-		private readonly Binder _parent;
+		private readonly ContainerBinder _parent;
 
 		private Dictionary<Type, IProvider> _providerByType;
 		private Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
-		public Binder(Binder parent = null)
+		public ContainerBinder(ContainerBinder parent = null)
 		{
 			_parent = parent;
 		}

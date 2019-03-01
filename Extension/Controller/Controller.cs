@@ -1,6 +1,7 @@
 using System;
+using Chlorine.Binder;
 
-namespace Chlorine.Controller
+namespace Chlorine
 {
 	internal class Controller : IController
 	{

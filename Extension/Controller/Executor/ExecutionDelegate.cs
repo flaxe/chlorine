@@ -1,6 +1,7 @@
 using System;
+using Chlorine.Provider;
 
-namespace Chlorine.Controller
+namespace Chlorine.Executor
 {
 	internal class ExecutionDelegate<TExecutable> : IExecutionDelegate
 			where TExecutable : class, IExecutable

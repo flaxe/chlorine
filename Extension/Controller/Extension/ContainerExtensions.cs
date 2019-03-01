@@ -1,6 +1,9 @@
-namespace Chlorine.Controller
+using Chlorine.Binder;
+using Chlorine.Executor;
+
+namespace Chlorine
 {
-	public static class ContainerExtensions
+	public static class ControllerContainerExtensions
 	{
 		public static BindingAction<TAction> BindAction<TAction>(this Container container)
 				where TAction : struct

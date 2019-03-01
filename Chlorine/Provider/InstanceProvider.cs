@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Provider
 {
 	public class InstanceProvider<T> : IProvider<T>
 			where T : class

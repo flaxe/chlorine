@@ -1,4 +1,6 @@
-namespace Chlorine.Controller
+using Chlorine.Provider;
+
+namespace Chlorine.Binder
 {
 	public struct BindingActionDelegate<TAction>
 			where TAction : struct

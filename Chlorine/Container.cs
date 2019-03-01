@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Chlorine.Binder;
+using Chlorine.Injector;
+using Chlorine.Provider;
 
 namespace Chlorine
 {
@@ -8,8 +11,8 @@ namespace Chlorine
 		private readonly Container _parent;
 		private WeakReferenceList<Container> _children;
 
-		private readonly Binder _binder;
-		private readonly Injector _injector;
+		private readonly ContainerBinder _binder;
+		private readonly ContainerInjector _injector;
 
 		private List<IExtension> _extensions;
 
@@ -21,11 +24,11 @@ namespace Chlorine
 		private Container(Container parent)
 		{
 			_parent = parent;
-			_binder = new Binder(_parent?._binder);
-			_injector = new Injector(_binder);
+			_binder = new ContainerBinder(_parent?._binder);
+			_injector = new ContainerInjector(_binder);
 
-			_binder.Bind(new InstanceProvider<Binder>(_binder));
-			_binder.Bind(new InstanceProvider<Injector>(_injector));
+			_binder.Bind(new InstanceProvider<ContainerBinder>(_binder));
+			_binder.Bind(new InstanceProvider<ContainerInjector>(_injector));
 
 			_binder.Bind(new InstanceProvider<IContainer>(this));
 		}

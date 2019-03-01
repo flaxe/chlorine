@@ -1,20 +1,21 @@
 using System;
 using System.Collections.Generic;
+using Chlorine.Binder;
 
-namespace Chlorine
+namespace Chlorine.Injector
 {
-	internal class Injector
+	internal class ContainerInjector
 	{
 		private static readonly Type ObjectType = typeof(object);
 
 		private readonly ArrayPool<TypeValue> _argumentsPool = new ArrayPool<TypeValue>();
 		private readonly ArrayPool<object> _parametersPool = new ArrayPool<object>();
 
-		private readonly Binder _binder;
+		private readonly ContainerBinder _binder;
 
 		private InjectAnalyzer _analyzer;
 
-		public Injector(Binder binder)
+		public ContainerInjector(ContainerBinder binder)
 		{
 			_binder = binder;
 		}

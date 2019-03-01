@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Provider
 {
 	public class SingletonProvider<T> : IProvider<T>
 			where T : class

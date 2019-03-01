@@ -6,7 +6,7 @@ namespace Chlorine
 
 		public Future(IPromise promise)
 		{
-			Join(promise);
+			Init(promise);
 		}
 
 		public override void Clear()
@@ -19,7 +19,7 @@ namespace Chlorine
 			}
 		}
 
-		public void Join(IPromise promise)
+		public void Init(IPromise promise)
 		{
 			_promise?.Revoke(this);
 			_promise = promise;
@@ -47,7 +47,7 @@ namespace Chlorine
 
 		public Future(IPromise<TResult> promise)
 		{
-			Join(promise);
+			Init(promise);
 		}
 
 		public TResult Result => _result;
@@ -69,7 +69,7 @@ namespace Chlorine
 			}
 		}
 
-		public void Join(IPromise<TResult> promise)
+		public void Init(IPromise<TResult> promise)
 		{
 			_promise?.Revoke(this);
 			_promise = promise;

@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Provider
 {
 	public class FromFactoryProvider<TFactory, T> : IProvider<T>
 			where TFactory : class, IFactory<T>

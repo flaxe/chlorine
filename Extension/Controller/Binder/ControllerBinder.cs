@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Chlorine.Executor;
+using Chlorine.Provider;
 
-namespace Chlorine.Controller
+namespace Chlorine.Binder
 {
 	internal class ControllerBinder
 	{
