@@ -15,13 +15,15 @@ namespace Chlorine.Controller
 		public BindingActionDelegate<TAction> To<TActionDelegate>()
 				where TActionDelegate : class, IActionDelegate<TAction, TResult>
 		{
-			return new BindingActionDelegate<TAction>(_binder, new ConcreteProvider<TActionDelegate, IActionDelegate<TAction, TResult>>(_container));
+			return new BindingActionDelegate<TAction>(_binder,
+					new ConcreteProvider<TActionDelegate, IActionDelegate<TAction, TResult>>(_container));
 		}
 
 		public BindingActionDelegate<TAction> FromFactory<TActionDelegateFactory>()
 				where TActionDelegateFactory : class, IFactory<IActionDelegate<TAction, TResult>>
 		{
-			return new BindingActionDelegate<TAction>(_binder, new FromFactoryProvider<TActionDelegateFactory, IActionDelegate<TAction, TResult>>(_container));
+			return new BindingActionDelegate<TAction>(_binder,
+					new FromFactoryProvider<TActionDelegateFactory, IActionDelegate<TAction, TResult>>(_container));
 		}
 	}
 }

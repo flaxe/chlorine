@@ -21,7 +21,7 @@ namespace Chlorine.Controller
 			Type actionType = typeof(TAction);
 			if (_actionDelegateProviderByType == null)
 			{
-				_actionDelegateProviderByType = new Dictionary<Type, IProvider>{{actionType, provider}};
+				_actionDelegateProviderByType = new Dictionary<Type, IProvider> {{actionType, provider}};
 			}
 			else if (_actionDelegateProviderByType.ContainsKey(actionType))
 			{
@@ -39,7 +39,7 @@ namespace Chlorine.Controller
 			Type executableType = typeof(TExecutable);
 			if (_executionDelegateByType == null)
 			{
-				_executionDelegateByType = new Dictionary<Type, IExecutionDelegate>{{executableType, executionDelegate}};
+				_executionDelegateByType = new Dictionary<Type, IExecutionDelegate> {{executableType, executionDelegate}};
 			}
 			else if (_executionDelegateByType.ContainsKey(executableType))
 			{
@@ -70,7 +70,7 @@ namespace Chlorine.Controller
 		public bool TryResolveExecutionDelegate(IExecutable executable, out IExecutionDelegate executionDelegate)
 		{
 			Type executableType = executable.GetType();
-			foreach (KeyValuePair<Type,IExecutionDelegate> pair in _executionDelegateByType)
+			foreach (KeyValuePair<Type, IExecutionDelegate> pair in _executionDelegateByType)
 			{
 				if (executableType.IsEqualOrDerivesFrom(pair.Key))
 				{

@@ -15,12 +15,14 @@ namespace Chlorine.Controller
 
 		public void AsSingleton()
 		{
-			_binder.BindExecutable(new ExecutionDelegate<TExecutable>(new SingletonProvider<IExecutor<TExecutable>>(_provider)));
+			_binder.BindExecutable(new ExecutionDelegate<TExecutable>(
+					new SingletonProvider<IExecutor<TExecutable>>(_provider)));
 		}
 
 		public void AsTransient()
 		{
-			_binder.BindExecutable(new ExecutionDelegate<TExecutable>(new TransientProvider<IExecutor<TExecutable>>(_provider)));
+			_binder.BindExecutable(new ExecutionDelegate<TExecutable>(
+					new TransientProvider<IExecutor<TExecutable>>(_provider)));
 		}
 	}
 }

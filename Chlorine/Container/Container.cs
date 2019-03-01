@@ -5,10 +5,13 @@ namespace Chlorine
 {
 	public class Container : IContainer
 	{
+		private readonly Container _parent;
+		private WeakReferenceList<Container> _children;
+
 		private readonly Binder _binder;
 		private readonly Injector _injector;
 
-		private List<IContainerExtension> _extensions;
+		private List<IExtension> _extensions;
 
 		public Container() : this(null)
 		{
@@ -17,7 +20,8 @@ namespace Chlorine
 
 		private Container(Container parent)
 		{
-			_binder = new Binder(parent?._binder);
+			_parent = parent;
+			_binder = new Binder(_parent?._binder);
 			_injector = new Injector(_binder);
 
 			_binder.Bind(new InstanceProvider<Binder>(_binder));
@@ -29,9 +33,17 @@ namespace Chlorine
 		public Container CreateSubContainer()
 		{
 			Container container = new Container(this);
+			if (_children == null)
+			{
+				_children = new WeakReferenceList<Container> {container};
+			}
+			else
+			{
+				_children.Add(container);
+			}
 			if (_extensions != null && _extensions.Count > 0)
 			{
-				foreach (IContainerExtension extension in _extensions)
+				foreach (IExtension extension in _extensions)
 				{
 					container.Extend(extension);
 				}
@@ -39,7 +51,7 @@ namespace Chlorine
 			return container;
 		}
 
-		public void Extend(IContainerExtension extension)
+		public void Extend(IExtension extension)
 		{
 			if (extension == null)
 			{
@@ -47,7 +59,7 @@ namespace Chlorine
 			}
 			if (_extensions == null)
 			{
-				_extensions = new List<IContainerExtension>{extension};
+				_extensions = new List<IExtension> {extension};
 			}
 			else if (_extensions.Contains(extension))
 			{
@@ -58,6 +70,13 @@ namespace Chlorine
 				_extensions.Add(extension);
 			}
 			extension.Extend(this);
+			if (_children != null && _children.Count > 0)
+			{
+				foreach (Container container in _children)
+				{
+					container.Extend(extension);
+				}
+			}
 		}
 
 		public void Install<TInstaller>(TypeValue[] arguments = null) where TInstaller : class, IInstaller

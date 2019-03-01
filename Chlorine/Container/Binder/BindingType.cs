@@ -17,9 +17,9 @@ namespace Chlorine
 			return new BindingTypeId<T>(_container, _binder, id);
 		}
 
-		public BindingTypeProvider<T> To<TConcrete>()where TConcrete : class, T
+		public BindingTypeProvider<T> To<TConcrete>() where TConcrete : class, T
 		{
-			return new BindingTypeProvider<T>(_binder, null, new ConcreteProvider<TConcrete,T>(_container));
+			return new BindingTypeProvider<T>(_binder, null, new ConcreteProvider<TConcrete, T>(_container));
 		}
 
 		public BindingTypeProvider<T> FromFactory<TFactory>() where TFactory : class, IFactory<T>

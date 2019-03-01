@@ -29,7 +29,7 @@ namespace Chlorine
 			{
 				if (_providerByType == null)
 				{
-					_providerByType = new Dictionary<Type, IProvider>{{type, provider}};
+					_providerByType = new Dictionary<Type, IProvider> {{type, provider}};
 				}
 				else if (_providerByType.ContainsKey(type))
 				{
@@ -46,7 +46,7 @@ namespace Chlorine
 				{
 					_providerByTypeAndId = new Dictionary<Type, Dictionary<object, IProvider>>
 					{
-							{type, new Dictionary<object, IProvider>{{id, provider}}}
+							{type, new Dictionary<object, IProvider> {{id, provider}}}
 					};
 				}
 				else if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
@@ -59,7 +59,7 @@ namespace Chlorine
 				}
 				else
 				{
-					_providerByTypeAndId.Add(type, new Dictionary<object, IProvider>{{id, provider}});
+					_providerByTypeAndId.Add(type, new Dictionary<object, IProvider> {{id, provider}});
 				}
 			}
 		}

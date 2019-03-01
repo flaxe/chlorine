@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	public interface IContainerExtension
+	public interface IExtension
 	{
 		void Extend(Container container);
 	}
