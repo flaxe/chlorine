@@ -1,3 +1,5 @@
+using Chlorine.Internal;
+
 namespace Chlorine
 {
 	public class Promise : AbstractPromise, IPromise

@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Internal
 {
 	public class AbstractFuture : IPoolable
 	{

@@ -54,6 +54,21 @@ namespace Chlorine
 			return container;
 		}
 
+		public void Extend<TExtension>(TypeValue[] arguments = null) where TExtension : class, IExtension
+		{
+			Extend(Instantiate<TExtension>(arguments));
+		}
+
+		public void Extend(Type type, TypeValue[] arguments = null)
+		{
+			IExtension extension = Instantiate(type, arguments) as IExtension;
+			if (extension == null)
+			{
+				throw new ArgumentException($"Invalid type '{type.Name}' given for extension.");
+			}
+			Extend(extension);
+		}
+
 		public void Extend(IExtension extension)
 		{
 			if (extension == null)
@@ -66,7 +81,7 @@ namespace Chlorine
 			}
 			else if (_extensions.Contains(extension))
 			{
-				throw new ArgumentException("Extension is already registered");
+				throw new ArgumentException("Extension is already registered.");
 			}
 			else
 			{
@@ -89,7 +104,12 @@ namespace Chlorine
 
 		public void Install(Type type, TypeValue[] arguments = null)
 		{
-			Install(Instantiate(type, arguments) as IInstaller);
+			IInstaller installer = Instantiate(type, arguments) as IInstaller;
+			if (installer == null)
+			{
+				throw new ArgumentException($"Invalid type '{type.Name}' given for installer.");
+			}
+			Install(installer);
 		}
 
 		public void Install(IInstaller installer)

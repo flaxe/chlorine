@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Internal
 {
 	public abstract class AbstractPromise : IPoolable
 	{

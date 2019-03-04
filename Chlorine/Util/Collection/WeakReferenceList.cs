@@ -28,7 +28,7 @@ namespace Chlorine
 
 		public Enumerator GetEnumerator()
 		{
-			return new Enumerator(_list.GetEnumerator());
+			return new Enumerator(_list);
 		}
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
@@ -150,9 +150,9 @@ namespace Chlorine
 			private List<WeakReference<T>>.Enumerator _enumerator;
 			private T _current;
 
-			internal Enumerator(List<WeakReference<T>>.Enumerator enumerator)
+			internal Enumerator(List<WeakReference<T>> list)
 			{
-				_enumerator = enumerator;
+				_enumerator = list.GetEnumerator();
 				_current = default;
 			}
 

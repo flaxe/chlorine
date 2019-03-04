@@ -1,3 +1,5 @@
+using Chlorine.Internal;
+
 namespace Chlorine
 {
 	public class Future : AbstractFuture, IFuture
