@@ -6,6 +6,10 @@ namespace Chlorine
 	{
 		private IPromise _promise;
 
+		public Future()
+		{
+		}
+
 		public Future(IPromise promise)
 		{
 			Init(promise);
@@ -47,12 +51,14 @@ namespace Chlorine
 
 		private IPromise<TResult> _promise;
 
+		public Future()
+		{
+		}
+
 		public Future(IPromise<TResult> promise)
 		{
 			Init(promise);
 		}
-
-		public TResult Result => _result;
 
 		public override void Reset()
 		{
@@ -69,6 +75,17 @@ namespace Chlorine
 				_promise.Revoke(this);
 				_promise = null;
 			}
+		}
+
+		public bool TryGetResult(out TResult result)
+		{
+			if (Status == FutureStatus.Resolved)
+			{
+				result = _result;
+				return true;
+			}
+			result = default;
+			return false;
 		}
 
 		public void Init(IPromise<TResult> promise)

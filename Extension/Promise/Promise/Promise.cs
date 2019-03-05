@@ -21,12 +21,21 @@ namespace Chlorine
 
 		private TResult _result;
 
-		public TResult Result => _result;
-
 		public override void Reset()
 		{
 			base.Reset();
 			_result = default;
+		}
+
+		public bool TryGetResult(out TResult result)
+		{
+			if (Status == PromiseStatus.Resolved)
+			{
+				result = _result;
+				return true;
+			}
+			result = default;
+			return false;
 		}
 
 		public void Fulfill(Future<TResult> future)

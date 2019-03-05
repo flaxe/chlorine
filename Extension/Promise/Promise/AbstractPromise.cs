@@ -18,22 +18,33 @@ namespace Chlorine.Internal
 		{
 		}
 
+		public bool IsResolved => _status == PromiseStatus.Resolved;
+		public bool IsRejected => _status == PromiseStatus.Rejected;
+
 		protected PromiseStatus Status
 		{
 			get => _status;
 			set => _status = value;
 		}
 
-		public bool IsResolved => _status == PromiseStatus.Resolved;
-		public bool IsRejected => _status == PromiseStatus.Rejected;
-
-		public Error Reason => _reason;
+		protected Error Reason => _reason;
 
 		public virtual void Reset()
 		{
 			RevokeAll();
 			_status = PromiseStatus.Pending;
 			_reason = default;
+		}
+
+		public bool TryGetReason(out Error reason)
+		{
+			if (_status == PromiseStatus.Rejected)
+			{
+				reason = _reason;
+				return true;
+			}
+			reason = default;
+			return false;
 		}
 
 		public void Fulfill(Future future)
