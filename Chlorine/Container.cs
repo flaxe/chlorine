@@ -6,7 +6,7 @@ using Chlorine.Provider;
 
 namespace Chlorine
 {
-	public class Container : IContainer
+	public sealed class Container : IContainer, IDisposable
 	{
 		private readonly Container _parent;
 		private WeakReferenceList<Container> _children;
@@ -31,6 +31,24 @@ namespace Chlorine
 			_binder.Bind(new InstanceProvider<ContainerInjector>(_injector));
 
 			_binder.Bind(new InstanceProvider<IContainer>(this));
+		}
+
+		~Container()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			_binder.Dispose();
+			if (_children != null)
+			{
+				foreach (Container child in _children)
+				{
+					child.Dispose();
+				}
+				_children = null;
+			}
 		}
 
 		public Container CreateSubContainer()
@@ -90,9 +108,9 @@ namespace Chlorine
 			extension.Extend(this);
 			if (_children != null && _children.Count > 0)
 			{
-				foreach (Container container in _children)
+				foreach (Container child in _children)
 				{
-					container.Extend(extension);
+					child.Extend(extension);
 				}
 			}
 		}

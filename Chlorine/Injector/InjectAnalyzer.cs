@@ -11,7 +11,7 @@ namespace Chlorine.Injector
 		Inject = 2
 	}
 
-	internal class InjectAnalyzer
+	internal sealed class InjectAnalyzer
 	{
 		private static readonly Type UnityComponentType = typeof(UnityEngine.Component);
 		private static readonly Type InjectAttributeType = typeof(InjectAttribute);

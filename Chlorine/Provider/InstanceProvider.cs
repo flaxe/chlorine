@@ -1,6 +1,6 @@
 namespace Chlorine.Provider
 {
-	public class InstanceProvider<T> : IProvider<T>
+	public sealed class InstanceProvider<T> : IProvider<T>
 			where T : class
 	{
 		private readonly T _instance;

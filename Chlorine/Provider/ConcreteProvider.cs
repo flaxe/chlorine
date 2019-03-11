@@ -1,6 +1,6 @@
 namespace Chlorine.Provider
 {
-	public class ConcreteProvider<TConcrete, T> : IProvider<T>
+	public sealed class ConcreteProvider<TConcrete, T> : IProvider<T>
 			where TConcrete : class, T
 			where T : class
 	{

@@ -1,6 +1,8 @@
+using System;
+
 namespace Chlorine.Provider
 {
-	public class FromFactoryProvider<TFactory, T> : IProvider<T>
+	public sealed class FromFactoryProvider<TFactory, T> : IProvider<T>, IDisposable
 			where TFactory : class, IFactory<T>
 			where T : class
 	{
@@ -10,6 +12,23 @@ namespace Chlorine.Provider
 		public FromFactoryProvider(Container container)
 		{
 			_container = container;
+		}
+
+		~FromFactoryProvider()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			if (_factory != null)
+			{
+				if (_factory is IDisposable disposable)
+				{
+					disposable.Dispose();
+				}
+				_factory = null;
+			}
 		}
 
 		public T Provide()

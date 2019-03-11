@@ -1,6 +1,8 @@
+using System;
+
 namespace Chlorine.Provider
 {
-	public class SingletonProvider<T> : IProvider<T>
+	public sealed class SingletonProvider<T> : IProvider<T>, IDisposable
 			where T : class
 	{
 		private readonly IProvider<T> _provider;
@@ -9,6 +11,27 @@ namespace Chlorine.Provider
 		public SingletonProvider(IProvider<T> provider)
 		{
 			_provider = provider;
+		}
+
+		~SingletonProvider()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			if (_instance != null)
+			{
+				if (_instance is IDisposable disposableInstance)
+				{
+					disposableInstance.Dispose();
+				}
+				_instance = null;
+			}
+			if (_provider is IDisposable disposableProvider)
+			{
+				disposableProvider.Dispose();
+			}
 		}
 
 		public T Provide()

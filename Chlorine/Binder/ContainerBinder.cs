@@ -4,7 +4,7 @@ using Chlorine.Provider;
 
 namespace Chlorine.Binder
 {
-	internal class ContainerBinder
+	internal sealed class ContainerBinder : IDisposable
 	{
 		private readonly ContainerBinder _parent;
 
@@ -14,6 +14,40 @@ namespace Chlorine.Binder
 		public ContainerBinder(ContainerBinder parent = null)
 		{
 			_parent = parent;
+		}
+
+		~ContainerBinder()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			if (_providerByType != null)
+			{
+				foreach (IProvider provider in _providerByType.Values)
+				{
+					if (provider is IDisposable disposable)
+					{
+						disposable.Dispose();
+					}
+				}
+				_providerByType = null;
+			}
+			if (_providerByTypeAndId != null)
+			{
+				foreach (Dictionary<object, IProvider> providerById in _providerByTypeAndId.Values)
+				{
+					foreach (IProvider provider in providerById.Values)
+					{
+						if (provider is IDisposable disposable)
+						{
+							disposable.Dispose();
+						}
+					}
+				}
+				_providerByTypeAndId = null;
+			}
 		}
 
 		public void Bind<T>(IProvider<T> provider)

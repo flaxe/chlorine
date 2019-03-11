@@ -1,6 +1,8 @@
+using System;
+
 namespace Chlorine.Provider
 {
-	public class TransientProvider<T> : IProvider<T>
+	public sealed class TransientProvider<T> : IProvider<T>, IDisposable
 			where T : class
 	{
 		private readonly IProvider<T> _provider;
@@ -8,6 +10,19 @@ namespace Chlorine.Provider
 		public TransientProvider(IProvider<T> provider)
 		{
 			_provider = provider;
+		}
+
+		~TransientProvider()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			if (_provider is IDisposable disposable)
+			{
+				disposable.Dispose();
+			}
 		}
 
 		public T Provide()

@@ -4,7 +4,7 @@ using Chlorine.Binder;
 
 namespace Chlorine.Injector
 {
-	internal class ContainerInjector
+	internal sealed class ContainerInjector
 	{
 		private static readonly Type ObjectType = typeof(object);
 
