@@ -19,6 +19,7 @@ namespace Chlorine
 		public Container() : this(null)
 		{
 			_binder.Bind(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
+			_binder.Bind(new SingletonProvider<Pool>(new ConcreteProvider<Pool, Pool>(this)));
 		}
 
 		private Container(Container parent)

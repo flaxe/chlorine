@@ -3,10 +3,10 @@ namespace Chlorine.Provider
 	public sealed class FromContainerProvider<T> : IProvider<T>
 			where T : class
 	{
-		private readonly Container _container;
+		private readonly IContainer _container;
 		private readonly object _id;
 
-		public FromContainerProvider(Container container, object id = null)
+		public FromContainerProvider(IContainer container, object id = null)
 		{
 			_container = container;
 			_id = id;

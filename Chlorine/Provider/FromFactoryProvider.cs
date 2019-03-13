@@ -6,10 +6,10 @@ namespace Chlorine.Provider
 			where TFactory : class, IFactory<T>
 			where T : class
 	{
-		private readonly Container _container;
+		private readonly IContainer _container;
 		private TFactory _factory;
 
-		public FromFactoryProvider(Container container)
+		public FromFactoryProvider(IContainer container)
 		{
 			_container = container;
 		}

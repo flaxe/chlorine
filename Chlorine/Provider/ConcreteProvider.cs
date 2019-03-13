@@ -4,9 +4,9 @@ namespace Chlorine.Provider
 			where TConcrete : class, T
 			where T : class
 	{
-		private readonly Container _container;
+		private readonly IContainer _container;
 
-		public ConcreteProvider(Container container)
+		public ConcreteProvider(IContainer container)
 		{
 			_container = container;
 		}

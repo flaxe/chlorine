@@ -46,7 +46,7 @@ namespace Chlorine.Binder
 
 		public void AsTransient()
 		{
-			_binder.Bind(new TransientProvider<T>(new ConcreteProvider<T, T>(_container)));
+			_binder.Bind(new ConcreteProvider<T, T>(_container));
 		}
 	}
 }
