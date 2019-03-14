@@ -6,13 +6,15 @@ namespace Chlorine.Binder
 {
 	internal sealed class ContainerBinder : IDisposable
 	{
+		private readonly Container _container;
 		private readonly ContainerBinder _parent;
 
 		private Dictionary<Type, IProvider> _providerByType;
 		private Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
-		public ContainerBinder(ContainerBinder parent = null)
+		public ContainerBinder(Container container, ContainerBinder parent = null)
 		{
+			_container = container;
 			_parent = parent;
 		}
 
@@ -50,14 +52,17 @@ namespace Chlorine.Binder
 			}
 		}
 
-		public void Bind<T>(IProvider<T> provider)
-				where T : class
+		public BindingType<T> Bind<T>() where T : class
+		{
+			return new BindingType<T>(_container, this);
+		}
+
+		public void Bind<T>(IProvider<T> provider) where T : class
 		{
 			Bind(null, provider);
 		}
 
-		public void Bind<T>(object id, IProvider<T> provider)
-				where T : class
+		public void Bind<T>(object id, IProvider<T> provider) where T : class
 		{
 			Type type = typeof(T);
 			if (id == null)

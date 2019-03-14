@@ -19,13 +19,13 @@ namespace Chlorine
 		public Container() : this(null)
 		{
 			_binder.Bind(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
-			_binder.Bind(new SingletonProvider<Pool>(new ConcreteProvider<Pool, Pool>(this)));
+			_binder.Bind(new SingletonProvider<Pool>(new InstanceProvider<Pool, Pool>(this)));
 		}
 
 		private Container(Container parent)
 		{
 			_parent = parent;
-			_binder = new ContainerBinder(_parent?._binder);
+			_binder = new ContainerBinder(this, _parent?._binder);
 			_injector = new ContainerInjector(_binder);
 
 			_binder.Bind(new InstanceProvider<ContainerBinder>(_binder));
@@ -142,7 +142,7 @@ namespace Chlorine
 
 		public BindingType<T> Bind<T>() where T : class
 		{
-			return new BindingType<T>(this, _binder);
+			return _binder.Bind<T>();
 		}
 
 		public T Resolve<T>(object id = null) where T : class

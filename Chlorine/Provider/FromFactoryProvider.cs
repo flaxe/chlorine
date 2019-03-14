@@ -45,4 +45,25 @@ namespace Chlorine.Provider
 			return Provide();
 		}
 	}
+
+	public sealed class FromFactoryMethodProvider<T> : IProvider<T>
+			where T : class
+	{
+		private readonly FactoryMethod<T> _factoryMethod;
+
+		public FromFactoryMethodProvider(FactoryMethod<T> factoryMethod)
+		{
+			_factoryMethod = factoryMethod;
+		}
+
+		public T Provide()
+		{
+			return _factoryMethod.Invoke();
+		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
+		}
+	}
 }

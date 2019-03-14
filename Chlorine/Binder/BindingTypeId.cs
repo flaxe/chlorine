@@ -17,14 +17,24 @@ namespace Chlorine.Binder
 			_id = id;
 		}
 
-		public BindingTypeProvider<T> To<TConcrete>() where TConcrete : class, T
+		public BindingTypeProvider<T> To<TInstance>() where TInstance : class, T
 		{
-			return new BindingTypeProvider<T>(_binder, _id, new ConcreteProvider<TConcrete, T>(_container));
+			return new BindingTypeProvider<T>(_binder, _id, new InstanceProvider<TInstance, T>(_container));
 		}
 
 		public BindingTypeProvider<T> FromFactory<TFactory>() where TFactory : class, IFactory<T>
 		{
 			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryProvider<TFactory, T>(_container));
+		}
+
+		public BindingTypeProvider<T> FromFactory(FactoryMethod<T> factoryMethod)
+		{
+			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryMethodProvider<T>(factoryMethod));
+		}
+
+		public void FromResolve<TResolve>(object id = null) where TResolve : class, T
+		{
+			_binder.Bind(_id, new FromContainerProvider<TResolve>(_container, id));
 		}
 
 		public void FromContainer(Container container)
@@ -39,12 +49,12 @@ namespace Chlorine.Binder
 
 		public void AsSingleton()
 		{
-			_binder.Bind(_id, new SingletonProvider<T>(new ConcreteProvider<T, T>(_container)));
+			_binder.Bind(_id, new SingletonProvider<T>(new InstanceProvider<T, T>(_container)));
 		}
 
 		public void AsTransient()
 		{
-			_binder.Bind(_id, new ConcreteProvider<T, T>(_container));
+			_binder.Bind(_id, new InstanceProvider<T, T>(_container));
 		}
 	}
 }

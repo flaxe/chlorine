@@ -20,4 +20,26 @@ namespace Chlorine.Provider
 			return Provide();
 		}
 	}
+
+	public sealed class InstanceProvider<TInstance, T> : IProvider<T>
+			where TInstance : class, T
+			where T : class
+	{
+		private readonly IContainer _container;
+
+		public InstanceProvider(IContainer container)
+		{
+			_container = container;
+		}
+
+		public T Provide()
+		{
+			return _container.Instantiate<TInstance>();
+		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
+		}
+	}
 }
