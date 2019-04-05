@@ -1,11 +1,8 @@
-using System;
-using Chlorine;
-
-namespace chlorine
+namespace Chlorine
 {
 	public class TrueFuture : IFuture, IPoolable
 	{
-		public TrueFuture()
+		internal TrueFuture()
 		{
 		}
 
@@ -47,11 +44,11 @@ namespace chlorine
 		private FutureStatus _status = FutureStatus.Pending;
 		private TResult _result;
 
-		public TrueFuture()
+		internal TrueFuture()
 		{
 		}
 
-		public TrueFuture(TResult result)
+		internal TrueFuture(TResult result)
 		{
 			Resolve(result);
 		}
@@ -94,7 +91,7 @@ namespace chlorine
 					resolved.Invoke();
 					break;
 				case FutureStatus.Pending:
-					throw new Exception("TrueFuture must be resolved before usage.");
+					throw new FutureException("TrueFuture must be resolved before usage.");
 			}
 		}
 
@@ -106,7 +103,7 @@ namespace chlorine
 					resolved.Invoke(_result);
 					break;
 				case FutureStatus.Pending:
-					throw new Exception("TrueFuture must be resolved before usage.");
+					throw new FutureException("TrueFuture must be resolved before usage.");
 			}
 		}
 

@@ -1,7 +1,4 @@
-using System;
-using Chlorine;
-
-namespace chlorine
+namespace Chlorine
 {
 	public class FalseFuture : IFuture, IPoolable
 	{
@@ -14,11 +11,11 @@ namespace chlorine
 		private FutureStatus _status = FutureStatus.Pending;
 		private Error _reason;
 
-		public FalseFuture()
+		internal FalseFuture()
 		{
 		}
 
-		public FalseFuture(Error reason)
+		internal FalseFuture(Error reason)
 		{
 			Reject(reason);
 		}
@@ -60,7 +57,7 @@ namespace chlorine
 					rejected.Invoke(_reason);
 					break;
 				case FutureStatus.Pending:
-					throw new Exception("FalseFuture must be rejected before usage.");
+					throw new FutureException("FalseFuture must be rejected before usage.");
 			}
 		}
 
@@ -76,11 +73,11 @@ namespace chlorine
 
 	public class FalseFuture<TResult> : FalseFuture, IFuture<TResult>
 	{
-		public FalseFuture()
+		internal FalseFuture()
 		{
 		}
 
-		public FalseFuture(Error reason) : base(reason)
+		internal FalseFuture(Error reason) : base(reason)
 		{
 		}
 

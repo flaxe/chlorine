@@ -4,6 +4,10 @@ namespace Chlorine
 {
 	public class Promise : AbstractPromise, IPromise
 	{
+		internal Promise()
+		{
+		}
+
 		public void Resolve()
 		{
 			if (Status == PromiseStatus.Pending)
@@ -20,6 +24,10 @@ namespace Chlorine
 		private WeakReferenceList<Future<TResult>> _resultFutures;
 
 		private TResult _result;
+
+		internal Promise()
+		{
+		}
 
 		public override void Reset()
 		{

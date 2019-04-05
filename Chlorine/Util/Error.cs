@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 namespace Chlorine
 {
@@ -32,7 +33,15 @@ namespace Chlorine
 
 		public override string ToString()
 		{
-			return $"{Message}({Code.ToString()}){(Exception != null ? $".{Environment.NewLine}{Exception.StackTrace}" : ".")}";
+			StringBuilder builder = new StringBuilder();
+			builder.Append(Message);
+			builder.Append('(').Append(Code.ToString()).Append(')');
+			if (Exception != null)
+			{
+				builder.Append(Environment.NewLine);
+				builder.Append(Exception.StackTrace);
+			}
+			return builder.ToString();
 		}
 
 		public static explicit operator Exception(Error error)

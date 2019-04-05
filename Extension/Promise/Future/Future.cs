@@ -6,11 +6,11 @@ namespace Chlorine
 	{
 		private IPromise _promise;
 
-		public Future()
+		internal Future()
 		{
 		}
 
-		public Future(IPromise promise)
+		internal Future(IPromise promise)
 		{
 			Init(promise);
 		}
@@ -51,11 +51,11 @@ namespace Chlorine
 
 		private IPromise<TResult> _promise;
 
-		public Future()
+		internal Future()
 		{
 		}
 
-		public Future(IPromise<TResult> promise)
+		internal Future(IPromise<TResult> promise)
 		{
 			Init(promise);
 		}
