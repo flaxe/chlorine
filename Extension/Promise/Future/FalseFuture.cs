@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	public class FalseFuture : IFuture, IPoolable
+	internal class FalseFuture : IFuture, IPoolable
 	{
 		private enum FutureStatus
 		{
@@ -23,14 +23,16 @@ namespace Chlorine
 		public bool IsResolved => false;
 		public bool IsRejected => _status == FutureStatus.Rejected;
 
-		public void Reset()
+		public Error Reason
 		{
-			_status = FutureStatus.Pending;
-			_reason = default;
-		}
-
-		public void Clear()
-		{
+			get
+			{
+				if (_status != FutureStatus.Rejected)
+				{
+					throw new FutureException("Future was not rejected.");
+				}
+				return _reason;
+			}
 		}
 
 		public bool TryGetReason(out Error reason)
@@ -42,6 +44,16 @@ namespace Chlorine
 			}
 			reason = default;
 			return false;
+		}
+
+		public void Reset()
+		{
+			_status = FutureStatus.Pending;
+			_reason = default;
+		}
+
+		public void Clear()
+		{
 		}
 
 		public void Then(FutureResolved resolved, FutureRejected rejected)
@@ -71,7 +83,7 @@ namespace Chlorine
 		}
 	}
 
-	public class FalseFuture<TResult> : FalseFuture, IFuture<TResult>
+	internal class FalseFuture<TResult> : FalseFuture, IFuture<TResult>
 	{
 		internal FalseFuture()
 		{
@@ -80,6 +92,8 @@ namespace Chlorine
 		internal FalseFuture(Error reason) : base(reason)
 		{
 		}
+
+		public TResult Result => throw new FutureException("Future was not resolved.");
 
 		public bool TryGetResult(out TResult result)
 		{

@@ -1,6 +1,6 @@
 namespace Chlorine
 {
-	public class TrueFuture : IFuture, IPoolable
+	internal class TrueFuture : IFuture, IPoolable
 	{
 		internal TrueFuture()
 		{
@@ -9,18 +9,20 @@ namespace Chlorine
 		public bool IsResolved => true;
 		public bool IsRejected => false;
 
+		public Error Reason => throw new FutureException("Future was not rejected.");
+
+		public bool TryGetReason(out Error reason)
+		{
+			reason = default;
+			return false;
+		}
+
 		public void Reset()
 		{
 		}
 
 		public void Clear()
 		{
-		}
-
-		public bool TryGetReason(out Error reason)
-		{
-			reason = default;
-			return false;
 		}
 
 		public void Then(FutureResolved resolved, FutureRejected rejected)
@@ -33,7 +35,7 @@ namespace Chlorine
 		}
 	}
 
-	public class TrueFuture<TResult> : IFuture<TResult>, IPoolable
+	internal class TrueFuture<TResult> : IFuture<TResult>, IPoolable
 	{
 		private enum FutureStatus
 		{
@@ -56,20 +58,24 @@ namespace Chlorine
 		public bool IsResolved => _status == FutureStatus.Resolved;
 		public bool IsRejected => false;
 
-		public void Reset()
-		{
-			_status = FutureStatus.Pending;
-			_result = default;
-		}
-
-		public void Clear()
-		{
-		}
+		public Error Reason => throw new FutureException("Future was not rejected.");
 
 		public bool TryGetReason(out Error reason)
 		{
 			reason = default;
 			return false;
+		}
+
+		public TResult Result
+		{
+			get
+			{
+				if (_status != FutureStatus.Resolved)
+				{
+					throw new FutureException("Future was not resolved.");
+				}
+				return _result;
+			}
 		}
 
 		public bool TryGetResult(out TResult result)
@@ -81,6 +87,16 @@ namespace Chlorine
 			}
 			result = default;
 			return false;
+		}
+
+		public void Reset()
+		{
+			_status = FutureStatus.Pending;
+			_result = default;
+		}
+
+		public void Clear()
+		{
 		}
 
 		public void Then(FutureResolved resolved, FutureRejected rejected)

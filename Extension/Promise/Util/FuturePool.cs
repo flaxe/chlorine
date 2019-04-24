@@ -27,7 +27,7 @@ namespace Chlorine
 			return new Future<TResult>(promise);
 		}
 
-		public TrueFuture GetTrue()
+		public IFuture GetTrue()
 		{
 			if (TryPull(out TrueFuture future))
 			{
@@ -36,7 +36,7 @@ namespace Chlorine
 			return new TrueFuture();
 		}
 
-		public TrueFuture<TResult> GetTrue<TResult>(TResult result)
+		public IFuture<TResult> GetTrue<TResult>(TResult result)
 		{
 			if (TryPull(out TrueFuture<TResult> future))
 			{
@@ -46,7 +46,7 @@ namespace Chlorine
 			return new TrueFuture<TResult>();
 		}
 
-		public FalseFuture GetFalse(Error error)
+		public IFuture GetFalse(Error error)
 		{
 			if (TryPull(out FalseFuture future))
 			{
@@ -56,7 +56,7 @@ namespace Chlorine
 			return new FalseFuture(error);
 		}
 
-		public FalseFuture<TResult> GetFalse<TResult>(Error error)
+		public IFuture<TResult> GetFalse<TResult>(Error error)
 		{
 			if (TryPull(out FalseFuture<TResult> future))
 			{

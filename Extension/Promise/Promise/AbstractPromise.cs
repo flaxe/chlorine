@@ -27,13 +27,16 @@ namespace Chlorine.Internal
 			set => _status = value;
 		}
 
-		protected Error Reason => _reason;
-
-		public virtual void Reset()
+		public Error Reason
 		{
-			RevokeAll();
-			_status = PromiseStatus.Pending;
-			_reason = default;
+			get
+			{
+				if (_status != PromiseStatus.Rejected)
+				{
+					throw new PromiseException("Promise was not rejected.");
+				}
+				return _reason;
+			}
 		}
 
 		public bool TryGetReason(out Error reason)
@@ -45,6 +48,13 @@ namespace Chlorine.Internal
 			}
 			reason = default;
 			return false;
+		}
+
+		public virtual void Reset()
+		{
+			RevokeAll();
+			_status = PromiseStatus.Pending;
+			_reason = default;
 		}
 
 		public void Fulfill(Future future)

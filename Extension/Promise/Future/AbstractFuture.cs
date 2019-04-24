@@ -29,7 +29,28 @@ namespace Chlorine.Internal
 			set => _status = value;
 		}
 
-		protected Error Reason => _reason;
+		public Error Reason
+		{
+			get
+			{
+				if (_status != FutureStatus.Rejected)
+				{
+					throw new FutureException("Future was not rejected.");
+				}
+				return _reason;
+			}
+		}
+
+		public bool TryGetReason(out Error reason)
+		{
+			if (_status == FutureStatus.Rejected)
+			{
+				reason = _reason;
+				return true;
+			}
+			reason = default;
+			return false;
+		}
 
 		public virtual void Reset()
 		{
@@ -42,17 +63,6 @@ namespace Chlorine.Internal
 		{
 			_resolved = null;
 			_rejected = null;
-		}
-
-		public bool TryGetReason(out Error reason)
-		{
-			if (_status == FutureStatus.Rejected)
-			{
-				reason = _reason;
-				return true;
-			}
-			reason = default;
-			return false;
 		}
 
 		public void Then(FutureResolved resolved, FutureRejected rejected)

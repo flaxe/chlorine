@@ -29,10 +29,16 @@ namespace Chlorine
 		{
 		}
 
-		public override void Reset()
+		public TResult Result
 		{
-			base.Reset();
-			_result = default;
+			get
+			{
+				if (Status != PromiseStatus.Resolved)
+				{
+					throw new PromiseException("Promise was not resolved.");
+				}
+				return _result;
+			}
 		}
 
 		public bool TryGetResult(out TResult result)
@@ -44,6 +50,12 @@ namespace Chlorine
 			}
 			result = default;
 			return false;
+		}
+
+		public override void Reset()
+		{
+			base.Reset();
+			_result = default;
 		}
 
 		public void Fulfill(Future<TResult> future)

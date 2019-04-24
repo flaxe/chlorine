@@ -60,6 +60,29 @@ namespace Chlorine
 			Init(promise);
 		}
 
+		public TResult Result
+		{
+			get
+			{
+				if (Status != FutureStatus.Resolved)
+				{
+					throw new FutureException("Future was not resolved.");
+				}
+				return _result;
+			}
+		}
+
+		public bool TryGetResult(out TResult result)
+		{
+			if (Status == FutureStatus.Resolved)
+			{
+				result = _result;
+				return true;
+			}
+			result = default;
+			return false;
+		}
+
 		public override void Reset()
 		{
 			base.Reset();
@@ -75,17 +98,6 @@ namespace Chlorine
 				_promise.Revoke(this);
 				_promise = null;
 			}
-		}
-
-		public bool TryGetResult(out TResult result)
-		{
-			if (Status == FutureStatus.Resolved)
-			{
-				result = _result;
-				return true;
-			}
-			result = default;
-			return false;
 		}
 
 		public void Init(IPromise<TResult> promise)

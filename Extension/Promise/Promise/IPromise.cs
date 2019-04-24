@@ -5,6 +5,7 @@ namespace Chlorine
 		bool IsResolved { get; }
 		bool IsRejected { get; }
 
+		Error Reason { get; }
 		bool TryGetReason(out Error reason);
 
 		void Fulfill(Future future);
@@ -14,6 +15,7 @@ namespace Chlorine
 
 	public interface IPromise<TResult> : IPromise
 	{
+		TResult Result { get; }
 		bool TryGetResult(out TResult result);
 
 		void Fulfill(Future<TResult> future);
