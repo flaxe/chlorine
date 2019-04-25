@@ -1,8 +1,9 @@
 using System;
-using System.Collections.Generic;
-using Chlorine.Binder;
-using Chlorine.Injector;
-using Chlorine.Provider;
+using Chlorine.Bindings;
+using Chlorine.Collections;
+using Chlorine.Extension;
+using Chlorine.Injection;
+using Chlorine.Providers;
 
 namespace Chlorine
 {
@@ -11,10 +12,9 @@ namespace Chlorine
 		private readonly Container _parent;
 		private WeakReferenceList<Container> _children;
 
-		private readonly ContainerBinder _binder;
-		private readonly ContainerInjector _injector;
-
-		private List<IExtension> _extensions;
+		private readonly Binder _binder;
+		private readonly Extender _extender;
+		private readonly Injector _injector;
 
 		public Container() : this(null)
 		{
@@ -25,11 +25,12 @@ namespace Chlorine
 		private Container(Container parent)
 		{
 			_parent = parent;
-			_binder = new ContainerBinder(this, _parent?._binder);
-			_injector = new ContainerInjector(_binder);
+			_binder = new Binder(this, _parent?._binder);
+			_extender = new Extender(this, _parent?._extender);
+			_injector = new Injector(_binder);
 
-			_binder.Bind(new InstanceProvider<ContainerBinder>(_binder));
-			_binder.Bind(new InstanceProvider<ContainerInjector>(_injector));
+			_binder.Bind(new InstanceProvider<Binder>(_binder));
+			_binder.Bind(new InstanceProvider<Injector>(_injector));
 
 			_binder.Bind(new InstanceProvider<IContainer>(this));
 		}
@@ -38,6 +39,8 @@ namespace Chlorine
 		{
 			Dispose();
 		}
+
+		public Container Parent => _parent;
 
 		public void Dispose()
 		{
@@ -63,55 +66,18 @@ namespace Chlorine
 			{
 				_children.Add(container);
 			}
-			if (_extensions != null && _extensions.Count > 0)
-			{
-				foreach (IExtension extension in _extensions)
-				{
-					container.Extend(extension);
-				}
-			}
+			_extender.Extend(container);
 			return container;
 		}
 
-		public void Extend<TExtension>(TypeValue[] arguments = null) where TExtension : class, IExtension
+		public void Extend<TExtension>() where TExtension : class, IExtension<TExtension>, new()
 		{
-			Extend(Instantiate<TExtension>(arguments));
-		}
-
-		public void Extend(Type type, TypeValue[] arguments = null)
-		{
-			IExtension extension = Instantiate(type, arguments) as IExtension;
-			if (extension == null)
-			{
-				throw new ArgumentException($"Invalid type '{type.Name}' given for extension.");
-			}
-			Extend(extension);
-		}
-
-		public void Extend(IExtension extension)
-		{
-			if (extension == null)
-			{
-				throw new ArgumentNullException(nameof(extension));
-			}
-			if (_extensions == null)
-			{
-				_extensions = new List<IExtension> {extension};
-			}
-			else if (_extensions.Contains(extension))
-			{
-				throw new ArgumentException("Extension is already registered.");
-			}
-			else
-			{
-				_extensions.Add(extension);
-			}
-			extension.Extend(this);
+			_extender.Install<TExtension>();
 			if (_children != null && _children.Count > 0)
 			{
 				foreach (Container child in _children)
 				{
-					child.Extend(extension);
+					child.Extend<TExtension>();
 				}
 			}
 		}

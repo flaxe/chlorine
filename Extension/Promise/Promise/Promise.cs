@@ -1,3 +1,4 @@
+using Chlorine.Collections;
 using Chlorine.Internal;
 
 namespace Chlorine
@@ -35,7 +36,7 @@ namespace Chlorine
 			{
 				if (Status != PromiseStatus.Resolved)
 				{
-					throw new PromiseException("Promise was not resolved.");
+					throw new PromiseException("Invalid operation. Promise was not resolved.");
 				}
 				return _result;
 			}

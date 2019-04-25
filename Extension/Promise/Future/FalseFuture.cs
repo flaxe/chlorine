@@ -29,7 +29,7 @@ namespace Chlorine
 			{
 				if (_status != FutureStatus.Rejected)
 				{
-					throw new FutureException("Future was not rejected.");
+					throw new FutureException("Invalid operation. Future was not rejected.");
 				}
 				return _reason;
 			}
@@ -69,7 +69,7 @@ namespace Chlorine
 					rejected.Invoke(_reason);
 					break;
 				case FutureStatus.Pending:
-					throw new FutureException("FalseFuture must be rejected before usage.");
+					throw new FutureException("Invalid operation. FalseFuture must be rejected before usage.");
 			}
 		}
 
@@ -93,7 +93,7 @@ namespace Chlorine
 		{
 		}
 
-		public TResult Result => throw new FutureException("Future was not resolved.");
+		public TResult Result => throw new FutureException("Invalid operation. Future was not resolved.");
 
 		public bool TryGetResult(out TResult result)
 		{

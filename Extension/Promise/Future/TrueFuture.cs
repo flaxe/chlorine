@@ -9,7 +9,7 @@ namespace Chlorine
 		public bool IsResolved => true;
 		public bool IsRejected => false;
 
-		public Error Reason => throw new FutureException("Future was not rejected.");
+		public Error Reason => throw new FutureException("Invalid operation. Future was not rejected.");
 
 		public bool TryGetReason(out Error reason)
 		{
@@ -58,7 +58,7 @@ namespace Chlorine
 		public bool IsResolved => _status == FutureStatus.Resolved;
 		public bool IsRejected => false;
 
-		public Error Reason => throw new FutureException("Future was not rejected.");
+		public Error Reason => throw new FutureException("Invalid operation. Future was not rejected.");
 
 		public bool TryGetReason(out Error reason)
 		{
@@ -72,7 +72,7 @@ namespace Chlorine
 			{
 				if (_status != FutureStatus.Resolved)
 				{
-					throw new FutureException("Future was not resolved.");
+					throw new FutureException("Invalid operation. Future was not resolved.");
 				}
 				return _result;
 			}
@@ -107,7 +107,7 @@ namespace Chlorine
 					resolved.Invoke();
 					break;
 				case FutureStatus.Pending:
-					throw new FutureException("TrueFuture must be resolved before usage.");
+					throw new FutureException("Invalid operation. TrueFuture must be resolved before usage.");
 			}
 		}
 
@@ -119,7 +119,7 @@ namespace Chlorine
 					resolved.Invoke(_result);
 					break;
 				case FutureStatus.Pending:
-					throw new FutureException("TrueFuture must be resolved before usage.");
+					throw new FutureException("Invalid operation. TrueFuture must be resolved before usage.");
 			}
 		}
 

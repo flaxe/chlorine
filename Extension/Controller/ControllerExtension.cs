@@ -1,14 +1,17 @@
-using Chlorine.Binder;
+using Chlorine.Bindings;
+using Chlorine.Extension;
 
 namespace Chlorine
 {
-	public class ControllerExtension : IExtension
+	public sealed class ControllerExtension : IExtension<ControllerExtension>
 	{
-		public void Extend(Container container)
+		private ControllerBinder _binder;
+
+		public void Extend(Container container, ControllerExtension parent)
 		{
-			ControllerBinder binder = new ControllerBinder(container.TryResolve<ControllerBinder>());
-			container.Bind<ControllerBinder>().ToInstance(binder);
-			container.Bind<IController>().ToInstance(new Controller(binder));
+			_binder = new ControllerBinder(parent?._binder);
+			container.Bind<ControllerBinder>().ToInstance(_binder);
+			container.Bind<IController>().To<Controller>().AsSingleton();
 		}
 	}
 }

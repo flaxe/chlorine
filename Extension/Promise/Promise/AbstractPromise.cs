@@ -1,3 +1,5 @@
+using Chlorine.Collections;
+
 namespace Chlorine.Internal
 {
 	public abstract class AbstractPromise : IPoolable
@@ -33,7 +35,7 @@ namespace Chlorine.Internal
 			{
 				if (_status != PromiseStatus.Rejected)
 				{
-					throw new PromiseException("Promise was not rejected.");
+					throw new PromiseException("Invalid operation. Promise was not rejected.");
 				}
 				return _reason;
 			}
