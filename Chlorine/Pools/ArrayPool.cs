@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Chlorine
 {
-	public class ArrayPool<T>
+	public sealed class ArrayPool<T>
 	{
 		private readonly List<Stack<T[]>> _stackByLength = new List<Stack<T[]>>();
 

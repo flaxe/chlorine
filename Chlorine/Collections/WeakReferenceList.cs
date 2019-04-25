@@ -7,10 +7,10 @@ namespace Chlorine.Collections
 	public class WeakReferenceList<T> : IEnumerable<T>
 			where T : class
 	{
-		private readonly List<WeakReference<T>> _overdueCache = new List<WeakReference<T>>();
+		private static readonly Pool<WeakReference<T>> Pool = new Pool<WeakReference<T>>();
 
-		private readonly Pool<WeakReference<T>> _pool = new Pool<WeakReference<T>>();
 		private readonly List<WeakReference<T>> _list;
+		private readonly List<WeakReference<T>> _overdueCache = new List<WeakReference<T>>();
 
 		public WeakReferenceList()
 		{
@@ -117,11 +117,11 @@ namespace Chlorine.Collections
 
 		private WeakReference<T> CreateReference(T target)
 		{
-			if (_pool.IsEmpty)
+			if (Pool.IsEmpty)
 			{
 				return new WeakReference<T>(target);
 			}
-			WeakReference<T> reference = _pool.Pull();
+			WeakReference<T> reference = Pool.Pull();
 			reference.SetTarget(target);
 			return reference;
 		}
@@ -129,7 +129,7 @@ namespace Chlorine.Collections
 		private void ReleaseReference(WeakReference<T> reference)
 		{
 			reference.SetTarget(null);
-			_pool.Release(reference);
+			Pool.Release(reference);
 		}
 
 		private void ReleaseOverdue()

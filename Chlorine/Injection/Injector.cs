@@ -8,8 +8,8 @@ namespace Chlorine.Injection
 	{
 		private static readonly Type ObjectType = typeof(object);
 
-		private readonly ArrayPool<TypeValue> _argumentsPool = new ArrayPool<TypeValue>();
-		private readonly ArrayPool<object> _parametersPool = new ArrayPool<object>();
+		private static readonly ArrayPool<TypeValue> ArgumentsPool = new ArrayPool<TypeValue>();
+		private static readonly ArrayPool<object> ParametersPool = new ArrayPool<object>();
 
 		private readonly Binder _binder;
 
@@ -56,7 +56,7 @@ namespace Chlorine.Injection
 			}
 			finally
 			{
-				_parametersPool.Release(parameters);
+				ParametersPool.Release(parameters);
 			}
 			InjectInternal(instance, info, arguments);
 			return instance;
@@ -97,7 +97,7 @@ namespace Chlorine.Injection
 					}
 					finally
 					{
-						_parametersPool.Release(parameters);
+						ParametersPool.Release(parameters);
 					}
 				}
 			}
@@ -117,10 +117,10 @@ namespace Chlorine.Injection
 			object[] parameters;
 			if (parametersInfo != null && parametersInfo.Count > 0)
 			{
-				parameters = _parametersPool.Pull(parametersInfo.Count) ?? new object[parametersInfo.Count];
+				parameters = ParametersPool.Pull(parametersInfo.Count) ?? new object[parametersInfo.Count];
 				if (arguments != null && arguments.Length > 0)
 				{
-					TypeValue[] unusedArguments = _argumentsPool.Pull(arguments.Length) ?? new TypeValue[arguments.Length];
+					TypeValue[] unusedArguments = ArgumentsPool.Pull(arguments.Length) ?? new TypeValue[arguments.Length];
 					arguments.CopyTo(unusedArguments, 0);
 					try
 					{
@@ -143,7 +143,7 @@ namespace Chlorine.Injection
 					}
 					finally
 					{
-						_argumentsPool.Release(unusedArguments);
+						ArgumentsPool.Release(unusedArguments);
 					}
 				}
 				else
@@ -158,7 +158,7 @@ namespace Chlorine.Injection
 			}
 			else
 			{
-				parameters = _parametersPool.Pull(0) ?? new object[0];
+				parameters = ParametersPool.Pull(0) ?? new object[0];
 			}
 			return parameters;
 		}

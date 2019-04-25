@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Chlorine.Extension
 {
-	internal class Extender
+	internal sealed class Extender : IDisposable
 	{
 		private readonly Container _container;
 		private readonly Extender _parent;
@@ -14,6 +14,22 @@ namespace Chlorine.Extension
 		{
 			_container = container;
 			_parent = parent;
+		}
+
+		~Extender()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			if (_holderByType != null && _holderByType.Count > 0)
+			{
+				foreach (IExtensionHolder extensionHolder in _holderByType.Values)
+				{
+					extensionHolder.Dispose();
+				}
+			}
 		}
 
 		public bool TryGetExtension<TExtension>(out TExtension extension)
@@ -70,14 +86,14 @@ namespace Chlorine.Extension
 			}
 		}
 
-		private interface IExtensionHolder
+		private interface IExtensionHolder : IDisposable
 		{
 			object Extension { get; }
 
 			void Extend(Container container);
 		}
 
-		private class ExtensionHolder<TExtension> : IExtensionHolder
+		private sealed class ExtensionHolder<TExtension> : IExtensionHolder
 				where TExtension : class, IExtension<TExtension>, new()
 		{
 			private readonly TExtension _extension;
@@ -86,6 +102,19 @@ namespace Chlorine.Extension
 			{
 				_extension = new TExtension();
 				_extension.Extend(container, parent);
+			}
+
+			~ExtensionHolder()
+			{
+				Dispose();
+			}
+
+			public void Dispose()
+			{
+				if (_extension is IDisposable disposable)
+				{
+					disposable.Dispose();
+				}
 			}
 
 			public TExtension Extension => _extension;

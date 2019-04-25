@@ -45,6 +45,7 @@ namespace Chlorine
 		public void Dispose()
 		{
 			_binder.Dispose();
+			_extender.Dispose();
 			if (_children != null)
 			{
 				foreach (Container child in _children)
