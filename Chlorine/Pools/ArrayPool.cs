@@ -23,6 +23,10 @@ namespace Chlorine
 
 		public void Release(T[] array, bool clear = true)
 		{
+			if (array == null)
+			{
+				throw new ArgumentNullException(nameof(array));
+			}
 			int length = array.Length;
 			if (clear)
 			{
@@ -49,13 +53,11 @@ namespace Chlorine
 					_stackByLength.Add(null);
 				}
 			}
-
 			stack = _stackByLength[length];
 			if (stack != null)
 			{
 				return stack;
 			}
-
 			stack = new Stack<T[]>();
 			_stackByLength[length] = stack;
 			return stack;
