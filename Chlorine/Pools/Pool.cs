@@ -3,47 +3,74 @@ using System.Collections.Generic;
 
 namespace Chlorine
 {
-	public sealed class Pool : IDisposable
+	public static class Pool<T> where T : class, new()
 	{
-		private Dictionary<Type, Stack<object>> _stackByType;
+		private static readonly Type Type = typeof(T);
 
-		~Pool()
+		public static void Clear()
 		{
-			Dispose();
+			Pool.Clear(Type);
 		}
 
-		public void Dispose()
+		public static T Pull()
 		{
-			if (_stackByType != null && _stackByType.Count > 0)
+			T value = Pool.Pull<T>();
+			if (value != null)
 			{
-				Type disposableType = typeof(IDisposable);
-				foreach (KeyValuePair<Type,Stack<object>> pair in _stackByType)
-				{
-					if (disposableType.IsAssignableFrom(pair.Key))
-					{
-						foreach (object value in pair.Value)
-						{
-							if (value is IDisposable disposable)
-							{
-								disposable.Dispose();
-							}
-						}
-					}
-				}
-				_stackByType = null;
+				return value;
 			}
+			return new T();
 		}
 
-		public T Pull<T>() where T : class
+		public static void Release(T value, bool reset = true)
 		{
-			if (_stackByType != null && _stackByType.TryGetValue(typeof(T), out Stack<object> stack) && stack.Count > 0)
+			if (value == null)
 			{
-				return stack.Pop() as T;
+				throw new ArgumentNullException(nameof(value));
+			}
+			Pool.UnsafeRelease(Type, value, reset);
+		}
+	}
+
+	internal static class Pool
+	{
+		private static readonly Dictionary<Type, Stack<object>> StackByType = new Dictionary<Type, Stack<object>>();
+
+		public static void Clear()
+		{
+			StackByType.Clear();
+		}
+
+		public static void Clear<T>() where T : class
+		{
+			Clear(typeof(T));
+		}
+
+		public static void Clear(Type type)
+		{
+			StackByType.Remove(type);
+		}
+
+		public static T Pull<T>() where T : class
+		{
+			object obj = Pull(typeof(T));
+			if (obj != null && obj is T value)
+			{
+				return value;
 			}
 			return default;
 		}
 
-		public void Release(object value, bool reset = true)
+		public static object Pull(Type type)
+		{
+			if (StackByType.TryGetValue(type, out Stack<object> stack) && stack.Count > 0)
+			{
+				return stack.Pop();
+			}
+			return default;
+		}
+
+		public static void Release(object value, bool reset = true)
 		{
 			if (value == null)
 			{
@@ -54,11 +81,16 @@ namespace Chlorine
 			{
 				throw new ArgumentException($"Type '{type.Name}' must be a reference type.");
 			}
+			UnsafeRelease(type, value, reset);
+		}
+
+		public static void UnsafeRelease(Type type, object value, bool reset)
+		{
 			if (reset && value is IPoolable poolable)
 			{
 				poolable.Reset();
 			}
-			if (_stackByType != null && _stackByType.TryGetValue(type, out Stack<object> stack))
+			if (StackByType.TryGetValue(type, out Stack<object> stack))
 			{
 				stack.Push(value);
 			}
@@ -66,64 +98,8 @@ namespace Chlorine
 			{
 				stack = new Stack<object>();
 				stack.Push(value);
-				if (_stackByType == null)
-				{
-					_stackByType = new Dictionary<Type, Stack<object>> {{type, stack}};
-				}
-				else
-				{
-					_stackByType.Add(type, stack);
-				}
+				StackByType.Add(type, stack);
 			}
-		}
-	}
-
-	public sealed class Pool<T> : IDisposable where T : class
-	{
-		private Stack<T> _stack;
-
-		~Pool()
-		{
-			Dispose();
-		}
-
-		public bool IsEmpty => _stack == null || _stack.Count == 0;
-
-		public void Dispose()
-		{
-			if (_stack != null && _stack.Count > 0 && typeof(IDisposable).IsAssignableFrom(typeof(T)))
-			{
-				foreach (T value in _stack)
-				{
-					if (value is IDisposable disposable)
-					{
-						disposable.Dispose();
-					}
-				}
-				_stack = null;
-			}
-		}
-
-		public T Pull()
-		{
-			return _stack != null && _stack.Count > 0 ? _stack.Pop() : default;
-		}
-
-		public void Release(T value, bool reset = true)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException(nameof(value));
-			}
-			if (reset && value is IPoolable poolable)
-			{
-				poolable.Reset();
-			}
-			if (_stack == null)
-			{
-				_stack = new Stack<T>();
-			}
-			_stack.Push(value);
 		}
 	}
 }

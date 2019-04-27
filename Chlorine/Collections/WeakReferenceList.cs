@@ -7,8 +7,6 @@ namespace Chlorine.Collections
 	public class WeakReferenceList<T> : IEnumerable<T>
 			where T : class
 	{
-		private static readonly Pool<WeakReference<T>> Pool = new Pool<WeakReference<T>>();
-
 		private readonly List<WeakReference<T>> _list;
 		private readonly List<WeakReference<T>> _overdueCache = new List<WeakReference<T>>();
 
@@ -45,7 +43,7 @@ namespace Chlorine.Collections
 		{
 			foreach (WeakReference<T> reference in _list)
 			{
-				ReleaseReference(reference);
+				WeakReferencePool<T>.Release(reference);
 			}
 			_overdueCache.Clear();
 			_list.Clear();
@@ -65,7 +63,7 @@ namespace Chlorine.Collections
 			bool notFound = !TryFind(target, out int index, out WeakReference<T> reference);
 			if (notFound)
 			{
-				_list.Add(CreateReference(target));
+				_list.Add(WeakReferencePool<T>.Pull(target));
 			}
 			ReleaseOverdue();
 			return notFound;
@@ -81,7 +79,7 @@ namespace Chlorine.Collections
 			if (found)
 			{
 				_list.RemoveAt(index);
-				ReleaseReference(reference);
+				WeakReferencePool<T>.Release(reference);
 			}
 			ReleaseOverdue();
 			return found;
@@ -115,23 +113,6 @@ namespace Chlorine.Collections
 			return false;
 		}
 
-		private WeakReference<T> CreateReference(T target)
-		{
-			if (Pool.IsEmpty)
-			{
-				return new WeakReference<T>(target);
-			}
-			WeakReference<T> reference = Pool.Pull();
-			reference.SetTarget(target);
-			return reference;
-		}
-
-		private void ReleaseReference(WeakReference<T> reference)
-		{
-			reference.SetTarget(null);
-			Pool.Release(reference);
-		}
-
 		private void ReleaseOverdue()
 		{
 			if (_overdueCache.Count > 0)
@@ -139,7 +120,7 @@ namespace Chlorine.Collections
 				foreach (WeakReference<T> overdueReference in _overdueCache)
 				{
 					_list.Remove(overdueReference);
-					ReleaseReference(overdueReference);
+					WeakReferencePool<T>.Release(overdueReference);
 				}
 				_overdueCache.Clear();
 			}

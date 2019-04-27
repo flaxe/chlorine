@@ -3,49 +3,46 @@ using System.Collections.Generic;
 
 namespace Chlorine
 {
-	public sealed class ListPool<T>
+	public static class ListPool<T>
 	{
-		private readonly List<List<T>> _lists = new List<List<T>>();
+		private static readonly List<List<T>> Lists = new List<List<T>>();
 
-		public void Clear()
+		public static void Clear()
 		{
-			if (_lists.Count > 0)
-			{
-				_lists.Clear();
-			}
+			Lists.Clear();
 		}
 
-		public List<T> Pull(int capacity = 0)
+		public static List<T> Pull(int capacity = 0)
 		{
-			if (_lists.Count > 0)
+			if (Lists.Count > 0)
 			{
 				if (capacity > 0)
 				{
 					int index = GetIndex(capacity);
 					if (index != -1)
 					{
-						List<T> list = _lists[index];
-						_lists[index] = null;
+						List<T> list = Lists[index];
+						Lists[index] = null;
 						return list;
 					}
 				}
 				else
 				{
-					for (int i = 0; i < _lists.Count; i++)
+					for (int i = 0; i < Lists.Count; i++)
 					{
-						List<T> list = _lists[i];
+						List<T> list = Lists[i];
 						if (list != null)
 						{
-							_lists[i] = null;
+							Lists[i] = null;
 							return list;
 						}
 					}
 				}
 			}
-			return default;
+			return new List<T>(capacity);
 		}
 
-		public void Release(List<T> list, bool clear = true)
+		public static void Release(List<T> list, bool clear = true)
 		{
 			if (list == null)
 			{
@@ -55,24 +52,24 @@ namespace Chlorine
 			{
 				list.Clear();
 			}
-			for (int i = 0; i < _lists.Count; i++)
+			for (int i = 0; i < Lists.Count; i++)
 			{
-				if (_lists[i] == null)
+				if (Lists[i] == null)
 				{
-					_lists[i] = list;
+					Lists[i] = list;
 					return;
 				}
 			}
-			_lists.Add(list);
+			Lists.Add(list);
 		}
 
-		private int GetIndex(int capacity)
+		private static int GetIndex(int capacity)
 		{
 			int index = -1;
 			int capacityDifference = int.MaxValue;
-			for (int i = 0; i < _lists.Count; i++)
+			for (int i = 0; i < Lists.Count; i++)
 			{
-				List<T> list = _lists[i];
+				List<T> list = Lists[i];
 				if (list == null || list.Capacity < capacity)
 				{
 					continue;

@@ -6,7 +6,6 @@ namespace Chlorine
 		bool IsRejected { get; }
 
 		Error Reason { get; }
-		bool TryGetReason(out Error reason);
 
 		void Clear();
 
@@ -17,6 +16,7 @@ namespace Chlorine
 	public interface IFuture<TResult> : IFuture
 	{
 		TResult Result { get; }
+
 		bool TryGetResult(out TResult result);
 
 		void Then(FutureResolved<TResult> resolved, FutureRejected rejected);

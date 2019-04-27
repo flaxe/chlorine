@@ -41,17 +41,6 @@ namespace Chlorine.Internal
 			}
 		}
 
-		public bool TryGetReason(out Error reason)
-		{
-			if (_status == PromiseStatus.Rejected)
-			{
-				reason = _reason;
-				return true;
-			}
-			reason = default;
-			return false;
-		}
-
 		public virtual void Reset()
 		{
 			RevokeAll();

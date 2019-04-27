@@ -1,11 +1,13 @@
 using Chlorine.Bindings;
-using Chlorine.Extension;
+using Chlorine.Extensions;
 
 namespace Chlorine
 {
 	public sealed class ControllerExtension : IExtension<ControllerExtension>
 	{
 		private ControllerBinder _binder;
+
+		internal ControllerBinder Binder => _binder;
 
 		public void Extend(Container container, ControllerExtension parent)
 		{

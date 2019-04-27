@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Chlorine.Extension
+namespace Chlorine.Extensions
 {
 	internal sealed class Extender : IDisposable
 	{

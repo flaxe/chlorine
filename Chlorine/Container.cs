@@ -1,7 +1,7 @@
 using System;
 using Chlorine.Bindings;
 using Chlorine.Collections;
-using Chlorine.Extension;
+using Chlorine.Extensions;
 using Chlorine.Injection;
 using Chlorine.Providers;
 
@@ -19,7 +19,6 @@ namespace Chlorine
 		public Container() : this(null)
 		{
 			_binder.Bind(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
-			_binder.Bind(new SingletonProvider<Pool>(new InstanceProvider<Pool, Pool>(this)));
 		}
 
 		private Container(Container parent)
@@ -54,6 +53,15 @@ namespace Chlorine
 				}
 				_children = null;
 			}
+		}
+
+		public TExtension Get<TExtension>() where TExtension : class, IExtension<TExtension>, new()
+		{
+			if (_extender.TryGetExtension(out TExtension extension))
+			{
+				return extension;
+			}
+			throw new ContainerException($"Extension with type '{typeof(TExtension).Name}' not installed.");
 		}
 
 		public Container CreateSubContainer()

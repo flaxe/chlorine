@@ -1,4 +1,4 @@
-namespace Chlorine.Extension
+namespace Chlorine.Extensions
 {
 	public interface IExtension<in TExtension> where TExtension : class
 	{

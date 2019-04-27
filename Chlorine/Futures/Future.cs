@@ -15,6 +15,10 @@ namespace Chlorine
 			Init(promise);
 		}
 
+		internal Future(Error reason) : base(reason)
+		{
+		}
+
 		public override void Clear()
 		{
 			base.Clear();
@@ -58,6 +62,16 @@ namespace Chlorine
 		internal Future(IPromise<TResult> promise)
 		{
 			Init(promise);
+		}
+
+		internal Future(TResult result)
+		{
+			Status = FutureStatus.Resolved;
+			_result = result;
+		}
+
+		internal Future(Error reason) : base(reason)
+		{
 		}
 
 		public TResult Result
