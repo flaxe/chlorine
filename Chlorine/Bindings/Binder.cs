@@ -9,13 +9,15 @@ namespace Chlorine.Bindings
 		private readonly Container _container;
 		private readonly Binder _parent;
 
-		private Dictionary<Type, IProvider> _providerByType;
-		private Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
+		private readonly Dictionary<Type, IProvider> _providerByType;
+		private readonly Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
 		public Binder(Container container, Binder parent = null)
 		{
 			_container = container;
 			_parent = parent;
+			_providerByType = new Dictionary<Type, IProvider>();
+			_providerByTypeAndId = new Dictionary<Type, Dictionary<object, IProvider>>();
 		}
 
 		~Binder()
@@ -25,7 +27,7 @@ namespace Chlorine.Bindings
 
 		public void Dispose()
 		{
-			if (_providerByType != null)
+			if (_providerByType.Count > 0)
 			{
 				foreach (IProvider provider in _providerByType.Values)
 				{
@@ -34,9 +36,9 @@ namespace Chlorine.Bindings
 						disposable.Dispose();
 					}
 				}
-				_providerByType = null;
+				_providerByType.Clear();
 			}
-			if (_providerByTypeAndId != null)
+			if (_providerByTypeAndId.Count > 0)
 			{
 				foreach (Dictionary<object, IProvider> providerById in _providerByTypeAndId.Values)
 				{
@@ -48,7 +50,7 @@ namespace Chlorine.Bindings
 						}
 					}
 				}
-				_providerByTypeAndId = null;
+				_providerByTypeAndId.Clear();
 			}
 		}
 
@@ -67,29 +69,15 @@ namespace Chlorine.Bindings
 			Type type = typeof(T);
 			if (id == null)
 			{
-				if (_providerByType == null)
-				{
-					_providerByType = new Dictionary<Type, IProvider> {{type, provider}};
-				}
-				else if (_providerByType.ContainsKey(type))
+				if (_providerByType.ContainsKey(type))
 				{
 					throw new ArgumentException($"Type '{type.Name}' with empty id is already registered.");
 				}
-				else
-				{
-					_providerByType.Add(type, provider);
-				}
+				_providerByType.Add(type, provider);
 			}
 			else
 			{
-				if (_providerByTypeAndId == null)
-				{
-					_providerByTypeAndId = new Dictionary<Type, Dictionary<object, IProvider>>
-					{
-							{type, new Dictionary<object, IProvider> {{id, provider}}}
-					};
-				}
-				else if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
+				if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
 				{
 					if (providerById.ContainsKey(id))
 					{
@@ -134,12 +122,12 @@ namespace Chlorine.Bindings
 		{
 			if (id == null)
 			{
-				if (_providerByType != null && _providerByType.TryGetValue(type, out provider))
+				if (_providerByType.TryGetValue(type, out provider))
 				{
 					return true;
 				}
 			}
-			else if (_providerByTypeAndId != null && _providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
+			else if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
 			{
 				if (providerById.TryGetValue(id, out provider))
 				{

@@ -1,36 +1,25 @@
-using System;
-
 namespace Chlorine.Providers
 {
-	internal class TransientActionDelegateProvider<TAction> : IActionDelegateProvider<TAction>, IDisposable
-			where TAction : struct
+	internal class TransientActionDelegateProvider<T> : IActionDelegateProvider<T> where T : class
 	{
-		private readonly IProvider<IActionDelegate<TAction>> _provider;
+		private readonly IProvider<T> _provider;
 
-		public TransientActionDelegateProvider(IProvider<IActionDelegate<TAction>> provider)
+		public TransientActionDelegateProvider(IProvider<T> provider)
 		{
 			_provider = provider;
 		}
 
-		~TransientActionDelegateProvider()
-		{
-			Dispose();
-		}
-
-		public void Dispose()
-		{
-			if (_provider is IDisposable disposable)
-			{
-				disposable.Dispose();
-			}
-		}
-
-		public IActionDelegate<TAction> Provide(ref TAction action)
+		public T Provide()
 		{
 			return _provider.Provide();
 		}
 
-		public void Release(IActionDelegate<TAction> actionDelegate)
+		object IProvider.Provide()
+		{
+			return Provide();
+		}
+
+		public void Release(T actionDelegate)
 		{
 		}
 	}

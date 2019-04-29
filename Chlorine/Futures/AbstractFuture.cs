@@ -1,3 +1,5 @@
+using Chlorine.Exceptions;
+
 namespace Chlorine.Internal
 {
 	public class AbstractFuture : IPoolable

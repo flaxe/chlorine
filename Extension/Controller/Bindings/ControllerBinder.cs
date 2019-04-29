@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Chlorine.Action;
+using Chlorine.Supervisors;
 using Chlorine.Execution;
 
 namespace Chlorine.Bindings
@@ -9,8 +9,8 @@ namespace Chlorine.Bindings
 	{
 		private readonly ControllerBinder _parent;
 
-		private Dictionary<Type, object> _actionSupervisorByType;
-		private Dictionary<Type, IExecutionDelegate> _executionDelegateByType;
+		private readonly Dictionary<Type, object> _actionSupervisorByType;
+		private readonly Dictionary<Type, IExecutionDelegate> _executionDelegateByType;
 
 		private Dictionary<Type, IExecutionDelegate> _executorsCache;
 		private HashSet<Type> _missingExecutorsCache;
@@ -18,6 +18,8 @@ namespace Chlorine.Bindings
 		public ControllerBinder(ControllerBinder parent = null)
 		{
 			_parent = parent;
+			_actionSupervisorByType = new Dictionary<Type, object>();
+			_executionDelegateByType = new Dictionary<Type, IExecutionDelegate>();
 		}
 
 		~ControllerBinder()
@@ -33,42 +35,28 @@ namespace Chlorine.Bindings
 				where TAction : struct
 		{
 			Type actionType = typeof(TAction);
-			if (_actionSupervisorByType == null)
-			{
-				_actionSupervisorByType = new Dictionary<Type, object> {{actionType, actionSupervisor}};
-			}
-			else if (_actionSupervisorByType.ContainsKey(actionType))
+			if (_actionSupervisorByType.ContainsKey(actionType))
 			{
 				throw new ArgumentException($"Action with type '{actionType.Name}' is already registered.");
 			}
-			else
-			{
-				_actionSupervisorByType.Add(actionType, actionSupervisor);
-			}
+			_actionSupervisorByType.Add(actionType, actionSupervisor);
 		}
 
 		public void BindExecutable<TExecutable>(ExecutionDelegate<TExecutable> executionDelegate)
 				where TExecutable : class, IExecutable
 		{
 			Type executableType = typeof(TExecutable);
-			if (_executionDelegateByType == null)
-			{
-				_executionDelegateByType = new Dictionary<Type, IExecutionDelegate> {{executableType, executionDelegate}};
-			}
-			else if (_executionDelegateByType.ContainsKey(executableType))
+			if (_executionDelegateByType.ContainsKey(executableType))
 			{
 				throw new ArgumentException($"Executable with type '{executableType.Name}' is already registered.");
 			}
-			else
-			{
-				_executionDelegateByType.Add(executableType, executionDelegate);
-			}
+			_executionDelegateByType.Add(executableType, executionDelegate);
 		}
 
-		public bool TryResolveActionSupervisor<TAction>(out IActionSupervisor<TAction> actionSupervisor)
+		public bool TryResolveSupervisor<TAction>(out IActionSupervisor<TAction> actionSupervisor)
 				where TAction : struct
 		{
-			if (TryResolveActionSupervisor(typeof(TAction), out object value) && value is IActionSupervisor<TAction> concreteSupervisor)
+			if (TryResolveSupervisor(typeof(TAction), out object value) && value is IActionSupervisor<TAction> concreteSupervisor)
 			{
 				actionSupervisor = concreteSupervisor;
 				return true;
@@ -77,13 +65,13 @@ namespace Chlorine.Bindings
 			return false;
 		}
 
-		public bool TryResolveActionSupervisor(Type actionType, out object actionSupervisor)
+		public bool TryResolveSupervisor(Type actionType, out object actionSupervisor)
 		{
-			if (_actionSupervisorByType != null && _actionSupervisorByType.TryGetValue(actionType, out actionSupervisor))
+			if (_actionSupervisorByType.TryGetValue(actionType, out actionSupervisor))
 			{
 				return true;
 			}
-			if (_parent != null && _parent.TryResolveActionSupervisor(actionType, out actionSupervisor))
+			if (_parent != null && _parent.TryResolveSupervisor(actionType, out actionSupervisor))
 			{
 				return true;
 			}
@@ -102,7 +90,7 @@ namespace Chlorine.Bindings
 			{
 				return true;
 			}
-			if (_executionDelegateByType != null && (_missingExecutorsCache == null || !_missingExecutorsCache.Contains(executableType)))
+			if (_missingExecutorsCache == null || !_missingExecutorsCache.Contains(executableType))
 			{
 				foreach (KeyValuePair<Type, IExecutionDelegate> pair in _executionDelegateByType)
 				{

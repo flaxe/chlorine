@@ -1,4 +1,5 @@
 using Chlorine.Collections;
+using Chlorine.Exceptions;
 
 namespace Chlorine.Internal
 {

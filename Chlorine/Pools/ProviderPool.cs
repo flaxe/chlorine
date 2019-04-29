@@ -1,27 +1,35 @@
 using System;
+using Chlorine.Providers;
 
 namespace Chlorine.Pools
 {
-	public static class Pool<T> where T : class, new()
+	public class ProviderPool<T> where T : class
 	{
 		private static readonly Type Type = typeof(T);
 
-		public static void Clear()
+		private readonly IProvider<T> _provider;
+
+		public ProviderPool(IProvider<T> provider)
+		{
+			_provider = provider;
+		}
+
+		public void Clear()
 		{
 			SharedPool.Clear(Type);
 		}
 
-		public static T Pull()
+		public T Pull()
 		{
 			T value = SharedPool.Pull<T>();
 			if (value != null)
 			{
 				return value;
 			}
-			return new T();
+			return _provider.Provide();
 		}
 
-		public static void Release(T value, bool reset = true)
+		public void Release(T value, bool reset = true)
 		{
 			if (value == null)
 			{

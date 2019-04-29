@@ -1,6 +1,6 @@
 using System;
 
-namespace Chlorine
+namespace Chlorine.Pools
 {
 	public static class FuturePool
 	{
@@ -8,12 +8,12 @@ namespace Chlorine
 
 		public static void Clear()
 		{
-			Pool.Clear(FutureType);
+			SharedPool.Clear(FutureType);
 		}
 
 		public static IFuture Pull(IPromise promise)
 		{
-			Future future = Pool.Pull<Future>();
+			Future future = SharedPool.Pull<Future>();
 			if (future != null)
 			{
 				future.Init(promise);
@@ -24,14 +24,14 @@ namespace Chlorine
 
 		public static IFuture PullResolved()
 		{
-			Future future = Pool.Pull<Future>() ?? new Future();
+			Future future = SharedPool.Pull<Future>() ?? new Future();
 			future.Resolve();
 			return future;
 		}
 
 		public static IFuture PullRejected(Error reason)
 		{
-			Future future = Pool.Pull<Future>();
+			Future future = SharedPool.Pull<Future>();
 			if (future != null)
 			{
 				future.Reject(reason);
@@ -46,7 +46,7 @@ namespace Chlorine
 			{
 				throw new ArgumentNullException(nameof(future));
 			}
-			Pool.UnsafeRelease(FutureType, future, true);
+			SharedPool.UnsafeRelease(FutureType, future, true);
 		}
 	}
 
@@ -56,12 +56,12 @@ namespace Chlorine
 
 		public static void Clear()
 		{
-			Pool.Clear(FutureType);
+			SharedPool.Clear(FutureType);
 		}
 
 		public static IFuture<TResult> Pull(IPromise<TResult> promise)
 		{
-			Future<TResult> future = Pool.Pull<Future<TResult>>();
+			Future<TResult> future = SharedPool.Pull<Future<TResult>>();
 			if (future != null)
 			{
 				future.Init(promise);
@@ -72,7 +72,7 @@ namespace Chlorine
 
 		public static IFuture<TResult> PullResolved(TResult result)
 		{
-			Future<TResult> future = Pool.Pull<Future<TResult>>();
+			Future<TResult> future = SharedPool.Pull<Future<TResult>>();
 			if (future != null)
 			{
 				future.Resolve(result);
@@ -83,7 +83,7 @@ namespace Chlorine
 
 		public static IFuture<TResult> PullRejected(Error reason)
 		{
-			Future<TResult> future = Pool.Pull<Future<TResult>>();
+			Future<TResult> future = SharedPool.Pull<Future<TResult>>();
 			if (future != null)
 			{
 				future.Reject(reason);
@@ -98,7 +98,7 @@ namespace Chlorine
 			{
 				throw new ArgumentNullException(nameof(future));
 			}
-			Pool.UnsafeRelease(FutureType, future, true);
+			SharedPool.UnsafeRelease(FutureType, future, true);
 		}
 	}
 }

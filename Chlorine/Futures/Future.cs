@@ -1,3 +1,4 @@
+using Chlorine.Exceptions;
 using Chlorine.Internal;
 
 namespace Chlorine

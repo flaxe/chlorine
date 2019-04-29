@@ -1,6 +1,8 @@
 using System;
-using Chlorine.Action;
+using Chlorine.Supervisors;
 using Chlorine.Bindings;
+using Chlorine.Exceptions;
+using Chlorine.Pools;
 
 namespace Chlorine
 {
@@ -25,11 +27,11 @@ namespace Chlorine
 
 		public IFuture Perform<TAction>(TAction action) where TAction : struct
 		{
-			if (!_binder.TryResolveActionSupervisor(out IActionSupervisor<TAction> actionSupervisor))
+			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
 			{
 				throw new ControllerException($"Unable to perform {typeof(TAction).Name}. Action not registered.");
 			}
-			Expected<IPromise> expectedPromise = actionSupervisor.TryPerform(ref action);
+			Expected<IPromise> expectedPromise = actionSupervisor.Perform(ref action);
 			if (expectedPromise.TryGetValue(out IPromise promise))
 			{
 				return FuturePool.Pull(promise);
@@ -39,13 +41,13 @@ namespace Chlorine
 
 		public IFuture<TResult> Perform<TAction, TResult>(TAction action) where TAction : struct
 		{
-			if (!_binder.TryResolveActionSupervisor(out IActionSupervisor<TAction> actionSupervisor))
+			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
 			{
 				throw new ControllerException($"Unable to perform {typeof(TAction).Name}. Action not registered.");
 			}
 			if (actionSupervisor is IActionSupervisor<TAction, TResult> actionResultSupervisor)
 			{
-				Expected<IPromise<TResult>> expectedPromise = actionResultSupervisor.TryPerform(ref action);
+				Expected<IPromise<TResult>> expectedPromise = actionResultSupervisor.Perform(ref action);
 				if (expectedPromise.TryGetValue(out IPromise<TResult> promise))
 				{
 					return FuturePool<TResult>.Pull(promise);
@@ -57,11 +59,11 @@ namespace Chlorine
 
 		public IFuture TryPerform<TAction>(TAction action) where TAction : struct
 		{
-			if (!_binder.TryResolveActionSupervisor(out IActionSupervisor<TAction> actionSupervisor))
+			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
 			{
 				return FuturePool.PullRejected(new Error($"Unable to perform {typeof(TAction).Name}. Action not registered."));
 			}
-			Expected<IPromise> expectedPromise = actionSupervisor.TryPerform(ref action);
+			Expected<IPromise> expectedPromise = actionSupervisor.Perform(ref action);
 			if (expectedPromise.TryGetValue(out IPromise promise))
 			{
 				return FuturePool.Pull(promise);
@@ -71,13 +73,13 @@ namespace Chlorine
 
 		public IFuture<TResult> TryPerform<TAction, TResult>(TAction action) where TAction : struct
 		{
-			if (!_binder.TryResolveActionSupervisor(out IActionSupervisor<TAction> actionSupervisor))
+			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
 			{
 				return FuturePool<TResult>.PullRejected(new Error($"Unable to perform {typeof(TAction).Name}. Action not registered."));
 			}
 			if (actionSupervisor is IActionSupervisor<TAction, TResult> actionResultSupervisor)
 			{
-				Expected<IPromise<TResult>> expectedPromise = actionResultSupervisor.TryPerform(ref action);
+				Expected<IPromise<TResult>> expectedPromise = actionResultSupervisor.Perform(ref action);
 				if (expectedPromise.TryGetValue(out IPromise<TResult> promise))
 				{
 					return FuturePool<TResult>.Pull(promise);

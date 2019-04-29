@@ -44,7 +44,7 @@ namespace Chlorine
 			return builder.ToString();
 		}
 
-		public static explicit operator Exception(Error error)
+		public static implicit operator Exception(Error error)
 		{
 			return error.Exception ?? new Exception(error.Message);
 		}

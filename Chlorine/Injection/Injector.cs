@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Chlorine.Bindings;
+using Chlorine.Exceptions;
+using Chlorine.Pools;
 
 namespace Chlorine.Injection
 {
@@ -8,34 +10,27 @@ namespace Chlorine.Injection
 	{
 		private static readonly Type ObjectType = typeof(object);
 
+		private readonly InjectAnalyzer _analyzer;
 		private readonly Binder _binder;
 
-		private InjectAnalyzer _analyzer;
-
-		public Injector(Binder binder)
+		public Injector(InjectAnalyzer analyzer, Binder binder)
 		{
+			_analyzer = analyzer;
 			_binder = binder;
 		}
 
+		public InjectAnalyzer Analyzer => _analyzer;
+
 		public object Instantiate(Type type, TypeValue[] arguments)
 		{
-			InjectInfo info = GetAnalyzer().GetInfo(type, InjectFlag.Construct | InjectFlag.Inject);
+			InjectInfo info = _analyzer.GetInfo(type, InjectFlag.Construct | InjectFlag.Inject);
 			return InstantiateInternal(info, arguments);
 		}
 
 		public void Inject(object instance, TypeValue[] arguments)
 		{
-			InjectInfo info = GetAnalyzer().GetInfo(instance.GetType(), InjectFlag.Inject);
+			InjectInfo info = _analyzer.GetInfo(instance.GetType(), InjectFlag.Inject);
 			InjectInternal(instance, info, arguments);
-		}
-
-		private InjectAnalyzer GetAnalyzer()
-		{
-			if (_analyzer == null && !_binder.TryResolveType(null, out _analyzer))
-			{
-				throw new InjectException("Unable to resolve 'InjectAnalyzer'.");
-			}
-			return _analyzer;
 		}
 
 		private object InstantiateInternal(InjectInfo info, TypeValue[] arguments)
@@ -64,7 +59,7 @@ namespace Chlorine.Injection
 			Type baseType = info.Type.BaseType;
 			if (baseType != null && baseType != ObjectType)
 			{
-				InjectInternal(instance, GetAnalyzer().GetInfo(baseType, InjectFlag.Inject), arguments);
+				InjectInternal(instance, _analyzer.GetInfo(baseType, InjectFlag.Inject), arguments);
 			}
 			List<InjectFieldInfo> fieldsInfo = info.Fields;
 			if (fieldsInfo != null && fieldsInfo.Count > 0)

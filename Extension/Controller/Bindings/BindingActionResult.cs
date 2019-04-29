@@ -14,17 +14,17 @@ namespace Chlorine.Bindings
 			_binder = binder;
 		}
 
-		public BindingActionDelegate<TAction> To<TActionDelegate>()
+		public BindingActionDelegate<TAction, TResult> To<TActionDelegate>()
 				where TActionDelegate : class, IActionDelegate<TAction, TResult>
 		{
-			return new BindingActionDelegate<TAction>(_binder,
+			return new BindingActionDelegate<TAction, TResult>(_binder,
 					new InstanceProvider<TActionDelegate, IActionDelegate<TAction, TResult>>(_container));
 		}
 
-		public BindingActionDelegate<TAction> FromFactory<TActionDelegateFactory>()
+		public BindingActionDelegate<TAction, TResult> FromFactory<TActionDelegateFactory>()
 				where TActionDelegateFactory : class, IFactory<IActionDelegate<TAction, TResult>>
 		{
-			return new BindingActionDelegate<TAction>(_binder,
+			return new BindingActionDelegate<TAction, TResult>(_binder,
 					new FromFactoryProvider<TActionDelegateFactory, IActionDelegate<TAction, TResult>>(_container));
 		}
 	}

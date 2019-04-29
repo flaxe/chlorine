@@ -8,12 +8,13 @@ namespace Chlorine.Extensions
 		private readonly Container _container;
 		private readonly Extender _parent;
 
-		private Dictionary<Type, IExtensionHolder> _holderByType;
+		private readonly Dictionary<Type, IExtending> _extendingByType;
 
 		public Extender(Container container, Extender parent = null)
 		{
 			_container = container;
 			_parent = parent;
+			_extendingByType = new Dictionary<Type, IExtending>();
 		}
 
 		~Extender()
@@ -23,11 +24,11 @@ namespace Chlorine.Extensions
 
 		public void Dispose()
 		{
-			if (_holderByType != null && _holderByType.Count > 0)
+			if (_extendingByType.Count > 0)
 			{
-				foreach (IExtensionHolder extensionHolder in _holderByType.Values)
+				foreach (IExtending extending in _extendingByType.Values)
 				{
-					extensionHolder.Dispose();
+					extending.Dispose();
 				}
 			}
 		}
@@ -36,9 +37,9 @@ namespace Chlorine.Extensions
 				where TExtension : class, IExtension<TExtension>, new()
 		{
 			Type extensionType = typeof(TExtension);
-			if (_holderByType != null && _holderByType.TryGetValue(extensionType, out IExtensionHolder extensionHolder))
+			if (_extendingByType.TryGetValue(extensionType, out IExtending extending))
 			{
-				if (extensionHolder.Extension is TExtension targetExtension)
+				if (extending.Extension is TExtension targetExtension)
 				{
 					extension = targetExtension;
 					return true;
@@ -50,11 +51,11 @@ namespace Chlorine.Extensions
 
 		public void Extend(Container container)
 		{
-			if (_holderByType != null && _holderByType.Count > 0)
+			if (_extendingByType.Count > 0)
 			{
-				foreach (IExtensionHolder extensionHolder in _holderByType.Values)
+				foreach (IExtending extending in _extendingByType.Values)
 				{
-					extensionHolder.Extend(container);
+					extending.Extend(container);
 				}
 			}
 		}
@@ -62,49 +63,42 @@ namespace Chlorine.Extensions
 		public void Install<TExtension>()
 				where TExtension : class, IExtension<TExtension>, new()
 		{
-			ExtensionHolder<TExtension> extensionHolder;
+			Extending<TExtension> extending;
 			if (_parent != null && _parent.TryGetExtension(out TExtension parentExtension))
 			{
-				extensionHolder = new ExtensionHolder<TExtension>(_container, parentExtension);
+				extending = new Extending<TExtension>(_container, parentExtension);
 			}
 			else
 			{
-				extensionHolder = new ExtensionHolder<TExtension>(_container);
+				extending = new Extending<TExtension>(_container);
 			}
 			Type extensionType = typeof(TExtension);
-			if (_holderByType == null)
-			{
-				_holderByType = new Dictionary<Type, IExtensionHolder> {{extensionType, extensionHolder}};
-			}
-			else if (_holderByType.ContainsKey(extensionType))
+			if (_extendingByType.ContainsKey(extensionType))
 			{
 				throw new ArgumentException($"Extension with type '{extensionType.Name}' already installed.");
 			}
-			else
-			{
-				_holderByType.Add(extensionType, extensionHolder);
-			}
+			_extendingByType.Add(extensionType, extending);
 		}
 
-		private interface IExtensionHolder : IDisposable
+		private interface IExtending : IDisposable
 		{
 			object Extension { get; }
 
 			void Extend(Container container);
 		}
 
-		private sealed class ExtensionHolder<TExtension> : IExtensionHolder
+		private sealed class Extending<TExtension> : IExtending
 				where TExtension : class, IExtension<TExtension>, new()
 		{
 			private readonly TExtension _extension;
 
-			public ExtensionHolder(Container container, TExtension parent = null)
+			public Extending(Container container, TExtension parent = null)
 			{
 				_extension = new TExtension();
 				_extension.Extend(container, parent);
 			}
 
-			~ExtensionHolder()
+			~Extending()
 			{
 				Dispose();
 			}
@@ -118,7 +112,7 @@ namespace Chlorine.Extensions
 			}
 
 			public TExtension Extension => _extension;
-			object IExtensionHolder.Extension => _extension;
+			object IExtending.Extension => _extension;
 
 			public void Extend(Container container)
 			{

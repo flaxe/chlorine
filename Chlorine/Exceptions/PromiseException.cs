@@ -1,6 +1,6 @@
 using System;
 
-namespace Chlorine
+namespace Chlorine.Exceptions
 {
 	public class PromiseException : Exception
 	{

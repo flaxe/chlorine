@@ -1,6 +1,6 @@
 using System;
 
-namespace Chlorine
+namespace Chlorine.Pools
 {
 	public static class PromisePool
 	{
@@ -8,12 +8,12 @@ namespace Chlorine
 
 		public static void Clear()
 		{
-			Pool.Clear(PromiseType);
+			SharedPool.Clear(PromiseType);
 		}
 
 		public static Promise Pull()
 		{
-			return Pool.Pull<Promise>() ?? new Promise();
+			return SharedPool.Pull<Promise>() ?? new Promise();
 		}
 
 		public static void Release(IPromise promise)
@@ -22,7 +22,7 @@ namespace Chlorine
 			{
 				throw new ArgumentNullException(nameof(promise));
 			}
-			Pool.UnsafeRelease(PromiseType, promise, true);
+			SharedPool.UnsafeRelease(PromiseType, promise, true);
 		}
 	}
 
@@ -32,12 +32,12 @@ namespace Chlorine
 
 		public static void Clear()
 		{
-			Pool.Clear(PromiseType);
+			SharedPool.Clear(PromiseType);
 		}
 
 		public static Promise<TResult> Pull()
 		{
-			return Pool.Pull<Promise<TResult>>() ?? new Promise<TResult>();
+			return SharedPool.Pull<Promise<TResult>>() ?? new Promise<TResult>();
 		}
 
 		public static void Release(IPromise<TResult> promise)
@@ -46,7 +46,7 @@ namespace Chlorine
 			{
 				throw new ArgumentNullException(nameof(promise));
 			}
-			Pool.UnsafeRelease(PromiseType, promise, true);
+			SharedPool.UnsafeRelease(PromiseType, promise, true);
 		}
 	}
 }

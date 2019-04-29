@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Chlorine
+namespace Chlorine.Pools
 {
 	public static class ListPool<T>
 	{
@@ -63,22 +63,27 @@ namespace Chlorine
 			Lists.Add(list);
 		}
 
-		private static int GetIndex(int capacity)
+		private static int GetIndex(int minCapacity)
 		{
 			int index = -1;
 			int capacityDifference = int.MaxValue;
 			for (int i = 0; i < Lists.Count; i++)
 			{
 				List<T> list = Lists[i];
-				if (list == null || list.Capacity < capacity)
+				if (list == null)
 				{
 					continue;
 				}
-				if (list.Capacity == capacity)
+				int capacity = list.Capacity;
+				if (capacity < minCapacity)
+				{
+					continue;
+				}
+				if (capacity == minCapacity)
 				{
 					return index;
 				}
-				int difference = list.Capacity - capacity;
+				int difference = capacity - minCapacity;
 				if (difference < capacityDifference)
 				{
 					index = i;

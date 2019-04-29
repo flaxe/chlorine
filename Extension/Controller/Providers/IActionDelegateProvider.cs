@@ -1,9 +1,7 @@
 namespace Chlorine.Providers
 {
-	internal interface IActionDelegateProvider<TAction>
-			where TAction : struct
+	internal interface IActionDelegateProvider<T> : IProvider<T> where T : class
 	{
-		IActionDelegate<TAction> Provide(ref TAction action);
-		void Release(IActionDelegate<TAction> actionDelegate);
+		void Release(T actionDelegate);
 	}
 }

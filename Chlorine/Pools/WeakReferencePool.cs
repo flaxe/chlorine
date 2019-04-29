@@ -1,6 +1,6 @@
 using System;
 
-namespace Chlorine
+namespace Chlorine.Pools
 {
 	public static class WeakReferencePool<T> where T : class
 	{
@@ -8,12 +8,12 @@ namespace Chlorine
 
 		public static void Clear()
 		{
-			Pool.Clear(WeakReferenceType);
+			SharedPool.Clear(WeakReferenceType);
 		}
 
 		public static WeakReference<T> Pull(T target)
 		{
-			WeakReference<T> reference = Pool.Pull<WeakReference<T>>();
+			WeakReference<T> reference = SharedPool.Pull<WeakReference<T>>();
 			if (reference != null)
 			{
 				reference.SetTarget(target);
@@ -29,7 +29,7 @@ namespace Chlorine
 				throw new ArgumentNullException(nameof(reference));
 			}
 			reference.SetTarget(null);
-			Pool.UnsafeRelease(WeakReferenceType, reference, true);
+			SharedPool.UnsafeRelease(WeakReferenceType, reference, true);
 		}
 	}
 }

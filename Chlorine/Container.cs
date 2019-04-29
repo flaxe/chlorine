@@ -1,6 +1,7 @@
 using System;
 using Chlorine.Bindings;
 using Chlorine.Collections;
+using Chlorine.Exceptions;
 using Chlorine.Extensions;
 using Chlorine.Injection;
 using Chlorine.Providers;
@@ -16,20 +17,21 @@ namespace Chlorine
 		private readonly Extender _extender;
 		private readonly Injector _injector;
 
-		public Container() : this(null)
+		public Container()
 		{
-			_binder.Bind(new InstanceProvider<InjectAnalyzer>(new InjectAnalyzer()));
+			_binder = new Binder(this);
+			_extender = new Extender(this);
+			_injector = new Injector(new InjectAnalyzer(), _binder);
+
+			_binder.Bind(new InstanceProvider<IContainer>(this));
 		}
 
 		private Container(Container parent)
 		{
 			_parent = parent;
-			_binder = new Binder(this, _parent?._binder);
-			_extender = new Extender(this, _parent?._extender);
-			_injector = new Injector(_binder);
-
-			_binder.Bind(new InstanceProvider<Binder>(_binder));
-			_binder.Bind(new InstanceProvider<Injector>(_injector));
+			_binder = new Binder(this, _parent._binder);
+			_extender = new Extender(this, _parent._extender);
+			_injector = new Injector(_parent._injector.Analyzer, _binder);
 
 			_binder.Bind(new InstanceProvider<IContainer>(this));
 		}
