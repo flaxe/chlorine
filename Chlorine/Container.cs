@@ -63,7 +63,8 @@ namespace Chlorine
 			{
 				return extension;
 			}
-			throw new ContainerException($"Extension with type '{typeof(TExtension).Name}' not installed.");
+			throw new ContainerException(ContainerErrorCode.ExtensionNotInstalled,
+					$"Extension with type '{typeof(TExtension).Name}' not installed.");
 		}
 
 		public Container CreateSubContainer()
@@ -103,7 +104,8 @@ namespace Chlorine
 			IInstaller installer = Instantiate(type, arguments) as IInstaller;
 			if (installer == null)
 			{
-				throw new ArgumentException($"Invalid type '{type.Name}' given for installer.");
+				throw new ContainerException(ContainerErrorCode.InvalidType,
+						$"Invalid type '{type.Name}' given for installer.");
 			}
 			Install(installer);
 		}
@@ -128,7 +130,8 @@ namespace Chlorine
 			{
 				return instance;
 			}
-			throw new ContainerException($"Unable to resolve '{typeof(T).Name}'{(id != null ? $" with id {id}." : ".")}");
+			throw new ContainerException(ContainerErrorCode.TypeNotRegistered,
+					$"Unable to resolve '{typeof(T).Name}'{(id != null ? $" with id {id}." : ".")}");
 		}
 
 		public object Resolve(Type type, object id = null)
@@ -137,7 +140,8 @@ namespace Chlorine
 			{
 				return instance;
 			}
-			throw new ContainerException($"Unable to resolve '{type.Name}'{(id != null ? $" with id {id}." : ".")}");
+			throw new ContainerException(ContainerErrorCode.TypeNotRegistered,
+					$"Unable to resolve '{type.Name}'{(id != null ? $" with id {id}." : ".")}");
 		}
 
 		public T TryResolve<T>(object id = null) where T : class

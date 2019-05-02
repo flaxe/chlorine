@@ -43,7 +43,8 @@ namespace Chlorine.Internal
 			{
 				if (_status != FutureStatus.Rejected)
 				{
-					throw new FutureException("Invalid operation. Future was not rejected.");
+					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+							"Invalid operation. Future was not rejected.");
 				}
 				return _reason;
 			}

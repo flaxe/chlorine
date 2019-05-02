@@ -18,7 +18,7 @@ namespace Chlorine
 		public void Extend(Container container, ControllerExtension parent)
 		{
 			_binder = new ControllerBinder(parent?._binder);
-			container.Bind<IController>().To<Controller>().AsSingleton();
+			container.Bind<IController>().ToInstance(new Controller(_binder));
 		}
 	}
 }

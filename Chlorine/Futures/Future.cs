@@ -81,7 +81,8 @@ namespace Chlorine
 			{
 				if (Status != FutureStatus.Resolved)
 				{
-					throw new FutureException("Invalid operation. Future was not resolved.");
+					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+							"Invalid operation. Future was not resolved.");
 				}
 				return _result;
 			}

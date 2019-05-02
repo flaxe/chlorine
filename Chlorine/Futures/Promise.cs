@@ -37,7 +37,8 @@ namespace Chlorine
 			{
 				if (Status != PromiseStatus.Resolved)
 				{
-					throw new PromiseException("Invalid operation. Promise was not resolved.");
+					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+							"Invalid operation. Promise was not resolved.");
 				}
 				return _result;
 			}

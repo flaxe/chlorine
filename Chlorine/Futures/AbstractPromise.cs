@@ -36,7 +36,8 @@ namespace Chlorine.Internal
 			{
 				if (_status != PromiseStatus.Rejected)
 				{
-					throw new PromiseException("Invalid operation. Promise was not rejected.");
+					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+							"Invalid operation. Promise was not rejected.");
 				}
 				return _reason;
 			}

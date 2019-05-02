@@ -1,4 +1,4 @@
-using System;
+using Chlorine.Exceptions;
 using Chlorine.Providers;
 
 namespace Chlorine.Execution
@@ -21,7 +21,8 @@ namespace Chlorine.Execution
 			}
 			else
 			{
-				throw new ArgumentException($"Executable has invalid type, '{typeof(TExecutable).Name}' is expected.");
+				throw new ControllerException(ControllerErrorCode.InvalidType,
+						$"Executable has invalid type, '{typeof(TExecutable).Name}' is expected.");
 			}
 		}
 	}

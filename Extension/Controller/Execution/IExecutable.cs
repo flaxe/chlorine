@@ -2,7 +2,7 @@ namespace Chlorine.Execution
 {
 	public interface IExecutable
 	{
-		bool IsProcessed { get; }
+		bool IsPending { get; }
 		bool IsSucceed { get; }
 		bool IsFailed { get; }
 

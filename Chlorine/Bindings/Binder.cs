@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Chlorine.Exceptions;
 using Chlorine.Providers;
 
 namespace Chlorine.Bindings
@@ -71,7 +72,8 @@ namespace Chlorine.Bindings
 			{
 				if (_providerByType.ContainsKey(type))
 				{
-					throw new ArgumentException($"Type '{type.Name}' with empty id is already registered.");
+					throw new ContainerException(ContainerErrorCode.TypeAlreadyRegistered,
+							$"Type '{type.Name}' with empty id is already registered.");
 				}
 				_providerByType.Add(type, provider);
 			}
@@ -81,7 +83,8 @@ namespace Chlorine.Bindings
 				{
 					if (providerById.ContainsKey(id))
 					{
-						throw new ArgumentException($"Type '{type.Name}' with id '{id}' is already registered.");
+						throw new ContainerException(ContainerErrorCode.TypeAlreadyRegistered,
+								$"Type '{type.Name}' with id '{id}' is already registered.");
 					}
 					providerById.Add(id, provider);
 				}

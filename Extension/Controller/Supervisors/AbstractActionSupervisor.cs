@@ -1,5 +1,6 @@
 using System;
 using Chlorine.Bindings;
+using Chlorine.Exceptions;
 using Chlorine.Execution;
 
 namespace Chlorine.Supervisors
@@ -16,26 +17,31 @@ namespace Chlorine.Supervisors
 			_binder = binder;
 		}
 
-		protected bool TryPerform(ref TAction action, IActionDelegate<TAction> actionDelegate, out Error error)
+		protected bool TryExecute(ref TAction action, IActionDelegate<TAction> actionDelegate, out Error error)
 		{
 			try
 			{
 				if (!actionDelegate.Init(action))
 				{
 					Type delegateType = actionDelegate.GetType();
-					error = new Error($"Failed to initialize delegate '{delegateType.Name}' with action '{ActionType.Name}'.");
+					error = new Error((int)ControllerErrorCode.InitializationFailed,
+							$"Failed to initialize delegate '{delegateType.Name}' with action '{ActionType.Name}'.");
 					return false;
 				}
 			}
 			catch (Exception exception)
 			{
-				error = new Error(exception);
+				Type delegateType = actionDelegate.GetType();
+				error = new Error((int)ControllerErrorCode.InitializationFailed,
+						$"Failed to initialize delegate '{delegateType.Name}' with action '{ActionType.Name}'.",
+						exception);
 				return false;
 			}
 			if (!_binder.TryResolveExecutionDelegate(actionDelegate, out IExecutionDelegate executionDelegate))
 			{
 				Type delegateType = actionDelegate.GetType();
-				error = new Error($"Failed to resolve executor for action delegate '{delegateType.Name}'.");
+				error = new Error((int)ControllerErrorCode.ExecutorNotRegistered,
+						$"Executor for action delegate '{delegateType.Name}' not registered.");
 				return false;
 			}
 			try
@@ -44,7 +50,10 @@ namespace Chlorine.Supervisors
 			}
 			catch (Exception exception)
 			{
-				error = new Error(exception);
+				Type delegateType = actionDelegate.GetType();
+				error = new Error((int)ControllerErrorCode.ExecutionFailed,
+						$"Failed to execute action delegate '{delegateType.Name}'.",
+						exception);
 				return false;
 			}
 			error = default;

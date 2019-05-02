@@ -38,7 +38,8 @@ namespace Chlorine.Injection
 			InjectConstructorInfo constructorInfo = info.Constructor;
 			if (constructorInfo == null)
 			{
-				throw new ArgumentException($"Can't instantiate '{info.Type.Name}'. Has no constructor.");
+				throw new InjectException(InjectErrorCode.HasNoConstructor,
+						$"Can't instantiate '{info.Type.Name}'. Has no constructor.");
 			}
 			object instance;
 			object[] parameters = ResolveParameters(info, constructorInfo.Parameters, arguments);
@@ -99,7 +100,8 @@ namespace Chlorine.Injection
 		{
 			if (!_binder.TryResolveType(type, attributeInfo?.Id, out object instance) && (attributeInfo == null || !attributeInfo.Optional))
 			{
-				throw new InjectException($"Unable to resolve '{type.Name}' while processing '{info.Type.Name}'.");
+				throw new InjectException(InjectErrorCode.TypeNotRegistered,
+						$"Unable to resolve '{type.Name}' while processing '{info.Type.Name}'.");
 			}
 			return instance;
 		}

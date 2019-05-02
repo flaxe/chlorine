@@ -2,13 +2,25 @@ using System;
 
 namespace Chlorine.Exceptions
 {
-	public class ContainerException : Exception
+	public enum ContainerErrorCode
 	{
-		public ContainerException(string message) : base(message)
+		TypeNotRegistered = -0xA0001,
+		TypeAlreadyRegistered = -0xA0002,
+		ExtensionNotInstalled = -0xA0003,
+		ExtensionAlreadyInstalled = -0xA0004,
+
+		InvalidType = -0xA0F01
+	}
+
+	public class ContainerException : ChlorineException
+	{
+		public ContainerException(ContainerErrorCode code, string message) :
+				base((int)code, message)
 		{
 		}
 
-		public ContainerException(string message, Exception innerException) : base(message, innerException)
+		public ContainerException(ContainerErrorCode code, string message, Exception innerException) :
+				base((int)code, message, innerException)
 		{
 		}
 	}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Chlorine.Exceptions;
 
 namespace Chlorine.Extensions
 {
@@ -75,7 +76,8 @@ namespace Chlorine.Extensions
 			Type extensionType = typeof(TExtension);
 			if (_extendingByType.ContainsKey(extensionType))
 			{
-				throw new ArgumentException($"Extension with type '{extensionType.Name}' already installed.");
+				throw new ContainerException(ContainerErrorCode.ExtensionAlreadyInstalled,
+						$"Extension with type '{extensionType.Name}' already installed.");
 			}
 			_extendingByType.Add(extensionType, extending);
 		}

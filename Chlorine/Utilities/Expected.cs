@@ -1,4 +1,5 @@
 using System;
+using Chlorine.Exceptions;
 
 namespace Chlorine
 {
@@ -30,7 +31,8 @@ namespace Chlorine
 			{
 				if (!_hasValue)
 				{
-					throw new Exception("Invalid operation. Expected has no value.");
+					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+							"Invalid operation. Expected has no value.");
 				}
 				return _value;
 			}
@@ -42,7 +44,8 @@ namespace Chlorine
 			{
 				if (_hasValue)
 				{
-					throw new Exception("Invalid operation. Expected has no error.");
+					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+							"Invalid operation. Expected has no error.");
 				}
 				return _error;
 			}

@@ -17,14 +17,13 @@ namespace Chlorine.Supervisors
 			foreach (var pair in Promises)
 			{
 				IActionDelegate<TAction> actionDelegate = pair.Key;
-				if (!actionDelegate.IsProcessed && actionDelegate is IStackable<TAction> stackable && stackable.Stack(action))
+				if (actionDelegate.IsPending && actionDelegate is IStackable<TAction> stackable && stackable.Stack(action))
 				{
 					promise = pair.Value;
 					error = default;
 					return true;
 				}
 			}
-
 			return base.TryPerform(ref action, out promise, out error);
 		}
 	}
@@ -43,14 +42,13 @@ namespace Chlorine.Supervisors
 			foreach (var pair in Promises)
 			{
 				IActionDelegate<TAction, TResult> actionDelegate = pair.Key;
-				if (!actionDelegate.IsProcessed && actionDelegate is IStackable<TAction> stackable && stackable.Stack(action))
+				if (actionDelegate.IsPending && actionDelegate is IStackable<TAction> stackable && stackable.Stack(action))
 				{
 					promise = pair.Value;
 					error = default;
 					return true;
 				}
 			}
-
 			return base.TryPerform(ref action, out promise, out error);
 		}
 	}

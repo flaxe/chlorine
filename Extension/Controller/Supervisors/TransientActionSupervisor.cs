@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Chlorine.Bindings;
+using Chlorine.Exceptions;
 using Chlorine.Execution;
 using Chlorine.Pools;
 using Chlorine.Providers;
@@ -12,6 +13,7 @@ namespace Chlorine.Supervisors
 			where TAction : struct
 	{
 		private readonly IActionDelegateProvider<IActionDelegate<TAction>> _provider;
+
 		private Dictionary<IActionDelegate<TAction>, Promise> _promiseByDelegate;
 
 		public TransientActionSupervisor(ControllerBinder binder, IActionDelegateProvider<IActionDelegate<TAction>> provider) :
@@ -46,7 +48,7 @@ namespace Chlorine.Supervisors
 			{
 				_promiseByDelegate.Add(actionDelegate, actionPromise);
 			}
-			if (TryPerform(ref action, actionDelegate, out Error actionError))
+			if (TryExecute(ref action, actionDelegate, out Error actionError))
 			{
 				promise = actionPromise;
 				error = default;
@@ -65,26 +67,29 @@ namespace Chlorine.Supervisors
 		public override void HandleComplete(IExecutable executable)
 		{
 			IActionDelegate<TAction> actionDelegate = (IActionDelegate<TAction>)executable;
-			if (_promiseByDelegate.TryGetValue(actionDelegate, out Promise promise))
+			if (!_promiseByDelegate.TryGetValue(actionDelegate, out Promise promise))
 			{
-				_promiseByDelegate.Remove(actionDelegate);
-				try
+				_provider.Release(actionDelegate);
+				throw new ControllerException(ControllerErrorCode.UnexpectedAction,
+						$"Unexpected action delegate with action '{typeof(TAction).Name}'.");
+			}
+			try
+			{
+				if (actionDelegate.IsSucceed)
 				{
-					if (actionDelegate.IsSucceed)
-					{
-						promise.Resolve();
-					}
-					else
-					{
-						promise.Reject(actionDelegate.Error);
-					}
+					promise.Resolve();
 				}
-				finally
+				else
 				{
-					PromisePool.Release(promise);
+					promise.Reject(actionDelegate.Error);
 				}
 			}
-			_provider.Release(actionDelegate);
+			finally
+			{
+				_promiseByDelegate.Remove(actionDelegate);
+				_provider.Release(actionDelegate);
+				PromisePool.Release(promise);
+			}
 		}
 	}
 
@@ -94,6 +99,7 @@ namespace Chlorine.Supervisors
 			where TAction : struct
 	{
 		private readonly IActionDelegateProvider<IActionDelegate<TAction, TResult>> _provider;
+
 		private Dictionary<IActionDelegate<TAction, TResult>, Promise<TResult>> _promiseByDelegate;
 
 		public TransientActionSupervisor(ControllerBinder binder, IActionDelegateProvider<IActionDelegate<TAction, TResult>> provider) :
@@ -137,7 +143,7 @@ namespace Chlorine.Supervisors
 			{
 				_promiseByDelegate.Add(actionDelegate, actionPromise);
 			}
-			if (TryPerform(ref action, actionDelegate, out Error actionError))
+			if (TryExecute(ref action, actionDelegate, out Error actionError))
 			{
 				promise = actionPromise;
 				error = default;
@@ -156,26 +162,37 @@ namespace Chlorine.Supervisors
 		public override void HandleComplete(IExecutable executable)
 		{
 			IActionDelegate<TAction, TResult> actionDelegate = (IActionDelegate<TAction, TResult>)executable;
-			if (_promiseByDelegate.TryGetValue(actionDelegate, out Promise<TResult> promise))
+			if (!_promiseByDelegate.TryGetValue(actionDelegate, out Promise<TResult> promise))
 			{
-				_promiseByDelegate.Remove(actionDelegate);
-				try
+				_provider.Release(actionDelegate);
+				throw new ControllerException(ControllerErrorCode.UnexpectedAction,
+						$"Unexpected action delegate with action '{typeof(TAction).Name}'.");
+			}
+			try
+			{
+				if (actionDelegate.IsSucceed)
 				{
-					if (actionDelegate.IsSucceed && actionDelegate.TryGetResult(out TResult result))
+					if (actionDelegate.TryGetResult(out TResult result))
 					{
 						promise.Resolve(result);
 					}
 					else
 					{
-						promise.Reject(actionDelegate.Error);
+						promise.Reject(new Error((int)ControllerErrorCode.GetResultFailed,
+								"Failed to get result from action delegate."));
 					}
 				}
-				finally
+				else
 				{
-					PromisePool<TResult>.Release(promise);
+					promise.Reject(actionDelegate.Error);
 				}
 			}
-			_provider.Release(actionDelegate);
+			finally
+			{
+				_promiseByDelegate.Remove(actionDelegate);
+				_provider.Release(actionDelegate);
+				PromisePool<TResult>.Release(promise);
+			}
 		}
 	}
 }

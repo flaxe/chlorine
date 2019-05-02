@@ -45,21 +45,23 @@ namespace Chlorine.Injection
 			Type type = info.Type;
 			if (type.IsEnum)
 			{
-				throw new ArgumentException("Enum types not supported.");
+				throw new InjectException(InjectErrorCode.TypeNotSupported, "Enum types not supported.");
 			}
 			if (type.IsArray)
 			{
-				throw new ArgumentException("Array types not supported.");
+				throw new InjectException(InjectErrorCode.TypeNotSupported, "Array types not supported.");
 			}
 			if ((flags & InjectFlag.Construct) == InjectFlag.Construct)
 			{
 				if (type.IsEqualOrDerivesFrom(UnityComponentType))
 				{
-					throw new ArgumentException($"Can't construct UnityEngine component '{type.Name}'.");
+					throw new InjectException(InjectErrorCode.UnityComponentConstruction,
+							$"Can't construct UnityEngine component '{type.Name}'.");
 				}
 				if (type.IsAbstract)
 				{
-					throw new ArgumentException($"Can't construct abstract class '{type.Name}'.");
+					throw new InjectException(InjectErrorCode.AbstractClassConstruction,
+							$"Can't construct abstract class '{type.Name}'.");
 				}
 				info.Constructor = GetConstructorInfo(type);
 			}
@@ -86,7 +88,8 @@ namespace Chlorine.Injection
 			int constructorsLength = constructors.Length;
 			if (constructorsLength == 0)
 			{
-				throw new ArgumentException($"Class '{type.Name}' has no constructors.");
+				throw new InjectException(InjectErrorCode.HasNoConstructor,
+						$"Class '{type.Name}' has no constructors.");
 			}
 			if (constructorsLength > 1)
 			{
@@ -104,7 +107,8 @@ namespace Chlorine.Injection
 				}
 				if (explicitConstructorsCount > 1)
 				{
-					throw new InjectException($"Class '{type.Name}' has multiple constructors with 'Inject' attribute.");
+					throw new InjectException(InjectErrorCode.MultipleConstructors,
+							$"Class '{type.Name}' has multiple constructors with 'Inject' attribute.");
 				}
 				if (explicitConstructorsCount == 1)
 				{
@@ -125,7 +129,8 @@ namespace Chlorine.Injection
 					return applicableConstructor;
 				}
 
-				throw new InjectException($"Class '{type.Name}' has multiple public constructors. Specify one with 'Inject' attribute.");
+				throw new InjectException(InjectErrorCode.MultipleConstructors,
+						$"Class '{type.Name}' has multiple public constructors. Specify one with 'Inject' attribute.");
 			}
 
 			return constructors[0];
@@ -154,7 +159,8 @@ namespace Chlorine.Injection
 					}
 					else if (attributes.Length > 1)
 					{
-						throw new InjectException($"Method '{method.Name}' at class '{type.Name}' has multiple 'Inject' attributes.");
+						throw new InjectException(InjectErrorCode.MultipleAttributes,
+								$"Method '{method.Name}' at class '{type.Name}' has multiple 'Inject' attributes.");
 					}
 				}
 				return methodsInfo;
@@ -189,7 +195,8 @@ namespace Chlorine.Injection
 					}
 					else if (attributes.Length > 1)
 					{
-						throw new InjectException($"Property '{property.Name}' at class '{type.Name}' has multiple 'Inject' attributes.");
+						throw new InjectException(InjectErrorCode.MultipleAttributes,
+								$"Property '{property.Name}' at class '{type.Name}' has multiple 'Inject' attributes.");
 					}
 				}
 				return propertiesInfo;
@@ -220,7 +227,8 @@ namespace Chlorine.Injection
 					}
 					else if (attributes.Length > 1)
 					{
-						throw new InjectException($"Field '{field.Name}' at class '{type.Name}' has multiple 'Inject' attributes.");
+						throw new InjectException(InjectErrorCode.MultipleAttributes,
+								$"Field '{field.Name}' at class '{type.Name}' has multiple 'Inject' attributes.");
 					}
 				}
 				return fieldsInfo;
@@ -252,7 +260,8 @@ namespace Chlorine.Injection
 			}
 			if (attributes.Length > 1)
 			{
-				throw new InjectException($"Parameter '{parameter.Name}' in method '{method.Name}' at class '{type.Name}' has multiple 'Inject' attributes.");
+				throw new InjectException(InjectErrorCode.MultipleAttributes,
+						$"Parameter '{parameter.Name}' in method '{method.Name}' at class '{type.Name}' has multiple 'Inject' attributes.");
 			}
 			return null;
 		}
@@ -263,7 +272,8 @@ namespace Chlorine.Injection
 			{
 				return new InjectAttributeInfo(injectAttribute.Id, injectAttribute.Optional);
 			}
-			throw new InjectException($"Attribute '{attribute.GetType()}' has invalid type.");
+			throw new InjectException(InjectErrorCode.InvalidType,
+					$"Attribute '{attribute.GetType()}' has invalid type.");
 		}
 
 		private struct AnalyzeResult

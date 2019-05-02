@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Chlorine.Exceptions;
 using Chlorine.Supervisors;
 using Chlorine.Execution;
 
@@ -37,7 +38,8 @@ namespace Chlorine.Bindings
 			Type actionType = typeof(TAction);
 			if (_actionSupervisorByType.ContainsKey(actionType))
 			{
-				throw new ArgumentException($"Action with type '{actionType.Name}' is already registered.");
+				throw new ControllerException(ControllerErrorCode.ActionAlreadyRegistered,
+						$"Action with type '{actionType.Name}' is already registered.");
 			}
 			_actionSupervisorByType.Add(actionType, actionSupervisor);
 		}
@@ -48,7 +50,8 @@ namespace Chlorine.Bindings
 			Type executableType = typeof(TExecutable);
 			if (_executionDelegateByType.ContainsKey(executableType))
 			{
-				throw new ArgumentException($"Executable with type '{executableType.Name}' is already registered.");
+				throw new ControllerException(ControllerErrorCode.ExecutorAlreadyRegistered,
+						$"Executable with type '{executableType.Name}' is already registered.");
 			}
 			_executionDelegateByType.Add(executableType, executionDelegate);
 		}
