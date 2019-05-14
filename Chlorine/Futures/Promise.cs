@@ -16,7 +16,7 @@ namespace Chlorine
 			{
 				Status = PromiseStatus.Resolved;
 				HandleResolve();
-				RevokeAll();
+				Clear();
 			}
 		}
 	}
@@ -86,9 +86,9 @@ namespace Chlorine
 			_resultFutures?.Remove(future);
 		}
 
-		public override void RevokeAll()
+		public override void Clear()
 		{
-			base.RevokeAll();
+			base.Clear();
 			_resultFutures?.Clear();
 		}
 
@@ -99,7 +99,7 @@ namespace Chlorine
 				Status = PromiseStatus.Resolved;
 				_result = result;
 				HandleResolve();
-				RevokeAll();
+				Clear();
 			}
 		}
 

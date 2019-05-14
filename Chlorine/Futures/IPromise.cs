@@ -7,15 +7,15 @@ namespace Chlorine
 
 		Error Reason { get; }
 
+		void Clear();
+
 		void Fulfill(Future future);
 		void Revoke(Future future);
-		void RevokeAll();
 	}
 
 	public interface IPromise<TResult> : IPromise
 	{
 		TResult Result { get; }
-
 		bool TryGetResult(out TResult result);
 
 		void Fulfill(Future<TResult> future);

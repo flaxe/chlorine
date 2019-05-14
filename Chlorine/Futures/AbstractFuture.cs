@@ -1,8 +1,10 @@
+using System;
+using System.Collections.Generic;
 using Chlorine.Exceptions;
 
 namespace Chlorine.Internal
 {
-	public class AbstractFuture : IPoolable
+	public abstract class AbstractFuture : IFuture, IPoolable
 	{
 		protected enum FutureStatus
 		{
@@ -15,6 +17,7 @@ namespace Chlorine.Internal
 
 		private FutureResolved _resolved;
 		private FutureRejected _rejected;
+		private List<IFutureHandler> _handlers;
 
 		private Error _reason;
 
@@ -61,10 +64,25 @@ namespace Chlorine.Internal
 		{
 			_resolved = null;
 			_rejected = null;
+			_handlers?.Clear();
+		}
+
+		public IFuture Then(FuturePromised promised)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IFuture<T> Then<T>(FutureResultPromised<T> promised)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void Then(FutureResolved resolved, FutureRejected rejected)
 		{
+			if (resolved == null)
+			{
+				throw new ArgumentNullException(nameof(resolved));
+			}
 			switch (_status)
 			{
 				case FutureStatus.Pending:
@@ -79,6 +97,10 @@ namespace Chlorine.Internal
 
 		public void Catch(FutureRejected rejected)
 		{
+			if (rejected == null)
+			{
+				throw new ArgumentNullException(nameof(rejected));
+			}
 			switch (_status)
 			{
 				case FutureStatus.Pending:
@@ -90,6 +112,31 @@ namespace Chlorine.Internal
 			}
 		}
 
+		public void Finally(IFutureHandler handler)
+		{
+			if (handler == null)
+			{
+				throw new ArgumentNullException(nameof(handler));
+			}
+			switch (_status)
+			{
+				case FutureStatus.Pending:
+					if (_handlers == null)
+					{
+						_handlers = new List<IFutureHandler>{ handler };
+					}
+					else
+					{
+						_handlers.Add(handler);
+					}
+					break;
+				case FutureStatus.Resolved:
+				case FutureStatus.Rejected:
+					handler.HandleFuture(this);
+					break;
+			}
+		}
+
 		public void Reject(Error reason)
 		{
 			if (_status == FutureStatus.Pending)
@@ -97,6 +144,7 @@ namespace Chlorine.Internal
 				_status = FutureStatus.Rejected;
 				_reason = reason;
 				HandleReject();
+				HandleFinalize();
 				Clear();
 			}
 		}
@@ -104,6 +152,17 @@ namespace Chlorine.Internal
 		protected virtual void HandleResolve()
 		{
 			_resolved?.Invoke();
+		}
+
+		protected virtual void HandleFinalize()
+		{
+			if (_handlers != null && _handlers.Count > 0)
+			{
+				foreach (IFutureHandler handler in _handlers)
+				{
+					handler.HandleFuture(this);
+				}
+			}
 		}
 
 		private void HandleReject()

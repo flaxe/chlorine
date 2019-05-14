@@ -45,9 +45,14 @@ namespace Chlorine.Internal
 
 		public virtual void Reset()
 		{
-			RevokeAll();
+			Clear();
 			_status = PromiseStatus.Pending;
 			_reason = default;
+		}
+
+		public virtual void Clear()
+		{
+			_futures?.Clear();
 		}
 
 		public void Fulfill(Future future)
@@ -75,11 +80,6 @@ namespace Chlorine.Internal
 			_futures?.Remove(future);
 		}
 
-		public virtual void RevokeAll()
-		{
-			_futures?.Clear();
-		}
-
 		public void Reject(Error reason)
 		{
 			if (_status == PromiseStatus.Pending)
@@ -87,7 +87,7 @@ namespace Chlorine.Internal
 				_status = PromiseStatus.Rejected;
 				_reason = reason;
 				HandleReject();
-				RevokeAll();
+				Clear();
 			}
 		}
 
