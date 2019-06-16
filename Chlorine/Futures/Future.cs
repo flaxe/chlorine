@@ -1,3 +1,4 @@
+using System;
 using Chlorine.Exceptions;
 using Chlorine.Internal;
 
@@ -5,6 +6,8 @@ namespace Chlorine
 {
 	public sealed class Future : AbstractFuture
 	{
+		private static readonly Type FutureType = typeof(Future);
+
 		private IPromise _promise;
 
 		internal Future(IPromise promise)
@@ -25,8 +28,8 @@ namespace Chlorine
 		{
 			if (_promise != null)
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState,
-						$"{GetType().Name} was not reset before reuse.");
+				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
+						$"{FutureType.Name} was not reset before reuse.");
 			}
 			_promise = promise;
 			_promise.Fulfill(this);
@@ -45,6 +48,8 @@ namespace Chlorine
 
 	public sealed class Future<TResult> : AbstractFuture<TResult>
 	{
+		private static readonly Type FutureType = typeof(Future<TResult>);
+
 		private IPromise<TResult> _promise;
 
 		internal Future(IPromise<TResult> promise)
@@ -64,8 +69,8 @@ namespace Chlorine
 		{
 			if (_promise != null)
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState,
-						$"{GetType().Name} was not reset before reuse.");
+				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
+						$"{FutureType.Name} was not reset before reuse.");
 			}
 			_promise = promise;
 			_promise.Fulfill(this);

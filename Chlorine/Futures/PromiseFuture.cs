@@ -1,3 +1,4 @@
+using System;
 using Chlorine.Exceptions;
 using Chlorine.Internal;
 using Chlorine.Pools;
@@ -6,12 +7,19 @@ namespace Chlorine
 {
 	internal sealed class PromiseFuture : AbstractFuture, IFutureHandler
 	{
+		private static readonly Type FutureType = typeof(PromiseFuture);
+
 		private IFuture _parent;
 		private FuturePromised _promised;
 		private IFuture _future;
 
 		internal void Init(IFuture parent, FuturePromised promised)
 		{
+			if (_parent != null)
+			{
+				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
+						$"{FutureType.Name} was not reset before reuse.");
+			}
 			_parent = parent;
 			_promised = promised;
 			_parent.Finally(this);
@@ -55,19 +63,27 @@ namespace Chlorine
 			}
 			else
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState, "Invalid state. Unexpected future.");
+				throw new ChlorineException(ChlorineErrorCode.InvalidState,
+						"Invalid state. Unexpected future.");
 			}
 		}
 	}
 
 	internal sealed class PromiseFuture<TInput> : AbstractFuture, IFutureHandler
 	{
+		private static readonly Type FutureType = typeof(PromiseFuture<TInput>);
+
 		private IFuture<TInput> _parent;
 		private FuturePromised<TInput> _promised;
 		private IFuture _future;
 
 		internal void Init(IFuture<TInput> parent, FuturePromised<TInput> promised)
 		{
+			if (_parent != null)
+			{
+				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
+						$"{FutureType.Name} was not reset before reuse.");
+			}
 			_parent = parent;
 			_promised = promised;
 			_parent.Finally(this);
@@ -111,19 +127,27 @@ namespace Chlorine
 			}
 			else
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState, "Invalid state. Unexpected future.");
+				throw new ChlorineException(ChlorineErrorCode.InvalidState,
+						"Invalid state. Unexpected future.");
 			}
 		}
 	}
 
 	internal sealed class PromiseFutureResult<TOutput> : AbstractFuture<TOutput>, IFutureHandler
 	{
+		private static readonly Type FutureType = typeof(PromiseFutureResult<TOutput>);
+
 		private IFuture _parent;
 		private FutureResultPromised<TOutput> _promised;
 		private IFuture<TOutput> _future;
 
 		internal void Init(IFuture parent, FutureResultPromised<TOutput> promised)
 		{
+			if (_parent != null)
+			{
+				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
+						$"{FutureType.Name} was not reset before reuse.");
+			}
 			_parent = parent;
 			_promised = promised;
 			_parent.Finally(this);
@@ -167,19 +191,27 @@ namespace Chlorine
 			}
 			else
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState, "Invalid state. Unexpected future.");
+				throw new ChlorineException(ChlorineErrorCode.InvalidState,
+						"Invalid state. Unexpected future.");
 			}
 		}
 	}
 
 	internal sealed class PromiseFutureResult<TOutput, TInput> : AbstractFuture<TOutput>, IFutureHandler
 	{
+		private static readonly Type FutureType = typeof(PromiseFutureResult<TOutput, TInput>);
+
 		private IFuture<TInput> _parent;
 		private FutureResultPromised<TOutput, TInput> _promised;
 		private IFuture<TOutput> _future;
 
 		internal void Init(IFuture<TInput> parent, FutureResultPromised<TOutput, TInput> promised)
 		{
+			if (_parent != null)
+			{
+				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
+						$"{FutureType.Name} was not reset before reuse.");
+			}
 			_parent = parent;
 			_promised = promised;
 			_parent.Finally(this);
@@ -223,7 +255,8 @@ namespace Chlorine
 			}
 			else
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState, "Invalid state. Unexpected future.");
+				throw new ChlorineException(ChlorineErrorCode.InvalidState,
+						"Invalid state. Unexpected future.");
 			}
 		}
 	}

@@ -4,6 +4,8 @@ namespace Chlorine.Exceptions
 {
 	public enum ChlorineErrorCode
 	{
+		NotResetBeforeReuse = -0xFF001,
+
 		InvalidOperation = -0xFFF01,
 		InvalidState = -0xFFF02
 	}
