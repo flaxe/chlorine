@@ -4,7 +4,8 @@ namespace Chlorine.Exceptions
 {
 	public enum ChlorineErrorCode
 	{
-		InvalidOperation = -0xFFF01
+		InvalidOperation = -0xFFF01,
+		InvalidState = -0xFFF02
 	}
 
 	public class ChlorineException : Exception

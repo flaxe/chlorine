@@ -4,7 +4,7 @@ using Chlorine.Internal;
 
 namespace Chlorine
 {
-	public class Promise : AbstractPromise, IPromise
+	public sealed class Promise : AbstractFalsePromise
 	{
 		internal Promise()
 		{
@@ -12,16 +12,18 @@ namespace Chlorine
 
 		public void Resolve()
 		{
-			if (Status == PromiseStatus.Pending)
+			if (Status != PromiseStatus.Pending)
 			{
-				Status = PromiseStatus.Resolved;
-				HandleResolve();
-				Clear();
+				throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+						"Invalid operation. Promise already resolved or rejected.");
 			}
+			Status = PromiseStatus.Resolved;
+			HandleResolve();
+			Clear();
 		}
 	}
 
-	public class Promise<TResult> : AbstractPromise, IPromise<TResult>
+	public sealed class Promise<TResult> : AbstractFalsePromise, IPromise<TResult>
 	{
 		private WeakReferenceList<Future<TResult>> _resultFutures;
 
@@ -94,13 +96,15 @@ namespace Chlorine
 
 		public void Resolve(TResult result)
 		{
-			if (Status == PromiseStatus.Pending)
+			if (Status != PromiseStatus.Pending)
 			{
-				Status = PromiseStatus.Resolved;
-				_result = result;
-				HandleResolve();
-				Clear();
+				throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+						"Invalid operation. Promise already resolved or rejected.");
 			}
+			Status = PromiseStatus.Resolved;
+			_result = result;
+			HandleResolve();
+			Clear();
 		}
 
 		protected override void HandleResolve()

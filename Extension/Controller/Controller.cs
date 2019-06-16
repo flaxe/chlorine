@@ -52,7 +52,7 @@ namespace Chlorine
 				Expected<IPromise<TResult>> expectedPromise = actionResultSupervisor.Perform(ref action);
 				if (expectedPromise.TryGetValue(out IPromise<TResult> promise))
 				{
-					return FuturePool<TResult>.Pull(promise);
+					return FuturePool.Pull(promise);
 				}
 				throw (ControllerException)expectedPromise.Error;
 			}
@@ -79,7 +79,7 @@ namespace Chlorine
 		{
 			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
 			{
-				return FuturePool<TResult>.PullRejected(new Error((int)ControllerErrorCode.ActionNotRegistered,
+				return FuturePool.PullRejected<TResult>(new Error((int)ControllerErrorCode.ActionNotRegistered,
 						$"Unable to perform '{typeof(TAction).Name}'. Action not registered."));
 			}
 			if (actionSupervisor is IActionSupervisor<TAction, TResult> actionResultSupervisor)
@@ -87,11 +87,11 @@ namespace Chlorine
 				Expected<IPromise<TResult>> expectedPromise = actionResultSupervisor.Perform(ref action);
 				if (expectedPromise.TryGetValue(out IPromise<TResult> promise))
 				{
-					return FuturePool<TResult>.Pull(promise);
+					return FuturePool.Pull(promise);
 				}
-				return FuturePool<TResult>.PullRejected(expectedPromise.Error);
+				return FuturePool.PullRejected<TResult>(expectedPromise.Error);
 			}
-			return FuturePool<TResult>.PullRejected(new Error((int)ControllerErrorCode.ActionDoesNotReturnResult,
+			return FuturePool.PullRejected<TResult>(new Error((int)ControllerErrorCode.ActionDoesNotReturnResult,
 					$"Unable to perform '{typeof(TAction).Name}'. Action does not return '{typeof(TResult).Name}'."));
 		}
 	}

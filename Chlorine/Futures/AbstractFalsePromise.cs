@@ -3,7 +3,7 @@ using Chlorine.Exceptions;
 
 namespace Chlorine.Internal
 {
-	public abstract class AbstractPromise : IPoolable
+	public abstract class AbstractFalsePromise : IPromise, IPoolable
 	{
 		protected enum PromiseStatus
 		{
@@ -17,7 +17,7 @@ namespace Chlorine.Internal
 		private PromiseStatus _status = PromiseStatus.Pending;
 		private Error _reason;
 
-		protected AbstractPromise()
+		protected AbstractFalsePromise()
 		{
 		}
 
@@ -82,13 +82,15 @@ namespace Chlorine.Internal
 
 		public void Reject(Error reason)
 		{
-			if (_status == PromiseStatus.Pending)
+			if (_status != PromiseStatus.Pending)
 			{
-				_status = PromiseStatus.Rejected;
-				_reason = reason;
-				HandleReject();
-				Clear();
+				throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+						"Invalid operation. Promise already resolved or rejected.");
 			}
+			_status = PromiseStatus.Rejected;
+			_reason = reason;
+			HandleReject();
+			Clear();
 		}
 
 		protected virtual void HandleResolve()

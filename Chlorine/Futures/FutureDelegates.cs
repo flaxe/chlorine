@@ -5,7 +5,7 @@ namespace Chlorine
 	public delegate void FutureRejected(Error reason);
 
 	public delegate IFuture FuturePromised();
-	public delegate IFuture FuturePromised<in TResult>(TResult result);
-	public delegate IFuture<T> FutureResultPromised<T>();
-	public delegate IFuture<T> FutureResultPromised<T, in TResult>(TResult result);
+	public delegate IFuture FuturePromised<in TInput>(TInput result);
+	public delegate IFuture<TOutput> FutureResultPromised<TOutput>();
+	public delegate IFuture<TOutput> FutureResultPromised<TOutput, in TInput>(TInput result);
 }

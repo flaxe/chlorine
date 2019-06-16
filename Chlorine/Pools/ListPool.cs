@@ -12,6 +12,22 @@ namespace Chlorine.Pools
 			Lists.Clear();
 		}
 
+		public static List<T> Pull(IEnumerable<T> enumerable)
+		{
+			if (enumerable == null)
+			{
+				throw new ArgumentNullException(nameof(enumerable));
+			}
+			int capacity = 0;
+			if (enumerable is ICollection<T> collection)
+			{
+				capacity = collection.Count;
+			}
+			List<T> list = Pull(capacity);
+			list.AddRange(enumerable);
+			return list;
+		}
+
 		public static List<T> Pull(int capacity = 0)
 		{
 			if (Lists.Count > 0)

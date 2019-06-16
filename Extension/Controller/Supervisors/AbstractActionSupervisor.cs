@@ -68,12 +68,12 @@ namespace Chlorine.Supervisors
 
 		protected sealed override Promise<TResult> Pull()
 		{
-			return PromisePool<TResult>.Pull();
+			return PromisePool.Pull<TResult>();
 		}
 
 		protected sealed override void Release(Promise<TResult> promise)
 		{
-			PromisePool<TResult>.Release(promise);
+			PromisePool.Release(promise);
 		}
 	}
 }
