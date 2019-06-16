@@ -3,7 +3,7 @@ using Chlorine.Providers;
 
 namespace Chlorine.Pools
 {
-	public class ProviderPool<T> where T : class
+	public sealed class ProviderPool<T> : IDisposable where T : class
 	{
 		private static readonly Type Type = typeof(T);
 
@@ -12,6 +12,16 @@ namespace Chlorine.Pools
 		public ProviderPool(IProvider<T> provider)
 		{
 			_provider = provider;
+		}
+
+		~ProviderPool()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			Clear();
 		}
 
 		public void Clear()

@@ -16,21 +16,20 @@ namespace Chlorine.Bindings
 			_provider = provider;
 		}
 
-		public BindingReusableActionDelegate<TAction> Reusable()
+		public BindingActionDelegateFromPool<TAction> WithPool()
 		{
-			return new BindingReusableActionDelegate<TAction>(_binder, _provider);
+			return new BindingActionDelegateFromPool<TAction>(_binder,
+					new FromPoolProvider<IActionDelegate<TAction>>(_provider));
 		}
 
 		public void AsTransient()
 		{
-			_binder.BindAction(new TransientActionSupervisor<TAction>(_binder,
-					new TransientActionDelegateProvider<IActionDelegate<TAction>>(_provider)));
+			_binder.BindAction(new TransientActionSupervisor<TAction>(_binder, _provider));
 		}
 
 		public void AsStackable()
 		{
-			_binder.BindAction(new StackableActionSupervisor<TAction>(_binder,
-					new TransientActionDelegateProvider<IActionDelegate<TAction>>(_provider)));
+			_binder.BindAction(new StackableActionSupervisor<TAction>(_binder, _provider));
 		}
 	}
 
@@ -47,21 +46,20 @@ namespace Chlorine.Bindings
 			_provider = provider;
 		}
 
-		public BindingReusableActionDelegate<TAction, TResult> Reusable()
+		public BindingActionDelegateFromPool<TAction, TResult> WithPool()
 		{
-			return new BindingReusableActionDelegate<TAction, TResult>(_binder, _provider);
+			return new BindingActionDelegateFromPool<TAction, TResult>(_binder,
+					new FromPoolProvider<IActionDelegate<TAction, TResult>>(_provider));
 		}
 
 		public void AsTransient()
 		{
-			_binder.BindAction(new TransientActionSupervisor<TAction, TResult>(_binder,
-					new TransientActionDelegateProvider<IActionDelegate<TAction, TResult>>(_provider)));
+			_binder.BindAction(new TransientActionSupervisor<TAction, TResult>(_binder, _provider));
 		}
 
 		public void AsStackable()
 		{
-			_binder.BindAction(new StackableActionSupervisor<TAction, TResult>(_binder,
-					new TransientActionDelegateProvider<IActionDelegate<TAction, TResult>>(_provider)));
+			_binder.BindAction(new StackableActionSupervisor<TAction, TResult>(_binder, _provider));
 		}
 	}
 }

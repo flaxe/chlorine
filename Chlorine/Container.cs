@@ -23,7 +23,7 @@ namespace Chlorine
 			_extender = new Extender(this);
 			_injector = new Injector(new InjectAnalyzer(), _binder);
 
-			_binder.Bind(new InstanceProvider<IContainer>(this));
+			_binder.Bind(new InstanceProvider<IContainer>(new ContainerProxy(this)));
 		}
 
 		private Container(Container parent)
@@ -33,15 +33,13 @@ namespace Chlorine
 			_extender = new Extender(this, _parent._extender);
 			_injector = new Injector(_parent._injector.Analyzer, _binder);
 
-			_binder.Bind(new InstanceProvider<IContainer>(this));
+			_binder.Bind(new InstanceProvider<IContainer>(new ContainerProxy(this)));
 		}
 
 		~Container()
 		{
 			Dispose();
 		}
-
-		public Container Parent => _parent;
 
 		public void Dispose()
 		{
@@ -104,8 +102,7 @@ namespace Chlorine
 			IInstaller installer = Instantiate(type, arguments) as IInstaller;
 			if (installer == null)
 			{
-				throw new ContainerException(ContainerErrorCode.InvalidType,
-						$"Invalid type '{type.Name}' given for installer.");
+				throw new ArgumentException($"'{type.Name}' is not an installer.");
 			}
 			Install(installer);
 		}

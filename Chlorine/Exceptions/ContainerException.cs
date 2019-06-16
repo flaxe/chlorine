@@ -9,7 +9,7 @@ namespace Chlorine.Exceptions
 		ExtensionNotInstalled = -0xA0003,
 		ExtensionAlreadyInstalled = -0xA0004,
 
-		InvalidType = -0xA0F01
+		InvalidOperation = -0xA0F01
 	}
 
 	public class ContainerException : ChlorineException

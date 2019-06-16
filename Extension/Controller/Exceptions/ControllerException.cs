@@ -7,8 +7,9 @@ namespace Chlorine.Exceptions
 		ActionNotRegistered = -0xC0001,
 		ActionDoesNotReturnResult = -0xC0002,
 		ActionAlreadyRegistered = -0xC0003,
-		ExecutorNotRegistered = -0xC0004,
-		ExecutorAlreadyRegistered = -0xC0005,
+		InvalidDelegate = -0xC0004,
+		ExecutorNotRegistered = -0xC0005,
+		ExecutorAlreadyRegistered = -0xC0006,
 
 		InitializationFailed = -0xC0101,
 		ExecutionFailed = -0xC0102,

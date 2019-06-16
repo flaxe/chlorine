@@ -50,12 +50,12 @@ namespace Chlorine.Pools
 			Type type = value.GetType();
 			if (type.IsValueType || type.IsEnum)
 			{
-				throw new ArgumentException($"Type '{type.Name}' must be a reference type.");
+				throw new ArgumentException($"'{type.Name}' must be a reference type.");
 			}
 			UnsafeRelease(type, value, reset);
 		}
 
-		public static void UnsafeRelease(Type type, object value, bool reset)
+		internal static void UnsafeRelease(Type type, object value, bool reset)
 		{
 			if (reset && value is IPoolable poolable)
 			{

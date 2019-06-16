@@ -1,55 +1,125 @@
 using Chlorine.Bindings;
+using Chlorine.Exceptions;
 using Chlorine.Providers;
 
 namespace Chlorine.Supervisors
 {
-	internal class StackableActionSupervisor<TAction> :
-			TransientActionSupervisor<TAction>
+	internal sealed class StackableActionSupervisor<TAction> :
+			AbstractActionSupervisor<TAction>,
+			IActionSupervisor<TAction>
 			where TAction : struct
 	{
-		public StackableActionSupervisor(ControllerBinder binder, IActionDelegateProvider<IActionDelegate<TAction>> provider) :
+		public StackableActionSupervisor(ControllerBinder binder, IProvider<IActionDelegate<TAction>> provider) :
 				base(binder, provider)
 		{
 		}
 
-		protected override bool TryPerform(ref TAction action, out IPromise promise, out Error error)
+		public Expected<IPromise> Perform(ref TAction action)
 		{
-			foreach (var pair in Promises)
+			if (TryStack(ref action, out Promise stackPromise))
 			{
-				IActionDelegate<TAction> actionDelegate = pair.Key;
-				if (actionDelegate.IsPending && actionDelegate is IStackable<TAction> stackable && stackable.Stack(action))
+				return new Expected<IPromise>(stackPromise);
+			}
+			if (TryPerform(ref action, out Promise performPromise, out Error error))
+			{
+				return new Expected<IPromise>(performPromise);
+			}
+			return error;
+		}
+
+		protected override bool CheckCompability(IActionDelegate<TAction> actionDelegate, out Error error)
+		{
+			if (actionDelegate is IStackable<TAction>)
+			{
+				error = default;
+				return true;
+			}
+			error = new Error((int)ControllerErrorCode.InvalidDelegate,
+					$"'{actionDelegate.GetType().Name}' is not stackable.");
+			return false;
+		}
+
+		private bool TryStack(ref TAction action, out Promise promise)
+		{
+			foreach (IActionDelegate<TAction> currentDelegate in CurrentDelegates)
+			{
+				if (currentDelegate.IsPending &&
+						currentDelegate is IStackable<TAction> stackable &&
+						stackable.Stack(action) &&
+						TryGetPromise(currentDelegate, out Promise currentPromise))
 				{
-					promise = pair.Value;
-					error = default;
+					promise = currentPromise;
 					return true;
 				}
 			}
-			return base.TryPerform(ref action, out promise, out error);
+			promise = default;
+			return false;
 		}
 	}
 
-	internal class StackableActionSupervisor<TAction, TResult> :
-			TransientActionSupervisor<TAction, TResult>
+	internal sealed class StackableActionSupervisor<TAction, TResult> :
+			AbstractActionSupervisor<TAction, TResult>,
+			IActionSupervisor<TAction, TResult>
 			where TAction : struct
 	{
-		public StackableActionSupervisor(ControllerBinder binder, IActionDelegateProvider<IActionDelegate<TAction, TResult>> provider) :
+		public StackableActionSupervisor(ControllerBinder binder, IProvider<IActionDelegate<TAction, TResult>> provider) :
 				base(binder, provider)
 		{
 		}
 
-		protected override bool TryPerform(ref TAction action, out IPromise<TResult> promise, out Error error)
+		public Expected<IPromise<TResult>> Perform(ref TAction action)
 		{
-			foreach (var pair in Promises)
+			if (TryStack(ref action, out Promise<TResult> stackPromise))
 			{
-				IActionDelegate<TAction, TResult> actionDelegate = pair.Key;
-				if (actionDelegate.IsPending && actionDelegate is IStackable<TAction> stackable && stackable.Stack(action))
+				return new Expected<IPromise<TResult>>(stackPromise);
+			}
+			if (TryPerform(ref action, out Promise<TResult> performPromise, out Error error))
+			{
+				return new Expected<IPromise<TResult>>(performPromise);
+			}
+			return error;
+		}
+
+		Expected<IPromise> IActionSupervisor<TAction>.Perform(ref TAction action)
+		{
+			if (TryStack(ref action, out Promise<TResult> stackPromise))
+			{
+				return new Expected<IPromise>(stackPromise);
+			}
+			if (TryPerform(ref action, out Promise<TResult> performPromise, out Error error))
+			{
+				return new Expected<IPromise>(performPromise);
+			}
+			return error;
+		}
+
+		protected override bool CheckCompability(IActionDelegate<TAction, TResult> actionDelegate, out Error error)
+		{
+			if (actionDelegate is IStackable<TAction>)
+			{
+				error = default;
+				return true;
+			}
+			error = new Error((int)ControllerErrorCode.InvalidDelegate,
+					$"'{actionDelegate.GetType().Name}' is not stackable.");
+			return false;
+		}
+
+		private bool TryStack(ref TAction action, out Promise<TResult> promise)
+		{
+			foreach (IActionDelegate<TAction, TResult> currentDelegate in CurrentDelegates)
+			{
+				if (currentDelegate.IsPending &&
+						currentDelegate is IStackable<TAction> stackable &&
+						stackable.Stack(action) &&
+						TryGetPromise(currentDelegate, out Promise<TResult> currentPromise))
 				{
-					promise = pair.Value;
-					error = default;
+					promise = currentPromise;
 					return true;
 				}
 			}
-			return base.TryPerform(ref action, out promise, out error);
+			promise = default;
+			return false;
 		}
 	}
 }

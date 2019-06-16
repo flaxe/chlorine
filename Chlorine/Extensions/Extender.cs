@@ -6,14 +6,14 @@ namespace Chlorine.Extensions
 {
 	internal sealed class Extender : IDisposable
 	{
-		private readonly Container _container;
+		private readonly WeakReference<Container> _container;
 		private readonly Extender _parent;
 
 		private readonly Dictionary<Type, IExtending> _extendingByType;
 
 		public Extender(Container container, Extender parent = null)
 		{
-			_container = container;
+			_container = new WeakReference<Container>(container);
 			_parent = parent;
 			_extendingByType = new Dictionary<Type, IExtending>();
 		}
@@ -65,19 +65,26 @@ namespace Chlorine.Extensions
 				where TExtension : class, IExtension<TExtension>, new()
 		{
 			Extending<TExtension> extending;
-			if (_parent != null && _parent.TryGetExtension(out TExtension parentExtension))
+			if (_container.TryGetTarget(out Container container))
 			{
-				extending = new Extending<TExtension>(_container, parentExtension);
+				if (_parent != null && _parent.TryGetExtension(out TExtension parentExtension))
+				{
+					extending = new Extending<TExtension>(container, parentExtension);
+				}
+				else
+				{
+					extending = new Extending<TExtension>(container);
+				}
 			}
 			else
 			{
-				extending = new Extending<TExtension>(_container);
+				throw new ContainerException(ContainerErrorCode.InvalidOperation, "Container was finalized.");
 			}
 			Type extensionType = typeof(TExtension);
 			if (_extendingByType.ContainsKey(extensionType))
 			{
 				throw new ContainerException(ContainerErrorCode.ExtensionAlreadyInstalled,
-						$"Extension with type '{extensionType.Name}' already installed.");
+						$"Invalid operation. Extension with type '{extensionType.Name}' already installed.");
 			}
 			_extendingByType.Add(extensionType, extending);
 		}

@@ -7,7 +7,7 @@ namespace Chlorine.Bindings
 {
 	internal sealed class Binder : IDisposable
 	{
-		private readonly Container _container;
+		private readonly WeakReference<Container> _container;
 		private readonly Binder _parent;
 
 		private readonly Dictionary<Type, IProvider> _providerByType;
@@ -15,7 +15,7 @@ namespace Chlorine.Bindings
 
 		public Binder(Container container, Binder parent = null)
 		{
-			_container = container;
+			_container = new WeakReference<Container>(container);
 			_parent = parent;
 			_providerByType = new Dictionary<Type, IProvider>();
 			_providerByTypeAndId = new Dictionary<Type, Dictionary<object, IProvider>>();
@@ -57,7 +57,12 @@ namespace Chlorine.Bindings
 
 		public BindingType<T> Bind<T>() where T : class
 		{
-			return new BindingType<T>(_container, this);
+			if (_container.TryGetTarget(out Container container))
+			{
+				return new BindingType<T>(container, this);
+			}
+			throw new ContainerException(ContainerErrorCode.InvalidOperation,
+					"Invalid operation. Container was finalized.");
 		}
 
 		public void Bind<T>(IProvider<T> provider) where T : class
