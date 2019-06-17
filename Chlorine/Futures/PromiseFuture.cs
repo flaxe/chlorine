@@ -17,8 +17,7 @@ namespace Chlorine
 		{
 			if (_parent != null)
 			{
-				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
-						$"{FutureType.Name} was not reset before reuse.");
+				throw new ReuseException(FutureType.Name);
 			}
 			_parent = parent;
 			_promised = promised;
@@ -81,8 +80,7 @@ namespace Chlorine
 		{
 			if (_parent != null)
 			{
-				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
-						$"{FutureType.Name} was not reset before reuse.");
+				throw new ReuseException(FutureType.Name);
 			}
 			_parent = parent;
 			_promised = promised;
@@ -145,8 +143,7 @@ namespace Chlorine
 		{
 			if (_parent != null)
 			{
-				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
-						$"{FutureType.Name} was not reset before reuse.");
+				throw new ReuseException(FutureType.Name);
 			}
 			_parent = parent;
 			_promised = promised;
@@ -209,8 +206,7 @@ namespace Chlorine
 		{
 			if (_parent != null)
 			{
-				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
-						$"{FutureType.Name} was not reset before reuse.");
+				throw new ReuseException(FutureType.Name);
 			}
 			_parent = parent;
 			_promised = promised;

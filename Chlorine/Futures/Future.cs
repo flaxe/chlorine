@@ -28,8 +28,7 @@ namespace Chlorine
 		{
 			if (_promise != null)
 			{
-				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
-						$"{FutureType.Name} was not reset before reuse.");
+				throw new ReuseException(FutureType.Name);
 			}
 			_promise = promise;
 			_promise.Fulfill(this);
@@ -69,8 +68,7 @@ namespace Chlorine
 		{
 			if (_promise != null)
 			{
-				throw new ChlorineException(ChlorineErrorCode.NotResetBeforeReuse,
-						$"{FutureType.Name} was not reset before reuse.");
+				throw new ReuseException(FutureType.Name);
 			}
 			_promise = promise;
 			_promise.Fulfill(this);
