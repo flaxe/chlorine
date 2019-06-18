@@ -35,8 +35,8 @@ namespace Chlorine.Supervisors
 		protected bool TryPerform(ref TAction action, out TPromise promise, out Error error)
 		{
 			TPromise actionPromise = Pull();
-			TActionDelegate actionDelegate = _provider.Provide();
-			if (CheckCompability(actionDelegate, out error))
+			Expected<TActionDelegate> expectedDelegate = ProvideDelegate();
+			if (expectedDelegate.TryGetValue(out TActionDelegate actionDelegate))
 			{
 				if (_promiseByActionDelegate == null)
 				{
@@ -58,6 +58,10 @@ namespace Chlorine.Supervisors
 
 				_promiseByActionDelegate.Remove(actionDelegate);
 			}
+			else
+			{
+				error = expectedDelegate.Error;
+			}
 
 			Release(actionDelegate);
 			Release(actionPromise);
@@ -66,7 +70,10 @@ namespace Chlorine.Supervisors
 			return false;
 		}
 
-		protected abstract bool CheckCompability(TActionDelegate actionDelegate, out Error error);
+		protected virtual Expected<TActionDelegate> ProvideDelegate()
+		{
+			return new Expected<TActionDelegate>(_provider.Provide());
+		}
 
 		protected abstract void HandleComplete(TActionDelegate actionDelegate, TPromise promise);
 

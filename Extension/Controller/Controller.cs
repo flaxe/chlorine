@@ -1,7 +1,7 @@
 using System;
-using Chlorine.Supervisors;
 using Chlorine.Bindings;
 using Chlorine.Exceptions;
+using Chlorine.Supervisors;
 using Chlorine.Pools;
 
 namespace Chlorine

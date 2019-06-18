@@ -67,13 +67,14 @@ namespace Chlorine.Commands
 				ExecutionResult execution = HandleExecute();
 				_status = CommandStatus.Executed;
 
-				if (execution.Status == ExecutionStatus.Succeed)
+				switch (execution.Status)
 				{
-					Apply();
-				}
-				else if (execution.Status == ExecutionStatus.Failed)
-				{
-					Fail(execution.Error);
+					case ExecutionStatus.Succeed:
+						Apply();
+						break;
+					case ExecutionStatus.Failed:
+						Fail(execution.Error);
+						break;
 				}
 			}
 			else
@@ -152,7 +153,7 @@ namespace Chlorine.Commands
 					if (_succeed)
 					{
 						throw new CommandException(CommandErrorCode.InvalidOperation,
-								"Invalid operation. CheckResult has no error.");
+								"Invalid operation. Check result has no error.");
 					}
 					return _error;
 				}
@@ -196,7 +197,7 @@ namespace Chlorine.Commands
 					if (_status != ExecutionStatus.Failed)
 					{
 						throw new CommandException(CommandErrorCode.InvalidOperation,
-								"Invalid operation. ExecutionResult has no error.");
+								"Invalid operation. Execution result has no error.");
 					}
 					return _error;
 				}

@@ -27,16 +27,18 @@ namespace Chlorine.Supervisors
 			return error;
 		}
 
-		protected override bool CheckCompability(IActionDelegate<TAction> actionDelegate, out Error error)
+		protected override Expected<IActionDelegate<TAction>> ProvideDelegate()
 		{
-			if (actionDelegate is IStackable<TAction>)
+			Expected<IActionDelegate<TAction>> expectedDelegate = base.ProvideDelegate();
+			if (expectedDelegate.TryGetValue(out IActionDelegate<TAction> actionDelegate))
 			{
-				error = default;
-				return true;
+				if (!(actionDelegate is IStackable<TAction>))
+				{
+					return new Error((int)ControllerErrorCode.InvalidDelegate,
+							$"'{actionDelegate.GetType().Name}' is not stackable.");
+				}
 			}
-			error = new Error((int)ControllerErrorCode.InvalidDelegate,
-					$"'{actionDelegate.GetType().Name}' is not stackable.");
-			return false;
+			return expectedDelegate;
 		}
 
 		private bool TryStack(ref TAction action, out Promise promise)
@@ -93,16 +95,18 @@ namespace Chlorine.Supervisors
 			return error;
 		}
 
-		protected override bool CheckCompability(IActionDelegate<TAction, TResult> actionDelegate, out Error error)
+		protected override Expected<IActionDelegate<TAction, TResult>> ProvideDelegate()
 		{
-			if (actionDelegate is IStackable<TAction>)
+			Expected<IActionDelegate<TAction, TResult>> expectedDelegate = base.ProvideDelegate();
+			if (expectedDelegate.TryGetValue(out IActionDelegate<TAction, TResult> actionDelegate))
 			{
-				error = default;
-				return true;
+				if (!(actionDelegate is IStackable<TAction>))
+				{
+					return new Error((int)ControllerErrorCode.InvalidDelegate,
+							$"'{actionDelegate.GetType().Name}' is not stackable.");
+				}
 			}
-			error = new Error((int)ControllerErrorCode.InvalidDelegate,
-					$"'{actionDelegate.GetType().Name}' is not stackable.");
-			return false;
+			return expectedDelegate;
 		}
 
 		private bool TryStack(ref TAction action, out Promise<TResult> promise)

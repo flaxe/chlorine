@@ -21,12 +21,6 @@ namespace Chlorine.Supervisors
 			}
 			return error;
 		}
-
-		protected override bool CheckCompability(IActionDelegate<TAction> actionDelegate, out Error error)
-		{
-			error = default;
-			return true;
-		}
 	}
 
 	internal sealed class TransientActionSupervisor<TAction, TResult> :
@@ -55,12 +49,6 @@ namespace Chlorine.Supervisors
 				return new Expected<IPromise>(promise);
 			}
 			return error;
-		}
-
-		protected override bool CheckCompability(IActionDelegate<TAction, TResult> actionDelegate, out Error error)
-		{
-			error = default;
-			return true;
 		}
 	}
 }

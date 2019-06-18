@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Chlorine.Exceptions;
-using Chlorine.Supervisors;
 using Chlorine.Execution;
+using Chlorine.Supervisors;
 
 namespace Chlorine.Bindings
 {

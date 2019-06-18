@@ -1,7 +1,7 @@
 namespace Chlorine.Supervisors
 {
 	internal interface IActionSupervisor<TAction>
-		where TAction : struct
+			where TAction : struct
 	{
 		Expected<IPromise> Perform(ref TAction action);
 	}

@@ -2,19 +2,22 @@ using System;
 using System.Collections.Generic;
 using Chlorine.Exceptions;
 using Chlorine.Execution;
+using Chlorine.Queues;
 
 namespace Chlorine.Commands
 {
-	internal sealed class CommandExecutor : IExecutor<Command>, IExecutionHandler
+	internal sealed class CommandExecutor : IExecutor<ICommand>, IExecutionHandler
 	{
+		private readonly IExecutionQueue _queue;
 		private readonly Dictionary<IExecutable, IExecutionHandler> _handlerByExecutable;
 
-		public CommandExecutor()
+		public CommandExecutor(IExecutionQueue queue)
 		{
+			_queue = queue;
 			_handlerByExecutable = new Dictionary<IExecutable, IExecutionHandler>();
 		}
 
-		public void Execute(Command command, IExecutionHandler handler)
+		public void Execute(ICommand command, IExecutionHandler handler)
 		{
 			if (command == null)
 			{
@@ -26,17 +29,29 @@ namespace Chlorine.Commands
 						$"Command '{command.GetType().Name}' already executed.");
 			}
 			_handlerByExecutable.Add(command, handler);
+			_queue.Enqueue(command);
+			HandleExecute();
 		}
 
-		public void HandleComplete(IExecutable executable)
+		private void HandleExecute()
+		{
+			if (_queue.Peek() is ICommand command)
+			{
+				command.Execute(this);
+			}
+		}
+
+		void IExecutionHandler.HandleComplete(IExecutable executable)
 		{
 			if (!_handlerByExecutable.TryGetValue(executable, out IExecutionHandler handler))
 			{
 				throw new CommandException(CommandErrorCode.UnexpectedCommand,
-						$"Unexpected command '{executable.GetType().Name}'");
+						$"Unexpected command '{executable.GetType().Name}'.");
 			}
 			_handlerByExecutable.Remove(executable);
+			_queue.Dequeue(executable);
 			handler.HandleComplete(executable);
+			HandleExecute();
 		}
 	}
 }
