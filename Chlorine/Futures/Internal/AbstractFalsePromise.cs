@@ -1,7 +1,7 @@
 using Chlorine.Collections;
 using Chlorine.Exceptions;
 
-namespace Chlorine.Internal
+namespace Chlorine.Futures.Internal
 {
 	public abstract class AbstractFalsePromise : IPromise, IPoolable
 	{

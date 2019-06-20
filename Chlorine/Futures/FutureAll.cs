@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Chlorine.Internal;
+using Chlorine.Futures.Internal;
 using Chlorine.Pools;
 
-namespace Chlorine
+namespace Chlorine.Futures
 {
 	internal class FutureAll : AbstractFuture, IFutureHandler
 	{

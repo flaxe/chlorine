@@ -1,8 +1,9 @@
 using System;
+using Chlorine.Controller.Exceptions;
+using Chlorine.Controller.Execution;
 using Chlorine.Exceptions;
-using Chlorine.Execution;
 
-namespace Chlorine.Commands
+namespace Chlorine.Controller.Commands
 {
 	public abstract class Command : ICommand, IPoolable
 	{

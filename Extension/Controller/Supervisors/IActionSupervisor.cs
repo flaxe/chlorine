@@ -1,4 +1,6 @@
-namespace Chlorine.Supervisors
+using Chlorine.Futures;
+
+namespace Chlorine.Controller.Supervisors
 {
 	internal interface IActionSupervisor<TAction>
 			where TAction : struct

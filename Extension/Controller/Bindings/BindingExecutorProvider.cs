@@ -1,7 +1,7 @@
-using Chlorine.Execution;
+using Chlorine.Controller.Execution;
 using Chlorine.Providers;
 
-namespace Chlorine.Bindings
+namespace Chlorine.Controller.Bindings
 {
 	public struct BindingExecutorProvider<TExecutable>
 			where TExecutable : class, IExecutable

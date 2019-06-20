@@ -1,9 +1,10 @@
-using Chlorine.Bindings;
-using Chlorine.Exceptions;
+using Chlorine.Controller.Bindings;
+using Chlorine.Controller.Exceptions;
+using Chlorine.Futures;
 using Chlorine.Pools;
 using Chlorine.Providers;
 
-namespace Chlorine.Supervisors
+namespace Chlorine.Controller.Supervisors.Internal
 {
 	internal abstract class AbstractActionSupervisor<TAction> :
 			AbstractActionDelegateSupervisor<TAction, IActionDelegate<TAction>, Promise>

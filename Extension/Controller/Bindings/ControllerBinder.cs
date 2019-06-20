@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Chlorine.Exceptions;
-using Chlorine.Execution;
-using Chlorine.Supervisors;
+using Chlorine.Controller.Exceptions;
+using Chlorine.Controller.Execution;
+using Chlorine.Controller.Supervisors;
 
-namespace Chlorine.Bindings
+namespace Chlorine.Controller.Bindings
 {
 	internal sealed class ControllerBinder : IDisposable
 	{

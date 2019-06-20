@@ -1,7 +1,7 @@
-using Chlorine.Exceptions;
+using Chlorine.Controller.Exceptions;
 using Chlorine.Providers;
 
-namespace Chlorine.Execution
+namespace Chlorine.Controller.Execution
 {
 	internal class ExecutionDelegate<TExecutable> : IExecutionDelegate
 			where TExecutable : class, IExecutable

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Chlorine.Exceptions;
 using Chlorine.Pools;
 
-namespace Chlorine.Internal
+namespace Chlorine.Futures.Internal
 {
 	public abstract class AbstractFalseFuture : IFuture, IPoolable
 	{

@@ -1,6 +1,6 @@
-using Chlorine.Execution;
+using Chlorine.Controller.Execution;
 
-namespace Chlorine.Commands
+namespace Chlorine.Controller.Commands
 {
 	public interface ICommand : IExecutable
 	{

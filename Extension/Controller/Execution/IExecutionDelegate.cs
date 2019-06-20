@@ -1,4 +1,4 @@
-namespace Chlorine.Execution
+namespace Chlorine.Controller.Execution
 {
 	internal interface IExecutionDelegate
 	{

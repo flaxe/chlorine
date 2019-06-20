@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	public interface IStackable<in T>
 	{

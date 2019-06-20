@@ -1,6 +1,6 @@
-using Chlorine.Execution;
+using Chlorine.Controller.Execution;
 
-namespace Chlorine.Queues
+namespace Chlorine.Controller.Queues
 {
 	public interface IExecutionQueue
 	{

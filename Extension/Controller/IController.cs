@@ -1,4 +1,6 @@
-namespace Chlorine
+using Chlorine.Futures;
+
+namespace Chlorine.Controller
 {
 	public interface IController
 	{

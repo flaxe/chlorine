@@ -1,8 +1,8 @@
 using Chlorine.Collections;
 using Chlorine.Exceptions;
-using Chlorine.Internal;
+using Chlorine.Futures.Internal;
 
-namespace Chlorine
+namespace Chlorine.Futures
 {
 	public sealed class Promise : AbstractFalsePromise
 	{

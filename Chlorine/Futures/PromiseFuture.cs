@@ -1,9 +1,9 @@
 using System;
 using Chlorine.Exceptions;
-using Chlorine.Internal;
+using Chlorine.Futures.Internal;
 using Chlorine.Pools;
 
-namespace Chlorine
+namespace Chlorine.Futures
 {
 	internal sealed class PromiseFuture : AbstractFuture, IFutureHandler
 	{

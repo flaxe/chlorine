@@ -1,10 +1,11 @@
 using System;
-using Chlorine.Bindings;
-using Chlorine.Exceptions;
-using Chlorine.Supervisors;
+using Chlorine.Controller.Bindings;
+using Chlorine.Controller.Exceptions;
+using Chlorine.Controller.Supervisors;
+using Chlorine.Futures;
 using Chlorine.Pools;
 
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	internal sealed class Controller : IController, IDisposable
 	{

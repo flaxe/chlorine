@@ -1,7 +1,7 @@
-using Chlorine.Bindings;
-using Chlorine.Execution;
+using Chlorine.Controller.Bindings;
+using Chlorine.Controller.Execution;
 
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	public static class ControllerExtensions
 	{

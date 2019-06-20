@@ -1,4 +1,4 @@
-namespace Chlorine
+namespace Chlorine.Futures
 {
 	public delegate void FutureResolved();
 	public delegate void FutureResolved<in TResult>(TResult result);

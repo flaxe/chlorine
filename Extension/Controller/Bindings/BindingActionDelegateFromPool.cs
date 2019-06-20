@@ -1,7 +1,7 @@
+using Chlorine.Controller.Supervisors;
 using Chlorine.Providers;
-using Chlorine.Supervisors;
 
-namespace Chlorine.Bindings
+namespace Chlorine.Controller.Bindings
 {
 	public struct BindingActionDelegateFromPool<TAction>
 			where TAction : struct

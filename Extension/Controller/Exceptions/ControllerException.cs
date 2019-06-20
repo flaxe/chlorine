@@ -1,6 +1,7 @@
 using System;
+using Chlorine.Exceptions;
 
-namespace Chlorine.Exceptions
+namespace Chlorine.Controller.Exceptions
 {
 	public enum ControllerErrorCode
 	{

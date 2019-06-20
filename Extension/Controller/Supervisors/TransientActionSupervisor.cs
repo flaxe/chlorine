@@ -1,7 +1,9 @@
-using Chlorine.Bindings;
+using Chlorine.Controller.Bindings;
+using Chlorine.Controller.Supervisors.Internal;
+using Chlorine.Futures;
 using Chlorine.Providers;
 
-namespace Chlorine.Supervisors
+namespace Chlorine.Controller.Supervisors
 {
 	internal sealed class TransientActionSupervisor<TAction> :
 			AbstractActionSupervisor<TAction>,

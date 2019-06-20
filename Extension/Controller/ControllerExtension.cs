@@ -1,8 +1,8 @@
 using System;
-using Chlorine.Bindings;
+using Chlorine.Controller.Bindings;
 using Chlorine.Extensions;
 
-namespace Chlorine
+namespace Chlorine.Controller
 {
 	public sealed class ControllerExtension : IExtension<ControllerExtension>, IDisposable
 	{

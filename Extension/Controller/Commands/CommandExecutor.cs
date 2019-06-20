@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Chlorine.Exceptions;
-using Chlorine.Execution;
-using Chlorine.Queues;
+using Chlorine.Controller.Exceptions;
+using Chlorine.Controller.Execution;
+using Chlorine.Controller.Queues;
 
-namespace Chlorine.Commands
+namespace Chlorine.Controller.Commands
 {
 	internal sealed class CommandExecutor : IExecutor<ICommand>, IExecutionHandler
 	{

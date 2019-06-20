@@ -1,3 +1,4 @@
+using Chlorine.Factories;
 using Chlorine.Providers;
 
 namespace Chlorine.Bindings

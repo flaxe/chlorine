@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Chlorine.Bindings;
-using Chlorine.Exceptions;
-using Chlorine.Execution;
+using Chlorine.Controller.Bindings;
+using Chlorine.Controller.Exceptions;
+using Chlorine.Controller.Execution;
+using Chlorine.Futures;
 using Chlorine.Providers;
 
-namespace Chlorine.Supervisors
+namespace Chlorine.Controller.Supervisors.Internal
 {
 	internal abstract class AbstractActionDelegateSupervisor<TAction, TActionDelegate, TPromise> : IExecutionHandler
 			where TAction : struct
