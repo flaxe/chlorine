@@ -48,6 +48,7 @@ namespace Chlorine.Controller.Commands
 
 		public void Reset()
 		{
+			HandleReset();
 			_handler = null;
 			_status = CommandStatus.Pending;
 			_error = default;
@@ -120,6 +121,8 @@ namespace Chlorine.Controller.Commands
 			HandleApply();
 			_handler.HandleComplete(this);
 		}
+
+		protected abstract void HandleReset();
 
 		protected abstract CheckResult HandleCheck();
 		protected abstract ExecutionResult HandleExecute();

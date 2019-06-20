@@ -28,7 +28,7 @@ namespace Chlorine.Bindings
 			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryProvider<TFactory, T>(_container));
 		}
 
-		public BindingTypeProvider<T> FromFactory(FactoryMethod<T> factoryMethod)
+		public BindingTypeProvider<T> FromFactoryMethod(FactoryMethod<T> factoryMethod)
 		{
 			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryMethodProvider<T>(factoryMethod));
 		}
