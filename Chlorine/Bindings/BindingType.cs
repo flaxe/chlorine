@@ -36,7 +36,7 @@ namespace Chlorine.Bindings
 
 		public void FromResolve<TResolve>(object id = null) where TResolve : class, T
 		{
-			_binder.Bind(new FromContainerProvider<TResolve>(_container, id));
+			_binder.Bind<T>(new FromContainerProvider<TResolve>(_container, id));
 		}
 
 		public void FromContainer(Container container)
