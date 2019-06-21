@@ -101,7 +101,7 @@ namespace Chlorine.Injection
 			if (!_binder.TryResolveType(type, attributeInfo?.Id, out object instance) && (attributeInfo == null || !attributeInfo.Optional))
 			{
 				throw new InjectException(InjectErrorCode.TypeNotRegistered,
-						$"Unable to resolve '{type.Name}' while processing '{info.Type.Name}'.");
+						$"Unable to resolve '{type.Name}'{(attributeInfo?.Id != null ? $" with attribute '{attributeInfo.Id}'" : "")} while processing '{info.Type.Name}'.");
 			}
 			return instance;
 		}

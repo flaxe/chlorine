@@ -14,6 +14,8 @@ namespace Chlorine.Exceptions
 		AbstractClassConstruction = -0xAD201,
 		UnityComponentConstruction = -0xAD202,
 
+		ReadonlyProperty = -0xAD301,
+
 		InvalidType = -0xADF01
 	}
 

@@ -182,7 +182,8 @@ namespace Chlorine.Injection
 				{
 					if (!property.CanWrite)
 					{
-						continue;
+						throw new InjectException(InjectErrorCode.ReadonlyProperty,
+								$"Property '{property.Name}' at class '{type.Name}' is readonly.");
 					}
 					Attribute[] attributes = Attribute.GetCustomAttributes(property, InjectAttributeType, false);
 					if (attributes.Length == 1)
