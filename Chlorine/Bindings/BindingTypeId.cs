@@ -28,6 +28,11 @@ namespace Chlorine.Bindings
 			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryProvider<TFactory, T>(_container));
 		}
 
+		public BindingTypeProvider<T> FromFactory(IFactory<T> factory)
+		{
+			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryProvider<T>(factory));
+		}
+
 		public BindingTypeProvider<T> FromFactoryMethod(FactoryMethod<T> factoryMethod)
 		{
 			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryMethodProvider<T>(factoryMethod));
@@ -41,6 +46,11 @@ namespace Chlorine.Bindings
 		public void FromContainer(Container container)
 		{
 			_binder.Bind(_id, new FromContainerProvider<T>(container, _id));
+		}
+
+		public void FromContainerResolve<TResolve>(Container container, object id = null) where TResolve : class, T
+		{
+			_binder.Bind<T>(_id, new FromContainerProvider<TResolve>(container, id));
 		}
 
 		public void ToInstance(T instance)

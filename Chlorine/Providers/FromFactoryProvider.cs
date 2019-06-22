@@ -3,6 +3,27 @@ using Chlorine.Factories;
 
 namespace Chlorine.Providers
 {
+	public sealed class FromFactoryProvider<T> : IProvider<T>
+			where T : class
+	{
+		private readonly IFactory<T> _factory;
+
+		public FromFactoryProvider(IFactory<T> factory)
+		{
+			_factory = factory;
+		}
+
+		public T Provide()
+		{
+			return _factory.Create();
+		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
+		}
+	}
+
 	public sealed class FromFactoryProvider<TFactory, T> : IProvider<T>, IDisposable
 			where TFactory : class, IFactory<T>
 			where T : class

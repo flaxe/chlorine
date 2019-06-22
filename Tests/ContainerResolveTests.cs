@@ -224,6 +224,29 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
+			public void FromFactoryInstance_Resolve()
+			{
+				FooFactory factory = new FooFactory();
+
+				Container container = new Container();
+				container.Bind<IFoo>().FromFactory(factory).AsSingleton();
+
+				TestResolveFrom(container);
+			}
+
+			[Test]
+			public void FromFactoryInstanceWithId_Resolve()
+			{
+				FooFactory factory = new FooFactory();
+
+				Container container = new Container();
+				container.Bind<IFoo>().WithId(A).FromFactory(factory).AsSingleton();
+				container.Bind<IFoo>().WithId(B).FromFactory(factory).AsSingleton();
+
+				TestResolveWithIdFrom(container);
+			}
+
+			[Test]
 			public void FromFactoryMethod_Resolve()
 			{
 				FooFactory factory = new FooFactory();
@@ -353,6 +376,29 @@ namespace Chlorine.Tests
 				Container container = new Container();
 				container.Bind<IFoo>().WithId(A).FromFactory<FooFactory>().AsTransient();
 				container.Bind<IFoo>().WithId(B).FromFactory<FooFactory>().AsTransient();
+
+				TestResolveWithIdFrom(container);
+			}
+
+			[Test]
+			public void FromFactoryInstance_Resolve()
+			{
+				FooFactory factory = new FooFactory();
+
+				Container container = new Container();
+				container.Bind<IFoo>().FromFactory(factory).AsTransient();
+
+				TestResolveFrom(container);
+			}
+
+			[Test]
+			public void FromFactoryInstanceWithId_Resolve()
+			{
+				FooFactory factory = new FooFactory();
+
+				Container container = new Container();
+				container.Bind<IFoo>().WithId(A).FromFactory(factory).AsTransient();
+				container.Bind<IFoo>().WithId(B).FromFactory(factory).AsTransient();
 
 				TestResolveWithIdFrom(container);
 			}
@@ -499,6 +545,40 @@ namespace Chlorine.Tests
 				Assert.AreSame(fooB, instanceB);
 				Assert.AreSame(fooA, bindingContainer.Resolve<IFoo>(A));
 				Assert.AreSame(fooB, bindingContainer.Resolve<IFoo>(B));
+			}
+
+			[Test]
+			public void FromContainerResolve_Resolve()
+			{
+				Foo instance = new Foo();
+
+				Container bindingContainer = new Container();
+				bindingContainer.Bind<Foo>().ToInstance(instance);
+
+				Container container = new Container();
+				container.Bind<IFoo>().FromContainerResolve<Foo>(bindingContainer);
+
+				IFoo foo = container.Resolve<IFoo>();
+				Assert.NotNull(foo);
+				Assert.AreSame(foo, instance);
+				Assert.AreSame(foo, bindingContainer.Resolve<Foo>());
+			}
+
+			[Test]
+			public void FromContainerResolveWithId_Resolve()
+			{
+				Foo instance = new Foo();
+
+				Container bindingContainer = new Container();
+				bindingContainer.Bind<Foo>().WithId(A).ToInstance(instance);
+
+				Container container = new Container();
+				container.Bind<IFoo>().WithId(B).FromContainerResolve<Foo>(bindingContainer, A);
+
+				IFoo foo = container.Resolve<IFoo>(B);
+				Assert.NotNull(foo);
+				Assert.AreSame(foo, instance);
+				Assert.AreSame(foo, bindingContainer.Resolve<Foo>(A));
 			}
 		}
 	}
