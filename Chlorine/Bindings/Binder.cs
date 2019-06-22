@@ -13,6 +13,8 @@ namespace Chlorine.Bindings
 		private readonly Dictionary<Type, IProvider> _providerByType;
 		private readonly Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
+		private Type _bindingType;
+
 		public Binder(Container container, Binder parent = null)
 		{
 			_container = new WeakReference<Container>(container);
@@ -59,6 +61,12 @@ namespace Chlorine.Bindings
 		{
 			if (_container.TryGetTarget(out Container container))
 			{
+				if (_bindingType != null)
+				{
+					throw new ContainerException(ContainerErrorCode.IncompleteBinding,
+							$"Incomplete binding of type '{_bindingType.Name}'.");
+				}
+				_bindingType = typeof(T);
 				return new BindingType<T>(container, this);
 			}
 			throw new ContainerException(ContainerErrorCode.InvalidOperation,
@@ -73,6 +81,11 @@ namespace Chlorine.Bindings
 		public void Bind<T>(object id, IProvider<T> provider) where T : class
 		{
 			Type type = typeof(T);
+			if (_bindingType != null && _bindingType != type)
+			{
+				throw new ContainerException(ContainerErrorCode.UnexpectedBinding,
+						$"Unexpected binding of type '{type.Name}'.");
+			}
 			if (id == null)
 			{
 				if (_providerByType.ContainsKey(type))
@@ -98,6 +111,7 @@ namespace Chlorine.Bindings
 					_providerByTypeAndId.Add(type, new Dictionary<object, IProvider> {{id, provider}});
 				}
 			}
+			_bindingType = null;
 		}
 
 		public bool TryResolveType<T>(object id, out T instance) where T : class
@@ -113,6 +127,11 @@ namespace Chlorine.Bindings
 
 		public bool TryResolveType(Type type, object id, out object instance)
 		{
+			if (_bindingType != null)
+			{
+				throw new ContainerException(ContainerErrorCode.IncompleteBinding,
+						$"Incomplete binding of type '{_bindingType.Name}'.");
+			}
 			if (TryGetTypeProvider(type, id, out IProvider provider))
 			{
 				instance = provider.Provide();
