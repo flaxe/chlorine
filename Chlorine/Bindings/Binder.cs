@@ -13,7 +13,8 @@ namespace Chlorine.Bindings
 		private readonly Dictionary<Type, IProvider> _providerByType;
 		private readonly Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
-		private Type _bindingType;
+		private Type _currentBinding;
+		private bool _bindingsCompleted;
 
 		public Binder(Container container, Binder parent = null)
 		{
@@ -61,12 +62,12 @@ namespace Chlorine.Bindings
 		{
 			if (_container.TryGetTarget(out Container container))
 			{
-				if (_bindingType != null)
+				if (_currentBinding != null)
 				{
 					throw new ContainerException(ContainerErrorCode.IncompleteBinding,
-							$"Incomplete binding of type '{_bindingType.Name}'.");
+							$"Incomplete '{_currentBinding.Name}' binding.");
 				}
-				_bindingType = typeof(T);
+				_currentBinding = typeof(T);
 				return new BindingType<T>(container, this);
 			}
 			throw new ContainerException(ContainerErrorCode.InvalidOperation,
@@ -81,10 +82,15 @@ namespace Chlorine.Bindings
 		public void Bind<T>(object id, IProvider<T> provider) where T : class
 		{
 			Type type = typeof(T);
-			if (_bindingType != null && _bindingType != type)
+			if (_bindingsCompleted)
+			{
+				throw new ContainerException(ContainerErrorCode.BindingsAlreadyCompleted,
+						$"Cannot bind '{type.Name}' after Inject/Instantiate/Resolve.");
+			}
+			if (_currentBinding != null && _currentBinding != type)
 			{
 				throw new ContainerException(ContainerErrorCode.UnexpectedBinding,
-						$"Unexpected binding of type '{type.Name}'.");
+						$"Unexpected '{type.Name}' binding. Must complete '{_currentBinding.Name}'.");
 			}
 			if (id == null)
 			{
@@ -111,7 +117,7 @@ namespace Chlorine.Bindings
 					_providerByTypeAndId.Add(type, new Dictionary<object, IProvider> {{id, provider}});
 				}
 			}
-			_bindingType = null;
+			_currentBinding = null;
 		}
 
 		public bool TryResolveType<T>(object id, out T instance) where T : class
@@ -127,11 +133,12 @@ namespace Chlorine.Bindings
 
 		public bool TryResolveType(Type type, object id, out object instance)
 		{
-			if (_bindingType != null)
+			if (_currentBinding != null)
 			{
 				throw new ContainerException(ContainerErrorCode.IncompleteBinding,
-						$"Incomplete binding of type '{_bindingType.Name}'.");
+						$"Incomplete '{_currentBinding.Name}' binding.");
 			}
+			_bindingsCompleted = true;
 			if (TryGetTypeProvider(type, id, out IProvider provider))
 			{
 				instance = provider.Provide();
