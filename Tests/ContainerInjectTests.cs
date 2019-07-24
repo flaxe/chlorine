@@ -548,5 +548,79 @@ namespace Chlorine.Tests
 				Assert.Throws<InjectException>(() => container.Instantiate<Waldo>());
 			}
 		}
+
+		[TestFixture]
+		private class DependencyTests
+		{
+			private class Xyzzy
+			{
+				[Inject]
+				public readonly Waldo Waldo;
+			}
+
+			private class Waldo
+			{
+				[Inject]
+				public readonly Barney Barney;
+			}
+
+			private class Barney
+			{
+				[Inject]
+				public readonly Xyzzy Xyzzy;
+			}
+
+			[Test]
+			public void CircularFieldDependency_ExceptionThrown()
+			{
+				Container container = new Container();
+				container.Bind<Xyzzy>().AsSingleton();
+				container.Bind<Waldo>().AsSingleton();
+				container.Bind<Barney>().AsSingleton();
+
+				Assert.Throws<InjectException>(() => container.Instantiate<Xyzzy>());
+			}
+
+			private class Bazola
+			{
+				public readonly Grunt Grunt;
+
+				public Bazola(Grunt grunt)
+				{
+					Grunt = grunt;
+				}
+			}
+
+			private class Grunt
+			{
+				public readonly Wombat Wombat;
+
+				public Grunt(Wombat wombat)
+				{
+					Wombat = wombat;
+				}
+			}
+
+			private class Wombat
+			{
+				public readonly Bazola Bazola;
+
+				public Wombat(Bazola bazola)
+				{
+					Bazola = bazola;
+				}
+			}
+
+			[Test]
+			public void CircularConstructorDependency_ExceptionThrown()
+			{
+				Container container = new Container();
+				container.Bind<Bazola>().AsSingleton();
+				container.Bind<Grunt>().AsSingleton();
+				container.Bind<Wombat>().AsSingleton();
+
+				Assert.Throws<InjectException>(() => container.Instantiate<Bazola>());
+			}
+		}
 	}
 }

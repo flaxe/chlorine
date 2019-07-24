@@ -58,7 +58,7 @@ namespace Chlorine.Controller.Commands
 		{
 			if (_status != CommandStatus.Pending || _handler != null)
 			{
-				throw new ReuseException(GetType().Name);
+				throw new ReuseException(this);
 			}
 
 			_handler = handler ?? throw new ArgumentNullException(nameof(handler));

@@ -1,4 +1,3 @@
-using System;
 using Chlorine.Exceptions;
 using Chlorine.Futures.Internal;
 
@@ -6,8 +5,6 @@ namespace Chlorine.Futures
 {
 	public sealed class Future : AbstractFuture
 	{
-		private static readonly Type FutureType = typeof(Future);
-
 		private IPromise _promise;
 
 		internal Future(IPromise promise)
@@ -28,7 +25,7 @@ namespace Chlorine.Futures
 		{
 			if (_promise != null)
 			{
-				throw new ReuseException(FutureType.Name);
+				throw new ReuseException(this);
 			}
 			_promise = promise;
 			_promise.Fulfill(this);
@@ -47,8 +44,6 @@ namespace Chlorine.Futures
 
 	public sealed class Future<TResult> : AbstractFuture<TResult>
 	{
-		private static readonly Type FutureType = typeof(Future<TResult>);
-
 		private IPromise<TResult> _promise;
 
 		internal Future(IPromise<TResult> promise)
@@ -68,7 +63,7 @@ namespace Chlorine.Futures
 		{
 			if (_promise != null)
 			{
-				throw new ReuseException(FutureType.Name);
+				throw new ReuseException(this);
 			}
 			_promise = promise;
 			_promise.Fulfill(this);

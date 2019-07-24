@@ -13,6 +13,10 @@ namespace Chlorine.Injection
 		private readonly InjectAnalyzer _analyzer;
 		private readonly Binder _binder;
 
+#if DEBUG
+		private readonly HashSet<Type> _instantiationTypes = new HashSet<Type>();
+#endif
+
 		public Injector(InjectAnalyzer analyzer, Binder binder)
 		{
 			_analyzer = analyzer;
@@ -35,6 +39,14 @@ namespace Chlorine.Injection
 
 		private object InstantiateInternal(InjectInfo info, TypeValue[] arguments)
 		{
+#if DEBUG
+			if (_instantiationTypes.Contains(info.Type))
+			{
+				throw new InjectException(InjectErrorCode.CircularDependency,
+						$"Type '{info.Type.Name}' has circular dependency.");
+			}
+			_instantiationTypes.Add(info.Type);
+#endif
 			InjectConstructorInfo constructorInfo = info.Constructor;
 			if (constructorInfo == null)
 			{
@@ -52,6 +64,9 @@ namespace Chlorine.Injection
 				ArrayPool<object>.Release(parameters);
 			}
 			InjectInternal(instance, info, arguments);
+#if DEBUG
+			_instantiationTypes.Remove(info.Type);
+#endif
 			return instance;
 		}
 

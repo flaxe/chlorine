@@ -1,4 +1,3 @@
-using System;
 using Chlorine.Exceptions;
 using Chlorine.Futures.Internal;
 using Chlorine.Pools;
@@ -7,8 +6,6 @@ namespace Chlorine.Futures
 {
 	internal sealed class PromiseFuture : AbstractFuture, IFutureHandler
 	{
-		private static readonly Type FutureType = typeof(PromiseFuture);
-
 		private IFuture _parent;
 		private FuturePromised _promised;
 		private IFuture _future;
@@ -17,7 +14,7 @@ namespace Chlorine.Futures
 		{
 			if (_parent != null)
 			{
-				throw new ReuseException(FutureType.Name);
+				throw new ReuseException(this);
 			}
 			_parent = parent;
 			_promised = promised;
@@ -70,8 +67,6 @@ namespace Chlorine.Futures
 
 	internal sealed class PromiseFuture<TInput> : AbstractFuture, IFutureHandler
 	{
-		private static readonly Type FutureType = typeof(PromiseFuture<TInput>);
-
 		private IFuture<TInput> _parent;
 		private FuturePromised<TInput> _promised;
 		private IFuture _future;
@@ -80,7 +75,7 @@ namespace Chlorine.Futures
 		{
 			if (_parent != null)
 			{
-				throw new ReuseException(FutureType.Name);
+				throw new ReuseException(this);
 			}
 			_parent = parent;
 			_promised = promised;
@@ -133,8 +128,6 @@ namespace Chlorine.Futures
 
 	internal sealed class PromiseFutureResult<TOutput> : AbstractFuture<TOutput>, IFutureHandler
 	{
-		private static readonly Type FutureType = typeof(PromiseFutureResult<TOutput>);
-
 		private IFuture _parent;
 		private FutureResultPromised<TOutput> _promised;
 		private IFuture<TOutput> _future;
@@ -143,7 +136,7 @@ namespace Chlorine.Futures
 		{
 			if (_parent != null)
 			{
-				throw new ReuseException(FutureType.Name);
+				throw new ReuseException(this);
 			}
 			_parent = parent;
 			_promised = promised;
@@ -196,8 +189,6 @@ namespace Chlorine.Futures
 
 	internal sealed class PromiseFutureResult<TOutput, TInput> : AbstractFuture<TOutput>, IFutureHandler
 	{
-		private static readonly Type FutureType = typeof(PromiseFutureResult<TOutput, TInput>);
-
 		private IFuture<TInput> _parent;
 		private FutureResultPromised<TOutput, TInput> _promised;
 		private IFuture<TOutput> _future;
@@ -206,7 +197,7 @@ namespace Chlorine.Futures
 		{
 			if (_parent != null)
 			{
-				throw new ReuseException(FutureType.Name);
+				throw new ReuseException(this);
 			}
 			_parent = parent;
 			_promised = promised;

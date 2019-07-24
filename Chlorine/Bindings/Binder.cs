@@ -13,8 +13,11 @@ namespace Chlorine.Bindings
 		private readonly Dictionary<Type, IProvider> _providerByType;
 		private readonly Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
-		private Type _currentBinding;
 		private bool _bindingsCompleted;
+
+#if DEBUG
+		private Type _currentBinding;
+#endif
 
 		public Binder(Container container, Binder parent = null)
 		{
@@ -60,18 +63,20 @@ namespace Chlorine.Bindings
 
 		public BindingType<T> Bind<T>() where T : class
 		{
-			if (_container.TryGetTarget(out Container container))
+			if (!_container.TryGetTarget(out Container container))
 			{
-				if (_currentBinding != null)
-				{
-					throw new ContainerException(ContainerErrorCode.IncompleteBinding,
-							$"Incomplete '{_currentBinding.Name}' binding.");
-				}
-				_currentBinding = typeof(T);
-				return new BindingType<T>(container, this);
+				throw new ContainerException(ContainerErrorCode.InvalidOperation,
+						"Invalid operation. Container was finalized.");
 			}
-			throw new ContainerException(ContainerErrorCode.InvalidOperation,
-					"Invalid operation. Container was finalized.");
+#if DEBUG
+			if (_currentBinding != null)
+			{
+				throw new ContainerException(ContainerErrorCode.IncompleteBinding,
+						$"Incomplete '{_currentBinding.Name}' binding.");
+			}
+			_currentBinding = typeof(T);
+#endif
+			return new BindingType<T>(container, this);
 		}
 
 		public void Bind<T>(IProvider<T> provider) where T : class
@@ -87,11 +92,14 @@ namespace Chlorine.Bindings
 				throw new ContainerException(ContainerErrorCode.BindingsAlreadyCompleted,
 						$"Cannot bind '{type.Name}' after Inject/Instantiate/Resolve.");
 			}
+#if DEBUG
 			if (_currentBinding != null && _currentBinding != type)
 			{
 				throw new ContainerException(ContainerErrorCode.UnexpectedBinding,
 						$"Unexpected '{type.Name}' binding. Must complete '{_currentBinding.Name}'.");
 			}
+			_currentBinding = null;
+#endif
 			if (id == null)
 			{
 				if (_providerByType.ContainsKey(type))
@@ -117,7 +125,6 @@ namespace Chlorine.Bindings
 					_providerByTypeAndId.Add(type, new Dictionary<object, IProvider> {{id, provider}});
 				}
 			}
-			_currentBinding = null;
 		}
 
 		public bool TryResolveType<T>(object id, out T instance) where T : class
@@ -133,11 +140,13 @@ namespace Chlorine.Bindings
 
 		public bool TryResolveType(Type type, object id, out object instance)
 		{
+#if DEBUG
 			if (_currentBinding != null)
 			{
 				throw new ContainerException(ContainerErrorCode.IncompleteBinding,
 						$"Incomplete '{_currentBinding.Name}' binding.");
 			}
+#endif
 			_bindingsCompleted = true;
 			if (TryGetTypeProvider(type, id, out IProvider provider))
 			{
