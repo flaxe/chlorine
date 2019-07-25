@@ -16,7 +16,7 @@ namespace Chlorine.Bindings
 		private bool _bindingsCompleted;
 
 #if DEBUG
-		private Type _currentBinding;
+		private Type _bindingType;
 #endif
 
 		public Binder(Container container, Binder parent = null)
@@ -69,12 +69,12 @@ namespace Chlorine.Bindings
 						"Invalid operation. Container was finalized.");
 			}
 #if DEBUG
-			if (_currentBinding != null)
+			if (_bindingType != null)
 			{
 				throw new ContainerException(ContainerErrorCode.IncompleteBinding,
-						$"Incomplete '{_currentBinding.Name}' binding.");
+						$"Incomplete binding. Finish '{_bindingType.Name}' binding.");
 			}
-			_currentBinding = typeof(T);
+			_bindingType = typeof(T);
 #endif
 			return new BindingType<T>(container, this);
 		}
@@ -93,12 +93,12 @@ namespace Chlorine.Bindings
 						$"Cannot bind '{type.Name}' after Inject/Instantiate/Resolve.");
 			}
 #if DEBUG
-			if (_currentBinding != null && _currentBinding != type)
+			if (_bindingType != null && _bindingType != type)
 			{
 				throw new ContainerException(ContainerErrorCode.UnexpectedBinding,
-						$"Unexpected '{type.Name}' binding. Must complete '{_currentBinding.Name}'.");
+						$"Unexpected '{type.Name}'. Finish '{_bindingType.Name}' binding.");
 			}
-			_currentBinding = null;
+			_bindingType = null;
 #endif
 			if (id == null)
 			{
@@ -141,10 +141,10 @@ namespace Chlorine.Bindings
 		public bool TryResolveType(Type type, object id, out object instance)
 		{
 #if DEBUG
-			if (_currentBinding != null)
+			if (_bindingType != null)
 			{
 				throw new ContainerException(ContainerErrorCode.IncompleteBinding,
-						$"Incomplete '{_currentBinding.Name}' binding.");
+						$"Incomplete binding. Finish '{_bindingType.Name}' binding.");
 			}
 #endif
 			_bindingsCompleted = true;

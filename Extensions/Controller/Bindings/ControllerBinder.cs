@@ -16,6 +16,10 @@ namespace Chlorine.Controller.Bindings
 		private Dictionary<Type, IExecutionDelegate> _executorsCache;
 		private HashSet<Type> _missingExecutorsCache;
 
+#if DEBUG
+		private Type _bindingType;
+#endif
+
 		public ControllerBinder(ControllerBinder parent = null)
 		{
 			_parent = parent;
@@ -32,10 +36,32 @@ namespace Chlorine.Controller.Bindings
 		{
 		}
 
+		public BindingAction<TAction> BindAction<TAction>(Container container)
+				where TAction : struct
+		{
+#if DEBUG
+			if (_bindingType != null)
+			{
+				throw new ControllerException(ControllerErrorCode.IncompleteBinding,
+						$"Incomplete binding. Finish '{_bindingType.Name}' binding.");
+			}
+			_bindingType = typeof(TAction);
+#endif
+			return new BindingAction<TAction>(container, this);
+		}
+
 		public void BindAction<TAction>(IActionSupervisor<TAction> actionSupervisor)
 				where TAction : struct
 		{
 			Type actionType = typeof(TAction);
+#if DEBUG
+			if (_bindingType != null && _bindingType != actionType)
+			{
+				throw new ControllerException(ControllerErrorCode.UnexpectedBinding,
+						$"Unexpected '{actionType.Name}'. Finish '{_bindingType.Name}' binding.");
+			}
+			_bindingType = null;
+#endif
 			if (_actionSupervisorByType.ContainsKey(actionType))
 			{
 				throw new ControllerException(ControllerErrorCode.ActionAlreadyRegistered,
@@ -44,10 +70,32 @@ namespace Chlorine.Controller.Bindings
 			_actionSupervisorByType.Add(actionType, actionSupervisor);
 		}
 
+		public BindingExecutable<TExecutable> BindExecutable<TExecutable>(Container container)
+				where TExecutable : class, IExecutable
+		{
+#if DEBUG
+			if (_bindingType != null)
+			{
+				throw new ControllerException(ControllerErrorCode.IncompleteBinding,
+						$"Incomplete binding. Finish '{_bindingType.Name}' binding.");
+			}
+			_bindingType = typeof(TExecutable);
+#endif
+			return new BindingExecutable<TExecutable>(container, this);
+		}
+
 		public void BindExecutable<TExecutable>(ExecutionDelegate<TExecutable> executionDelegate)
 				where TExecutable : class, IExecutable
 		{
 			Type executableType = typeof(TExecutable);
+#if DEBUG
+			if (_bindingType != null && _bindingType != executableType)
+			{
+				throw new ControllerException(ControllerErrorCode.UnexpectedBinding,
+						$"Unexpected '{executableType.Name}'. Finish '{_bindingType.Name}' binding.");
+			}
+			_bindingType = null;
+#endif
 			if (_executionDelegateByType.ContainsKey(executableType))
 			{
 				throw new ControllerException(ControllerErrorCode.ExecutorAlreadyRegistered,
@@ -70,6 +118,13 @@ namespace Chlorine.Controller.Bindings
 
 		public bool TryResolveSupervisor(Type actionType, out object actionSupervisor)
 		{
+#if DEBUG
+			if (_bindingType != null)
+			{
+				throw new ControllerException(ControllerErrorCode.IncompleteBinding,
+						$"Incomplete binding. Finish '{_bindingType.Name}' binding.");
+			}
+#endif
 			if (_actionSupervisorByType.TryGetValue(actionType, out actionSupervisor))
 			{
 				return true;
@@ -89,6 +144,13 @@ namespace Chlorine.Controller.Bindings
 
 		public bool TryResolveExecutionDelegate(Type executableType, out IExecutionDelegate executionDelegate)
 		{
+#if DEBUG
+			if (_bindingType != null)
+			{
+				throw new ControllerException(ControllerErrorCode.IncompleteBinding,
+						$"Incomplete binding. Finish '{_bindingType.Name}' binding.");
+			}
+#endif
 			if (_executorsCache != null && _executorsCache.TryGetValue(executableType, out executionDelegate))
 			{
 				return true;

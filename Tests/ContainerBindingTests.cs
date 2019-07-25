@@ -16,14 +16,6 @@ namespace Chlorine.Tests
 		{
 		}
 
-		private class FooFactory : IFactory<IFoo>
-		{
-			public IFoo Create()
-			{
-				return new Foo();
-			}
-		}
-
 		[TestFixture]
 		private class DuplicateTests
 		{
@@ -46,6 +38,22 @@ namespace Chlorine.Tests
 			}
 		}
 
+		private interface IBar
+		{
+		}
+
+		private class Bar : IBar
+		{
+		}
+
+		private class FooFactory : IFactory<IFoo>
+		{
+			public IFoo Create()
+			{
+				return new Foo();
+			}
+		}
+
 		[TestFixture]
 		private class IncompleteTests
 		{
@@ -55,7 +63,7 @@ namespace Chlorine.Tests
 				Container container = new Container();
 				container.Bind<IFoo>();
 
-				Assert.Throws<ContainerException>(() => container.Resolve<IFoo>());
+				Assert.Throws<ContainerException>(() => container.Bind<IBar>().To<Bar>().AsTransient());
 			}
 
 			[Test]
@@ -64,7 +72,7 @@ namespace Chlorine.Tests
 				Container container = new Container();
 				container.Bind<IFoo>().WithId(A);
 
-				Assert.Throws<ContainerException>(() => container.Resolve<IFoo>(A));
+				Assert.Throws<ContainerException>(() => container.Bind<IBar>().To<Bar>().AsTransient());
 			}
 
 			[Test]
@@ -73,7 +81,7 @@ namespace Chlorine.Tests
 				Container container = new Container();
 				container.Bind<IFoo>().To<Foo>();
 
-				Assert.Throws<ContainerException>(() => container.Resolve<IFoo>());
+				Assert.Throws<ContainerException>(() => container.Bind<IBar>().To<Bar>().AsTransient());
 			}
 
 			[Test]
@@ -81,6 +89,15 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Bind<IFoo>().FromFactory<FooFactory>();
+
+				Assert.Throws<ContainerException>(() => container.Bind<IBar>().To<Bar>().AsTransient());
+			}
+
+			[Test]
+			public void IncompleteResolve_ExceptionThrown()
+			{
+				Container container = new Container();
+				container.Bind<IFoo>();
 
 				Assert.Throws<ContainerException>(() => container.Resolve<IFoo>());
 			}

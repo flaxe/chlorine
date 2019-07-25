@@ -12,9 +12,12 @@ namespace Chlorine.Controller.Exceptions
 		ExecutorNotRegistered = -0xC0005,
 		ExecutorAlreadyRegistered = -0xC0006,
 
-		InitializationFailed = -0xC0101,
-		ExecutionFailed = -0xC0102,
-		GetResultFailed = -0xC0103,
+		IncompleteBinding = -0xC0101,
+		UnexpectedBinding = -0xC0102,
+
+		InitializationFailed = -0xC0201,
+		ExecutionFailed = -0xC0202,
+		GetResultFailed = -0xC0203,
 
 		UnexpectedAction = -0xC0F01,
 		InvalidType = -0xC0F02

@@ -9,14 +9,14 @@ namespace Chlorine.Controller
 				where TAction : struct
 		{
 			ControllerExtension extension = container.Get<ControllerExtension>();
-			return new BindingAction<TAction>(container, extension.Binder);
+			return extension.Binder.BindAction<TAction>(container);
 		}
 
 		public static BindingExecutable<TExecutable> BindExecutable<TExecutable>(this Container container)
 				where TExecutable : class, IExecutable
 		{
 			ControllerExtension extension = container.Get<ControllerExtension>();
-			return new BindingExecutable<TExecutable>(container, extension.Binder);
+			return extension.Binder.BindExecutable<TExecutable>(container);
 		}
 	}
 }
