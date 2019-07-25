@@ -550,6 +550,181 @@ namespace Chlorine.Tests
 		}
 
 		[TestFixture]
+		private class ArgumentsTests
+		{
+			private class Xyzzy
+			{
+				public readonly Foo Foo;
+				public readonly Bar Bar;
+
+				public Xyzzy(Foo foo, Bar bar)
+				{
+					Foo = foo;
+					Bar = bar;
+				}
+			}
+
+			[Test]
+			public void ConstructorArguments_Instantiate()
+			{
+				Foo foo = new Foo();
+				Bar bar = new Bar();
+
+				Container container = new Container();
+
+				Xyzzy xyzzy = container.Instantiate<Xyzzy, Foo, Bar>(foo, bar);
+				Assert.NotNull(xyzzy);
+				Assert.AreSame(xyzzy.Foo, foo);
+				Assert.AreSame(xyzzy.Bar, bar);
+			}
+
+			[Test]
+			public void ConstructorArgumentsOverride_Instantiate()
+			{
+				Foo foo1 = new Foo();
+				Foo foo2 = new Foo();
+				Bar bar = new Bar();
+
+				Container container = new Container();
+				container.Bind<Foo>().ToInstance(foo1);
+
+				Xyzzy xyzzy = container.Instantiate<Xyzzy, Foo, Bar>(foo2, bar);
+				Assert.NotNull(xyzzy);
+				Assert.AreSame(xyzzy.Foo, foo2);
+				Assert.AreSame(xyzzy.Bar, bar);
+			}
+
+			[Test]
+			public void MissingConstructorArguments_ExceptionThrown()
+			{
+				Foo foo = new Foo();
+
+				Container container = new Container();
+
+				Assert.Throws<InjectException>(() => container.Instantiate<Xyzzy, Foo>(foo));
+			}
+
+			private class Waldo
+			{
+				public readonly Foo Foo1;
+				public readonly Foo Foo2;
+				public readonly Foo Foo3;
+
+				public Waldo(Foo foo1, Foo foo2, Foo foo3)
+				{
+					Foo1 = foo1;
+					Foo2 = foo2;
+					Foo3 = foo3;
+				}
+			}
+
+			[Test]
+			public void ConstructorArgumentsOrder_Instantiate()
+			{
+				Foo foo1 = new Foo();
+				Foo foo2 = new Foo();
+				Foo foo3 = new Foo();
+
+				Container container = new Container();
+
+				Waldo waldo = container.Instantiate<Waldo, Foo, Foo, Foo>(foo1, foo2, foo3);
+				Assert.NotNull(waldo);
+				Assert.AreSame(waldo.Foo1, foo1);
+				Assert.AreSame(waldo.Foo2, foo2);
+				Assert.AreSame(waldo.Foo3, foo3);
+			}
+
+			private class Zzyzx
+			{
+				public Foo Foo;
+				public Bar Bar;
+
+				[Inject]
+				public void Inject(Foo foo, Bar bar)
+				{
+					Foo = foo;
+					Bar = bar;
+				}
+			}
+
+			[Test]
+			public void MethodArguments_Inject()
+			{
+				Foo foo = new Foo();
+				Bar bar = new Bar();
+
+				Zzyzx zzyzx = new Zzyzx();
+
+				Container container = new Container();
+				container.Inject(zzyzx, foo, bar);
+
+				Assert.AreSame(zzyzx.Foo, foo);
+				Assert.AreSame(zzyzx.Bar, bar);
+			}
+
+			[Test]
+			public void MethodArgumentsOverride_Inject()
+			{
+				Foo foo1 = new Foo();
+				Foo foo2 = new Foo();
+				Bar bar = new Bar();
+
+				Zzyzx zzyzx = new Zzyzx();
+
+				Container container = new Container();
+				container.Bind<Foo>().ToInstance(foo1);
+				container.Inject(zzyzx, foo2, bar);
+
+				Assert.AreSame(zzyzx.Foo, foo2);
+				Assert.AreSame(zzyzx.Bar, bar);
+			}
+
+			[Test]
+			public void MissingMethodArguments_ExceptionThrown()
+			{
+				Foo foo = new Foo();
+
+				Zzyzx zzyzx = new Zzyzx();
+
+				Container container = new Container();
+
+				Assert.Throws<InjectException>(() => container.Inject(zzyzx, foo));
+			}
+
+			private class Barney
+			{
+				public Foo Foo1;
+				public Foo Foo2;
+				public Foo Foo3;
+
+				[Inject]
+				public void Inject(Foo foo1, Foo foo2, Foo foo3)
+				{
+					Foo1 = foo1;
+					Foo2 = foo2;
+					Foo3 = foo3;
+				}
+			}
+
+			[Test]
+			public void MethodArgumentsOrder_Inject()
+			{
+				Foo foo1 = new Foo();
+				Foo foo2 = new Foo();
+				Foo foo3 = new Foo();
+
+				Barney barney = new Barney();
+
+				Container container = new Container();
+				container.Inject(barney, foo1, foo2, foo3);
+
+				Assert.AreSame(barney.Foo1, foo1);
+				Assert.AreSame(barney.Foo2, foo2);
+				Assert.AreSame(barney.Foo3, foo3);
+			}
+		}
+
+		[TestFixture]
 		private class DependencyTests
 		{
 			private class Xyzzy

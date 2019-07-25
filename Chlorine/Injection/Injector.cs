@@ -145,6 +145,7 @@ namespace Chlorine.Injection
 								{
 									parameter = argument.Value;
 									unusedArguments[j] = default;
+									break;
 								}
 							}
 							parameters[i] = parameter ?? ResolveType(info, parameterType, parameterInfo.Attribute);
