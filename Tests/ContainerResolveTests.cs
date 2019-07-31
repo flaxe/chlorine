@@ -581,5 +581,67 @@ namespace Chlorine.Tests
 				Assert.AreSame(foo, bindingContainer.Resolve<Foo>(A));
 			}
 		}
+
+		[TestFixture]
+		private class FromSubContainerTests
+		{
+			[Test]
+			public void ParentBinding_Resolve()
+			{
+				IFoo foo = new Foo();
+
+				Container container = new Container();
+				container.Bind<IFoo>().ToInstance(foo);
+
+				Container subContainer = container.CreateSubContainer();
+
+				Assert.AreSame(foo, subContainer.Resolve<IFoo>());
+			}
+
+			[Test]
+			public void ChildrenBinding_ExceptionThrown()
+			{
+				IFoo foo = new Foo();
+
+				Container container = new Container();
+
+				Container subContainer = container.CreateSubContainer();
+				subContainer.Bind<IFoo>().ToInstance(foo);
+
+				Assert.Throws<ContainerException>(() => container.Resolve<IFoo>());
+			}
+
+			[Test]
+			public void OverrideBinding_Resolve()
+			{
+				IFoo foo1 = new Foo();
+				IFoo foo2 = new Foo();
+
+				Container container = new Container();
+				container.Bind<IFoo>().ToInstance(foo1);
+
+				Container subContainer = container.CreateSubContainer();
+				subContainer.Bind<IFoo>().ToInstance(foo2);
+
+				Assert.AreSame(foo1, container.Resolve<IFoo>());
+				Assert.AreSame(foo2, subContainer.Resolve<IFoo>());
+			}
+
+			[Test]
+			public void OverrideWithIdBinding_Resolve()
+			{
+				IFoo foo1 = new Foo();
+				IFoo foo2 = new Foo();
+
+				Container container = new Container();
+				container.Bind<IFoo>().WithId(A).ToInstance(foo1);
+
+				Container subContainer = container.CreateSubContainer();
+				subContainer.Bind<IFoo>().WithId(A).ToInstance(foo2);
+
+				Assert.AreSame(foo1, container.Resolve<IFoo>(A));
+				Assert.AreSame(foo2, subContainer.Resolve<IFoo>(A));
+			}
+		}
 	}
 }
