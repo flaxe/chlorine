@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using Chlorine.Controller.Bindings;
 using Chlorine.Controller.Exceptions;
 using Chlorine.Controller.Execution;
+using Chlorine.Controller.Providers;
 using Chlorine.Futures;
-using Chlorine.Providers;
 
 namespace Chlorine.Controller.Supervisors.Internal
 {

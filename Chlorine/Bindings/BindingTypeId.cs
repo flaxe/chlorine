@@ -18,54 +18,54 @@ namespace Chlorine.Bindings
 			_id = id;
 		}
 
-		public BindingTypeProvider<T> To<TInstance>() where TInstance : class, T
+		public BindingTypeProvider To<TInstance>() where TInstance : class, T
 		{
-			return new BindingTypeProvider<T>(_binder, _id, new InstanceProvider<TInstance, T>(_container));
+			return new BindingTypeProvider(_binder, typeof(T), _id, new TypeProvider(typeof(TInstance), _container));
 		}
 
-		public BindingTypeProvider<T> FromFactory<TFactory>() where TFactory : class, IFactory<T>
+		public BindingTypeProvider FromFactory<TFactory>() where TFactory : class, IFactory<T>
 		{
-			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryProvider<TFactory, T>(_container));
+			return new BindingTypeProvider(_binder, typeof(T), _id, new FromFactoryTypeProvider<T>(typeof(TFactory), _container));
 		}
 
-		public BindingTypeProvider<T> FromFactory(IFactory<T> factory)
+		public BindingTypeProvider FromFactory(IFactory<T> factory)
 		{
-			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryProvider<T>(factory));
+			return new BindingTypeProvider(_binder, typeof(T), _id, new FromFactoryProvider<T>(factory));
 		}
 
-		public BindingTypeProvider<T> FromFactoryMethod(FactoryMethod<T> factoryMethod)
+		public BindingTypeProvider FromFactoryMethod(FactoryMethod<T> factoryMethod)
 		{
-			return new BindingTypeProvider<T>(_binder, _id, new FromFactoryMethodProvider<T>(factoryMethod));
+			return new BindingTypeProvider(_binder, typeof(T), _id, new FromFactoryMethodProvider<T>(factoryMethod));
 		}
 
 		public void FromResolve<TResolve>(object id = null) where TResolve : class, T
 		{
-			_binder.Bind<T>(_id, new FromContainerProvider<TResolve>(_container, id));
+			_binder.Bind(typeof(T), _id, new FromContainerProvider(_container, typeof(TResolve), id));
 		}
 
 		public void FromContainer(Container container)
 		{
-			_binder.Bind(_id, new FromContainerProvider<T>(container, _id));
+			_binder.Bind(typeof(T), _id, new FromContainerProvider(container, typeof(T), _id));
 		}
 
 		public void FromContainerResolve<TResolve>(Container container, object id = null) where TResolve : class, T
 		{
-			_binder.Bind<T>(_id, new FromContainerProvider<TResolve>(container, id));
+			_binder.Bind(typeof(T), _id, new FromContainerProvider(container, typeof(TResolve), id));
 		}
 
 		public void ToInstance(T instance)
 		{
-			_binder.Bind(_id, new InstanceProvider<T>(instance));
+			_binder.Bind(typeof(T), _id, new InstanceProvider(instance));
 		}
 
 		public void AsSingleton()
 		{
-			_binder.Bind(_id, new SingletonProvider<T>(new InstanceProvider<T, T>(_container)));
+			_binder.Bind(typeof(T), _id, new SingletonProvider(new TypeProvider(typeof(T), _container)));
 		}
 
 		public void AsTransient()
 		{
-			_binder.Bind(_id, new InstanceProvider<T, T>(_container));
+			_binder.Bind(typeof(T), _id, new TypeProvider(typeof(T), _container));
 		}
 	}
 }

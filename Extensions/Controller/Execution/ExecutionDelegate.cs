@@ -1,5 +1,5 @@
 using Chlorine.Controller.Exceptions;
-using Chlorine.Providers;
+using Chlorine.Controller.Providers;
 
 namespace Chlorine.Controller.Execution
 {

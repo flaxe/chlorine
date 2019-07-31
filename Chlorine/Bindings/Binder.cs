@@ -79,14 +79,13 @@ namespace Chlorine.Bindings
 			return new BindingType<T>(container, this);
 		}
 
-		public void Bind<T>(IProvider<T> provider) where T : class
+		public void Bind(Type type, IProvider provider)
 		{
-			Bind(null, provider);
+			Bind(type, null, provider);
 		}
 
-		public void Bind<T>(object id, IProvider<T> provider) where T : class
+		public void Bind(Type type, object id, IProvider provider)
 		{
-			Type type = typeof(T);
 			if (_bindingsCompleted)
 			{
 				throw new ContainerException(ContainerErrorCode.BindingsAlreadyCompleted,
@@ -125,17 +124,6 @@ namespace Chlorine.Bindings
 					_providerByTypeAndId.Add(type, new Dictionary<object, IProvider> {{id, provider}});
 				}
 			}
-		}
-
-		public bool TryResolveType<T>(object id, out T instance) where T : class
-		{
-			if (TryResolveType(typeof(T), id, out object value) && value is T concreteValue)
-			{
-				instance = concreteValue;
-				return true;
-			}
-			instance = default;
-			return false;
 		}
 
 		public bool TryResolveType(Type type, object id, out object instance)

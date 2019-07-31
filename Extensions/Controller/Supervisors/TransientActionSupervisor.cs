@@ -1,7 +1,7 @@
 using Chlorine.Controller.Bindings;
+using Chlorine.Controller.Providers;
 using Chlorine.Controller.Supervisors.Internal;
 using Chlorine.Futures;
-using Chlorine.Providers;
 
 namespace Chlorine.Controller.Supervisors
 {

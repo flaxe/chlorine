@@ -1,11 +1,12 @@
 using System;
-using Chlorine.Providers;
+using System.Collections.Generic;
+using Chlorine.Controller.Providers;
 
-namespace Chlorine.Pools
+namespace Chlorine.Controller.Pools
 {
 	public sealed class ProviderPool<T> : IDisposable where T : class
 	{
-		private static readonly Type Type = typeof(T);
+		private static readonly Stack<T> Stack = new Stack<T>();
 
 		private readonly IProvider<T> _provider;
 
@@ -26,15 +27,14 @@ namespace Chlorine.Pools
 
 		public void Clear()
 		{
-			SharedPool.Clear(Type);
+			Stack.Clear();
 		}
 
 		public T Pull()
 		{
-			T value = SharedPool.Pull<T>();
-			if (value != null)
+			if (Stack.Count > 0)
 			{
-				return value;
+				return Stack.Pop();
 			}
 			return _provider.Provide();
 		}
@@ -45,7 +45,11 @@ namespace Chlorine.Pools
 			{
 				throw new ArgumentNullException(nameof(value));
 			}
-			SharedPool.UnsafeRelease(Type, value, reset);
+			if (reset && value is IPoolable poolable)
+			{
+				poolable.Reset();
+			}
+			Stack.Push(value);
 		}
 	}
 }

@@ -1,25 +1,23 @@
+using System;
+
 namespace Chlorine.Providers
 {
-	public sealed class FromContainerProvider<T> : IProvider<T>
-			where T : class
+	internal sealed class FromContainerProvider : IProvider
 	{
 		private readonly IContainer _container;
+		private readonly Type _type;
 		private readonly object _id;
 
-		public FromContainerProvider(IContainer container, object id = null)
+		public FromContainerProvider(IContainer container, Type type, object id = null)
 		{
 			_container = container;
+			_type = type;
 			_id = id;
 		}
 
-		public T Provide()
+		public object Provide()
 		{
-			return _container.Resolve<T>(_id);
-		}
-
-		object IProvider.Provide()
-		{
-			return Provide();
+			return _container.Resolve(_type, _id);
 		}
 	}
 }

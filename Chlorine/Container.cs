@@ -23,7 +23,7 @@ namespace Chlorine
 			_extender = new Extender(this);
 			_injector = new Injector(new InjectAnalyzer(), _binder);
 
-			_binder.Bind(new InstanceProvider<IContainer>(new ContainerProxy(this)));
+			_binder.Bind(typeof(IContainer), new InstanceProvider(new ContainerProxy(this)));
 		}
 
 		private Container(Container parent)
@@ -33,7 +33,7 @@ namespace Chlorine
 			_extender = new Extender(this, _parent._extender);
 			_injector = new Injector(_parent._injector.Analyzer, _binder);
 
-			_binder.Bind(new InstanceProvider<IContainer>(new ContainerProxy(this)));
+			_binder.Bind(typeof(IContainer), new InstanceProvider(new ContainerProxy(this)));
 		}
 
 		~Container()
@@ -123,7 +123,7 @@ namespace Chlorine
 
 		public T Resolve<T>(object id = null) where T : class
 		{
-			if (_binder.TryResolveType(id, out T instance))
+			if (_binder.TryResolveType(typeof(T), id, out object value) && value is T instance)
 			{
 				return instance;
 			}
@@ -143,7 +143,7 @@ namespace Chlorine
 
 		public T TryResolve<T>(object id = null) where T : class
 		{
-			return _binder.TryResolveType(id, out T instance) ? instance : default;
+			return _binder.TryResolveType(typeof(T), id, out object instance) ? instance as T : default;
 		}
 
 		public object TryResolve(Type type, object id = null)

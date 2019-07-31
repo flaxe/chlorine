@@ -1,13 +1,15 @@
 using System;
+using Chlorine.Providers;
 
-namespace Chlorine.Providers
+namespace Chlorine.Controller.Providers
 {
-	internal sealed class SingletonProvider : IProvider, IDisposable
+	internal sealed class SingletonProvider<T> : IProvider<T>, IDisposable
+			where T : class
 	{
-		private readonly IProvider _provider;
-		private object _instance;
+		private readonly IProvider<T> _provider;
+		private T _instance;
 
-		public SingletonProvider(IProvider provider)
+		public SingletonProvider(IProvider<T> provider)
 		{
 			_provider = provider;
 		}
@@ -33,9 +35,14 @@ namespace Chlorine.Providers
 			}
 		}
 
-		public object Provide()
+		public T Provide()
 		{
 			return _instance ?? (_instance = _provider.Provide());
+		}
+
+		object IProvider.Provide()
+		{
+			return Provide();
 		}
 	}
 }

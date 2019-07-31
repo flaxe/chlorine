@@ -1,7 +1,8 @@
 using System;
-using Chlorine.Pools;
+using Chlorine.Controller.Pools;
+using Chlorine.Providers;
 
-namespace Chlorine.Providers
+namespace Chlorine.Controller.Providers
 {
 	public sealed class FromPoolProvider<T> : IFromPoolProvider<T>, IDisposable
 			where T : class

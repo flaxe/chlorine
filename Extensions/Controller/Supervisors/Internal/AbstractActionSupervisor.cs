@@ -1,8 +1,8 @@
 using Chlorine.Controller.Bindings;
 using Chlorine.Controller.Exceptions;
+using Chlorine.Controller.Providers;
 using Chlorine.Futures;
 using Chlorine.Pools;
-using Chlorine.Providers;
 
 namespace Chlorine.Controller.Supervisors.Internal
 {

@@ -3,7 +3,7 @@ using Chlorine.Factories;
 
 namespace Chlorine.Providers
 {
-	public sealed class FromFactoryProvider<T> : IProvider<T>
+	internal sealed class FromFactoryProvider<T> : IProvider
 			where T : class
 	{
 		private readonly IFactory<T> _factory;
@@ -13,30 +13,27 @@ namespace Chlorine.Providers
 			_factory = factory;
 		}
 
-		public T Provide()
+		public object Provide()
 		{
 			return _factory.Create();
 		}
-
-		object IProvider.Provide()
-		{
-			return Provide();
-		}
 	}
 
-	public sealed class FromFactoryProvider<TFactory, T> : IProvider<T>, IDisposable
-			where TFactory : class, IFactory<T>
+	internal sealed class FromFactoryTypeProvider<T> : IProvider, IDisposable
 			where T : class
 	{
+		private readonly Type _factoryType;
 		private readonly IContainer _container;
-		private TFactory _factory;
 
-		public FromFactoryProvider(IContainer container)
+		private IFactory<T> _factory;
+
+		public FromFactoryTypeProvider(Type factoryType, IContainer container)
 		{
+			_factoryType = factoryType;
 			_container = container;
 		}
 
-		~FromFactoryProvider()
+		~FromFactoryTypeProvider()
 		{
 			Dispose();
 		}
@@ -53,22 +50,17 @@ namespace Chlorine.Providers
 			}
 		}
 
-		public T Provide()
+		public object Provide()
 		{
 			if (_factory == null)
 			{
-				_factory = _container.Instantiate<TFactory>();
+				_factory = _container.Instantiate(_factoryType) as IFactory<T>;
 			}
 			return _factory.Create();
 		}
-
-		object IProvider.Provide()
-		{
-			return Provide();
-		}
 	}
 
-	public sealed class FromFactoryMethodProvider<T> : IProvider<T>
+	internal sealed class FromFactoryMethodProvider<T> : IProvider
 			where T : class
 	{
 		private readonly FactoryMethod<T> _factoryMethod;
@@ -78,14 +70,9 @@ namespace Chlorine.Providers
 			_factoryMethod = factoryMethod;
 		}
 
-		public T Provide()
+		public object Provide()
 		{
 			return _factoryMethod.Invoke();
-		}
-
-		object IProvider.Provide()
-		{
-			return Provide();
 		}
 	}
 }

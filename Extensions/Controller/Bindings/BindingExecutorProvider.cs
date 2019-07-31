@@ -1,5 +1,5 @@
 using Chlorine.Controller.Execution;
-using Chlorine.Providers;
+using Chlorine.Controller.Providers;
 
 namespace Chlorine.Controller.Bindings
 {
