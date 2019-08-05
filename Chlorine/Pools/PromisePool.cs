@@ -5,6 +5,16 @@ namespace Chlorine.Pools
 {
 	public static class PromisePool
 	{
+		public static void Clear()
+		{
+			SharedPool.Clear<Promise>();
+		}
+
+		public static void Clear<TResult>()
+		{
+			SharedPool.Clear<Promise<TResult>>();
+		}
+
 		public static Promise Pull()
 		{
 			return SharedPool.Pull<Promise>() ?? new Promise();

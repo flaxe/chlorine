@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Chlorine.Pools
 {
-	internal static class SharedPool
+	public static class SharedPool
 	{
 		private static readonly Dictionary<Type, Stack<object>> StackByType = new Dictionary<Type, Stack<object>>();
 
@@ -22,7 +22,7 @@ namespace Chlorine.Pools
 			StackByType.Remove(type);
 		}
 
-		public static T Pull<T>() where T : class
+		internal static T Pull<T>() where T : class
 		{
 			object obj = Pull(typeof(T));
 			if (obj != null && obj is T value)
@@ -32,7 +32,7 @@ namespace Chlorine.Pools
 			return default;
 		}
 
-		public static object Pull(Type type)
+		internal static object Pull(Type type)
 		{
 			if (StackByType.TryGetValue(type, out Stack<object> stack) && stack.Count > 0)
 			{
@@ -41,7 +41,7 @@ namespace Chlorine.Pools
 			return default;
 		}
 
-		public static void Release(object value, bool reset = true)
+		internal static void Release(object value, bool reset = true)
 		{
 			if (value == null)
 			{
