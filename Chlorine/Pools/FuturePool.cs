@@ -6,6 +6,16 @@ namespace Chlorine.Pools
 {
 	public static class FuturePool
 	{
+		public static void Clear()
+		{
+			SharedPool.Clear<Future>();
+		}
+
+		public static void Clear<TResult>()
+		{
+			SharedPool.Clear<Future<TResult>>();
+		}
+
 		public static IFuture Pull(IPromise promise)
 		{
 			Future future = SharedPool.Pull<Future>();

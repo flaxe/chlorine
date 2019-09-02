@@ -118,5 +118,17 @@ namespace Chlorine.Futures
 				}
 			}
 		}
+
+		protected override void HandleReject()
+		{
+			base.HandleReject();
+			if (_resultFutures != null && _resultFutures.Count > 0)
+			{
+				foreach (Future<TResult> resultFuture in _resultFutures)
+				{
+					resultFuture.Reject(Reason);
+				}
+			}
+		}
 	}
 }

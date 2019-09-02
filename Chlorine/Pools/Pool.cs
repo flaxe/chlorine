@@ -4,11 +4,9 @@ namespace Chlorine.Pools
 {
 	public static class Pool<T> where T : class, new()
 	{
-		private static readonly Type Type = typeof(T);
-
 		public static void Clear()
 		{
-			SharedPool.Clear(Type);
+			SharedPool.Clear(typeof(T));
 		}
 
 		public static T Pull()
@@ -27,7 +25,7 @@ namespace Chlorine.Pools
 			{
 				throw new ArgumentNullException(nameof(value));
 			}
-			SharedPool.UnsafeRelease(Type, value, reset);
+			SharedPool.UnsafeRelease(value.GetType(), value, reset);
 		}
 	}
 }

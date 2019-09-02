@@ -32,6 +32,7 @@ namespace Chlorine.Futures.Internal
 			_reason = reason;
 		}
 
+		public bool IsPending => _status == FutureStatus.Pending;
 		public bool IsResolved => _status == FutureStatus.Resolved;
 		public bool IsRejected => _status == FutureStatus.Rejected;
 

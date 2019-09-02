@@ -36,7 +36,10 @@ namespace Chlorine.Futures
 			base.Clear();
 			if (_promise != null)
 			{
-				_promise.Revoke(this);
+				if (_promise.IsPending)
+				{
+					_promise.Revoke(this);
+				}
 				_promise = null;
 			}
 		}
@@ -74,7 +77,10 @@ namespace Chlorine.Futures
 			base.Clear();
 			if (_promise != null)
 			{
-				_promise.Revoke(this);
+				if (_promise.IsPending)
+				{
+					_promise.Revoke(this);
+				}
 				_promise = null;
 			}
 		}

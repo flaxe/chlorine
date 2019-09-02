@@ -327,7 +327,6 @@ namespace Chlorine.Tests
 
 				Xyzzy xyzzy = new Xyzzy();
 				container.Inject(xyzzy);
-				Assert.NotNull(xyzzy);
 				Assert.AreSame(xyzzy.Foo, foo);
 				Assert.IsNull(xyzzy.Bar);
 				Assert.AreSame(xyzzy.QuxA, quxA);
@@ -359,6 +358,49 @@ namespace Chlorine.Tests
 
 				Assert.Throws<InjectException>(() => container.Instantiate<Xyzzy>());
 			}
+
+			private class Waldo
+			{
+				public Foo Foo;
+
+				[Inject]
+				private void Init()
+				{
+					Foo = new Foo();
+				}
+			}
+
+			[Test]
+			public void EmptyMethod_Inject()
+			{
+				Container container = new Container();
+
+				Waldo waldo = new Waldo();
+				container.Inject(waldo);
+				Assert.IsNotNull(waldo.Foo);
+			}
+
+			private class Barney : Waldo
+			{
+				public Qux Qux;
+
+				[Inject]
+				private void Init()
+				{
+					Qux = new Qux();
+				}
+			}
+
+			[Test]
+			public void HiddenEmptyMethod_Inject()
+			{
+				Container container = new Container();
+
+				Barney barney = new Barney();
+				container.Inject(barney);
+				Assert.IsNotNull(barney.Foo);
+				Assert.IsNotNull(barney.Qux);
+			}
 		}
 
 		[TestFixture]
@@ -367,15 +409,15 @@ namespace Chlorine.Tests
 			private class Xyzzy
 			{
 				[Inject]
-				public readonly Foo Foo;
+				public readonly Foo Foo = default;
 				[Inject(Optional = true)]
-				public readonly Bar Bar;
+				public readonly Bar Bar = default;
 				[Inject(Id = A)]
-				public readonly Qux QuxA;
+				public readonly Qux QuxA = default;
 				[Inject(Id = B, Optional = true)]
-				public readonly Qux QuxB;
+				public readonly Qux QuxB = default;
 				[Inject(Id = A, Optional = true)]
-				public readonly Baz Baz;
+				public readonly Baz Baz = default;
 			}
 
 			[Test]
@@ -531,7 +573,7 @@ namespace Chlorine.Tests
 
 			private class Waldo
 			{
-				private Foo _foo;
+				private Foo _foo = default;
 
 				[Inject]
 				public Foo Foo => _foo;
@@ -730,19 +772,19 @@ namespace Chlorine.Tests
 			private class Xyzzy
 			{
 				[Inject]
-				public readonly Waldo Waldo;
+				public readonly Waldo Waldo = default;
 			}
 
 			private class Waldo
 			{
 				[Inject]
-				public readonly Barney Barney;
+				public readonly Barney Barney = default;
 			}
 
 			private class Barney
 			{
 				[Inject]
-				public readonly Xyzzy Xyzzy;
+				public readonly Xyzzy Xyzzy = default;
 			}
 
 			[Test]

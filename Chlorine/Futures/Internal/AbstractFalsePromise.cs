@@ -21,6 +21,7 @@ namespace Chlorine.Futures.Internal
 		{
 		}
 
+		public bool IsPending => _status == PromiseStatus.Pending;
 		public bool IsResolved => _status == PromiseStatus.Resolved;
 		public bool IsRejected => _status == PromiseStatus.Rejected;
 
@@ -95,7 +96,7 @@ namespace Chlorine.Futures.Internal
 
 		protected virtual void HandleResolve()
 		{
-			if (_futures != null)
+			if (_futures != null && _futures.Count > 0)
 			{
 				foreach (Future future in _futures)
 				{
@@ -104,7 +105,7 @@ namespace Chlorine.Futures.Internal
 			}
 		}
 
-		private void HandleReject()
+		protected virtual void HandleReject()
 		{
 			if (_futures != null && _futures.Count > 0)
 			{

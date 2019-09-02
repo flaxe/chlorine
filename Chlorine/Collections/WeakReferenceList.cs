@@ -5,7 +5,7 @@ using Chlorine.Pools;
 
 namespace Chlorine.Collections
 {
-	public class WeakReferenceList<T> : IEnumerable<T>
+	public class WeakReferenceList<T> : ICollection<T>
 			where T : class
 	{
 		private readonly List<WeakReference<T>> _list;
@@ -22,6 +22,7 @@ namespace Chlorine.Collections
 		}
 
 		public bool IsEmpty => _list.Count == 0;
+		public bool IsReadOnly => false;
 
 		public int Count => _list.Count;
 
@@ -52,22 +53,20 @@ namespace Chlorine.Collections
 
 		public bool Contains(T target)
 		{
-			return TryFind(target, out int index, out WeakReference<T> reference);
+			return TryFind(target, out int _, out WeakReference<T> _);
 		}
 
-		public bool Add(T target)
+		public void Add(T target)
 		{
 			if (target == null)
 			{
 				throw new ArgumentNullException(nameof(target));
 			}
-			bool notFound = !TryFind(target, out int index, out WeakReference<T> reference);
-			if (notFound)
+			if (!TryFind(target, out int _, out WeakReference<T> _))
 			{
 				_list.Add(WeakReferencePool<T>.Pull(target));
 			}
 			ReleaseOverdue();
-			return notFound;
 		}
 
 		public bool Remove(T target)
@@ -84,6 +83,15 @@ namespace Chlorine.Collections
 			}
 			ReleaseOverdue();
 			return found;
+		}
+
+		public void CopyTo(T[] array, int arrayIndex)
+		{
+			foreach (T target in this)
+			{
+				array[arrayIndex] = target;
+				arrayIndex++;
+			}
 		}
 
 		private bool TryFind(T target, out int index, out WeakReference<T> reference)

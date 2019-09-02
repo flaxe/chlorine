@@ -2,6 +2,7 @@ namespace Chlorine.Futures
 {
 	public interface IPromise
 	{
+		bool IsPending { get; }
 		bool IsResolved { get; }
 		bool IsRejected { get; }
 
