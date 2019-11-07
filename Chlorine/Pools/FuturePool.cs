@@ -6,20 +6,21 @@ namespace Chlorine.Pools
 {
 	public static class FuturePool
 	{
+		private static readonly HashSet<Type> FutureTypes = new HashSet<Type>();
+
 		public static void Clear()
 		{
-			SharedPool.Clear<Future>();
-		}
-
-		public static void Clear<TResult>()
-		{
-			SharedPool.Clear<Future<TResult>>();
+			foreach (Type futureType in FutureTypes)
+			{
+				SharedPool.Clear(futureType);
+			}
+			FutureTypes.Clear();
 		}
 
 		public static IFuture Pull(IPromise promise)
 		{
-			Future future = SharedPool.Pull<Future>();
-			if (future != null)
+			Type futureType = typeof(Future);
+			if (SharedPool.Pull(futureType) is Future future)
 			{
 				future.Init(promise);
 				return future;
@@ -29,8 +30,8 @@ namespace Chlorine.Pools
 
 		public static IFuture<TResult> Pull<TResult>(IPromise<TResult> promise)
 		{
-			Future<TResult> future = SharedPool.Pull<Future<TResult>>();
-			if (future != null)
+			Type futureType = typeof(Future<TResult>);
+			if (SharedPool.Pull(futureType) is Future<TResult> future)
 			{
 				future.Init(promise);
 				return future;
@@ -40,8 +41,8 @@ namespace Chlorine.Pools
 
 		public static IFuture Pull(IEnumerable<IFuture> futures)
 		{
-			FutureAll future = SharedPool.Pull<FutureAll>();
-			if (future != null)
+			Type futureType = typeof(Future);
+			if (SharedPool.Pull(futureType) is FutureAll future)
 			{
 				future.Init(futures);
 				return future;
@@ -51,8 +52,8 @@ namespace Chlorine.Pools
 
 		public static IFuture PullResolved()
 		{
-			Future future = SharedPool.Pull<Future>();
-			if (future != null)
+			Type futureType = typeof(Future);
+			if (SharedPool.Pull(futureType) is Future future)
 			{
 				future.Resolve();
 				return future;
@@ -62,8 +63,8 @@ namespace Chlorine.Pools
 
 		public static IFuture<TResult> PullResolved<TResult>(TResult result)
 		{
-			Future<TResult> future = SharedPool.Pull<Future<TResult>>();
-			if (future != null)
+			Type futureType = typeof(Future<TResult>);
+			if (SharedPool.Pull(futureType) is Future<TResult> future)
 			{
 				future.Resolve(result);
 				return future;
@@ -73,8 +74,8 @@ namespace Chlorine.Pools
 
 		public static IFuture PullRejected(Error reason)
 		{
-			Future future = SharedPool.Pull<Future>();
-			if (future != null)
+			Type futureType = typeof(Future);
+			if (SharedPool.Pull(futureType) is Future future)
 			{
 				future.Reject(reason);
 				return future;
@@ -84,8 +85,8 @@ namespace Chlorine.Pools
 
 		public static IFuture<TResult> PullRejected<TResult>(Error reason)
 		{
-			Future<TResult> future = SharedPool.Pull<Future<TResult>>();
-			if (future != null)
+			Type futureType = typeof(Future<TResult>);
+			if (SharedPool.Pull(futureType) is Future<TResult> future)
 			{
 				future.Reject(reason);
 				return future;
@@ -99,7 +100,9 @@ namespace Chlorine.Pools
 			{
 				throw new ArgumentNullException(nameof(future));
 			}
-			SharedPool.UnsafeRelease(future.GetType(), future, true);
+			Type futureType = future.GetType();
+			FutureTypes.Add(futureType);
+			SharedPool.UnsafeRelease(futureType, future, true);
 		}
 	}
 }

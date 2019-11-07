@@ -4,15 +4,16 @@ namespace Chlorine.Pools
 {
 	public static class Pool<T> where T : class, new()
 	{
+		private static readonly Type Type = typeof(T);
+
 		public static void Clear()
 		{
-			SharedPool.Clear(typeof(T));
+			SharedPool.Clear(Type);
 		}
 
 		public static T Pull()
 		{
-			T value = SharedPool.Pull<T>();
-			if (value != null)
+			if (SharedPool.Pull(Type) is T value)
 			{
 				return value;
 			}

@@ -16,7 +16,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void PromiseResolve_IsResolved()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 				promise.Resolve();
 
@@ -26,7 +26,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void PromiseRepeatedResolve_ExceptionThrown()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 				promise.Resolve();
 
@@ -36,7 +36,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void RejectedPromiseResolve_ExceptionThrown()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 				promise.Reject(Reason);
 
@@ -46,7 +46,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResultPromiseResolve_IsResolved()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
@@ -56,7 +56,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResultPromiseRepeatedResolve_ExceptionThrown()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
@@ -66,7 +66,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void RejectedResultPromiseResolve_ExceptionThrown()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
@@ -80,7 +80,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void PromiseReject_IsRejected()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 				promise.Reject(Reason);
 
@@ -90,7 +90,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void PromiseRepeatedReject_ExceptionThrown()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 				promise.Reject(Reason);
 
@@ -100,7 +100,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResolvedPromiseReject_ExceptionThrown()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 				promise.Resolve();
 
@@ -110,7 +110,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResultPromiseReject_IsRejected()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
@@ -120,7 +120,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResultPromiseRepeatedReject_ExceptionThrown()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
@@ -130,7 +130,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResolvedResultPromiseReject_ExceptionThrown()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
@@ -144,7 +144,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResolvedResultPromiseGetResult_Equal()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
@@ -154,7 +154,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResolvedResultPromiseTryGetResult_Equal()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
@@ -165,7 +165,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void PendingResultPromiseGetResult_ExceptionThrown()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 
 				Assert.Throws<ChlorineException>(() =>
@@ -177,7 +177,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void PendingResultPromiseTryGetResult_False()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 
 				Assert.IsFalse(promise.TryGetResult(out uint _));
@@ -186,7 +186,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void RejectedResultPromiseGetResult_ExceptionThrown()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
@@ -199,7 +199,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void RejectedResultPromiseTryGetResult_False()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
@@ -213,7 +213,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void RejectedPromiseGetReason_Equal()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 				promise.Reject(Reason);
 
@@ -223,7 +223,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void RejectedResultPromiseGetReason_Equal()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
@@ -233,7 +233,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void PendingPromiseGetReason_ExceptionThrown()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 
 				Assert.Throws<ChlorineException>(() =>
@@ -245,7 +245,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void PendingResultPromiseGetReason_ExceptionThrown()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 
 				Assert.Throws<ChlorineException>(() =>
@@ -257,7 +257,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResolvedPromiseGetReason_ExceptionThrown()
 			{
-				PromisePool.Clear();
+				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 				promise.Resolve();
 
@@ -270,7 +270,7 @@ namespace Chlorine.Tests
 			[Test]
 			public void ResolvedResultPromiseGetReason_ExceptionThrown()
 			{
-				PromisePool.Clear<uint>();
+				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
@@ -278,62 +278,6 @@ namespace Chlorine.Tests
 				{
 					Error _ = promise.Reason;
 				});
-			}
-		}
-
-		[TestFixture]
-		private class PoolTests
-		{
-			[Test]
-			public void ReleaseResolvedPromise_Release()
-			{
-				PromisePool.Clear();
-				Promise firstPromise = PromisePool.Pull();
-				firstPromise.Resolve();
-				PromisePool.Release(firstPromise);
-
-				Promise secondPromise = PromisePool.Pull();
-				Assert.IsTrue(secondPromise.IsPending);
-				Assert.AreSame(firstPromise, secondPromise);
-			}
-
-			[Test]
-			public void ReleaseResolvedResultPromise_Release()
-			{
-				PromisePool.Clear<uint>();
-				Promise<uint> firstPromise = PromisePool.Pull<uint>();
-				firstPromise.Resolve(Result);
-				PromisePool.Release(firstPromise);
-
-				Promise<uint> secondPromise = PromisePool.Pull<uint>();
-				Assert.IsTrue(secondPromise.IsPending);
-				Assert.AreSame(firstPromise, secondPromise);
-			}
-
-			[Test]
-			public void ReleaseRejectedPromise_Release()
-			{
-				PromisePool.Clear();
-				Promise firstPromise = PromisePool.Pull();
-				firstPromise.Reject(Reason);
-				PromisePool.Release(firstPromise);
-
-				Promise secondPromise = PromisePool.Pull();
-				Assert.IsTrue(secondPromise.IsPending);
-				Assert.AreSame(firstPromise, secondPromise);
-			}
-
-			[Test]
-			public void ReleaseRejectedResultPromise_Release()
-			{
-				PromisePool.Clear<uint>();
-				Promise<uint> firstPromise = PromisePool.Pull<uint>();
-				firstPromise.Reject(Reason);
-				PromisePool.Release(firstPromise);
-
-				Promise<uint> secondPromise = PromisePool.Pull<uint>();
-				Assert.IsTrue(secondPromise.IsPending);
-				Assert.AreSame(firstPromise, secondPromise);
 			}
 		}
 	}

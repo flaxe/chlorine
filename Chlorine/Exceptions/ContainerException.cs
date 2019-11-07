@@ -8,7 +8,6 @@ namespace Chlorine.Exceptions
 		TypeAlreadyRegistered = -0xA0002,
 		ExtensionNotInstalled = -0xA0003,
 		ExtensionAlreadyInstalled = -0xA0004,
-		BindingsAlreadyCompleted = -0xA0005,
 
 		IncompleteBinding = -0xA0101,
 		UnexpectedBinding = -0xA0102,

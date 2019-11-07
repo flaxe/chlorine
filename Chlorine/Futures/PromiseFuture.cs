@@ -6,18 +6,19 @@ namespace Chlorine.Futures
 {
 	internal sealed class PromiseFuture : AbstractFuture, IFutureHandler
 	{
-		private IFuture _parent;
 		private FuturePromised _promised;
-		private IFuture _future;
 
-		internal void Init(IFuture parent, FuturePromised promised)
+		private IFuture _parent;
+		private IFuture _internal;
+
+		internal void Init(FuturePromised promised, IFuture parent)
 		{
-			if (_parent != null)
+			if (_parent != null || _internal != null)
 			{
 				throw new ReuseException(this);
 			}
-			_parent = parent;
 			_promised = promised;
+			_parent = parent;
 			_parent.Finally(this);
 		}
 
@@ -29,16 +30,16 @@ namespace Chlorine.Futures
 				SharedPool.UnsafeRelease(_parent.GetType(), _parent, true);
 				_parent = null;
 			}
+			if (_internal != null)
+			{
+				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
+				_internal = null;
+			}
 		}
 
 		public override void Clear()
 		{
 			base.Clear();
-			if (_future != null)
-			{
-				SharedPool.UnsafeRelease(_future.GetType(), _future, true);
-				_future = null;
-			}
 			_promised = null;
 		}
 
@@ -48,12 +49,13 @@ namespace Chlorine.Futures
 			{
 				Reject(future.Reason);
 			}
-			else if (future == _parent && _future == null)
+			else if (future == _parent && _internal == null)
 			{
-				_future = _promised.Invoke();
-				_future.Finally(this);
+				_internal = _promised.Invoke();
+				_internal.Finally(this);
+				_promised = null;
 			}
-			else if (future == _future)
+			else if (future == _internal)
 			{
 				Resolve();
 			}
@@ -67,18 +69,19 @@ namespace Chlorine.Futures
 
 	internal sealed class PromiseFuture<TInput> : AbstractFuture, IFutureHandler
 	{
-		private IFuture<TInput> _parent;
 		private FuturePromised<TInput> _promised;
-		private IFuture _future;
 
-		internal void Init(IFuture<TInput> parent, FuturePromised<TInput> promised)
+		private IFuture<TInput> _parent;
+		private IFuture _internal;
+
+		internal void Init(FuturePromised<TInput> promised, IFuture<TInput> parent)
 		{
-			if (_parent != null)
+			if (_parent != null || _internal != null)
 			{
 				throw new ReuseException(this);
 			}
-			_parent = parent;
 			_promised = promised;
+			_parent = parent;
 			_parent.Finally(this);
 		}
 
@@ -90,16 +93,16 @@ namespace Chlorine.Futures
 				SharedPool.UnsafeRelease(_parent.GetType(), _parent, true);
 				_parent = null;
 			}
+			if (_internal != null)
+			{
+				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
+				_internal = null;
+			}
 		}
 
 		public override void Clear()
 		{
 			base.Clear();
-			if (_future != null)
-			{
-				SharedPool.UnsafeRelease(_future.GetType(), _future, true);
-				_future = null;
-			}
 			_promised = null;
 		}
 
@@ -109,12 +112,13 @@ namespace Chlorine.Futures
 			{
 				Reject(future.Reason);
 			}
-			else if (future == _parent && _parent.TryGetResult(out TInput input) && _future == null)
+			else if (future == _parent && _parent.TryGetResult(out TInput input) && _internal == null)
 			{
-				_future = _promised.Invoke(input);
-				_future.Finally(this);
+				_internal = _promised.Invoke(input);
+				_internal.Finally(this);
+				_promised = null;
 			}
-			else if (future == _future)
+			else if (future == _internal)
 			{
 				Resolve();
 			}
@@ -128,18 +132,19 @@ namespace Chlorine.Futures
 
 	internal sealed class PromiseFutureResult<TOutput> : AbstractFuture<TOutput>, IFutureHandler
 	{
-		private IFuture _parent;
 		private FutureResultPromised<TOutput> _promised;
-		private IFuture<TOutput> _future;
 
-		internal void Init(IFuture parent, FutureResultPromised<TOutput> promised)
+		private IFuture _parent;
+		private IFuture<TOutput> _internal;
+
+		internal void Init(FutureResultPromised<TOutput> promised, IFuture parent)
 		{
-			if (_parent != null)
+			if (_parent != null || _internal != null)
 			{
 				throw new ReuseException(this);
 			}
-			_parent = parent;
 			_promised = promised;
+			_parent = parent;
 			_parent.Finally(this);
 		}
 
@@ -151,16 +156,16 @@ namespace Chlorine.Futures
 				SharedPool.UnsafeRelease(_parent.GetType(), _parent, true);
 				_parent = null;
 			}
+			if (_internal != null)
+			{
+				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
+				_internal = null;
+			}
 		}
 
 		public override void Clear()
 		{
 			base.Clear();
-			if (_future != null)
-			{
-				SharedPool.UnsafeRelease(_future.GetType(), _future, true);
-				_future = null;
-			}
 			_promised = null;
 		}
 
@@ -170,12 +175,13 @@ namespace Chlorine.Futures
 			{
 				Reject(future.Reason);
 			}
-			else if (future == _parent && _future == null)
+			else if (future == _parent && _internal == null)
 			{
-				_future = _promised.Invoke();
-				_future.Finally(this);
+				_internal = _promised.Invoke();
+				_internal.Finally(this);
+				_promised = null;
 			}
-			else if (future == _future && _future.TryGetResult(out TOutput output))
+			else if (future == _internal && _internal.TryGetResult(out TOutput output))
 			{
 				Resolve(output);
 			}
@@ -189,18 +195,19 @@ namespace Chlorine.Futures
 
 	internal sealed class PromiseFutureResult<TOutput, TInput> : AbstractFuture<TOutput>, IFutureHandler
 	{
-		private IFuture<TInput> _parent;
 		private FutureResultPromised<TOutput, TInput> _promised;
-		private IFuture<TOutput> _future;
 
-		internal void Init(IFuture<TInput> parent, FutureResultPromised<TOutput, TInput> promised)
+		private IFuture<TInput> _parent;
+		private IFuture<TOutput> _internal;
+
+		internal void Init(FutureResultPromised<TOutput, TInput> promised, IFuture<TInput> parent)
 		{
-			if (_parent != null)
+			if (_parent != null || _internal != null)
 			{
 				throw new ReuseException(this);
 			}
-			_parent = parent;
 			_promised = promised;
+			_parent = parent;
 			_parent.Finally(this);
 		}
 
@@ -212,16 +219,16 @@ namespace Chlorine.Futures
 				SharedPool.UnsafeRelease(_parent.GetType(), _parent, true);
 				_parent = null;
 			}
+			if (_internal != null)
+			{
+				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
+				_internal = null;
+			}
 		}
 
 		public override void Clear()
 		{
 			base.Clear();
-			if (_future != null)
-			{
-				SharedPool.UnsafeRelease(_future.GetType(), _future, true);
-				_future = null;
-			}
 			_promised = null;
 		}
 
@@ -231,12 +238,13 @@ namespace Chlorine.Futures
 			{
 				Reject(future.Reason);
 			}
-			else if (future == _parent && _parent.TryGetResult(out TInput input) && _future == null)
+			else if (future == _parent && _parent.TryGetResult(out TInput input) && _internal == null)
 			{
-				_future = _promised.Invoke(input);
-				_future.Finally(this);
+				_internal = _promised.Invoke(input);
+				_internal.Finally(this);
+				_promised = null;
 			}
-			else if (future == _future && _future.TryGetResult(out TOutput output))
+			else if (future == _internal && _internal.TryGetResult(out TOutput output))
 			{
 				Resolve(output);
 			}

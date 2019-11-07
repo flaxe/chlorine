@@ -18,6 +18,7 @@ namespace Chlorine.Futures.Internal
 
 		private FutureResolved _resolved;
 		private FutureRejected _rejected;
+
 		private List<IFutureHandler> _handlers;
 
 		private Error _reason;
@@ -72,14 +73,14 @@ namespace Chlorine.Futures.Internal
 		public IFuture Then(FuturePromised promised)
 		{
 			PromiseFuture future = Pool<PromiseFuture>.Pull();
-			future.Init(this, promised);
+			future.Init(promised, this);
 			return future;
 		}
 
 		public IFuture<T> Then<T>(FutureResultPromised<T> promised)
 		{
 			PromiseFutureResult<T> future = Pool<PromiseFutureResult<T>>.Pull();
-			future.Init(this, promised);
+			future.Init(promised, this);
 			return future;
 		}
 

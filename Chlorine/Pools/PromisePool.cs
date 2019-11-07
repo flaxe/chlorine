@@ -1,28 +1,38 @@
 using System;
+using System.Collections.Generic;
 using Chlorine.Futures;
 
 namespace Chlorine.Pools
 {
 	public static class PromisePool
 	{
+		private static readonly HashSet<Type> PromiseTypes = new HashSet<Type>();
+
 		public static void Clear()
 		{
-			SharedPool.Clear<Promise>();
-		}
-
-		public static void Clear<TResult>()
-		{
-			SharedPool.Clear<Promise<TResult>>();
+			foreach (Type promiseType in PromiseTypes)
+			{
+				SharedPool.Clear(promiseType);
+			}
+			PromiseTypes.Clear();
 		}
 
 		public static Promise Pull()
 		{
-			return SharedPool.Pull<Promise>() ?? new Promise();
+			if (SharedPool.Pull(typeof(Promise)) is Promise promise)
+			{
+				return promise;
+			}
+			return new Promise();
 		}
 
 		public static Promise<TResult> Pull<TResult>()
 		{
-			return SharedPool.Pull<Promise<TResult>>() ?? new Promise<TResult>();
+			if (SharedPool.Pull(typeof(Promise<TResult>)) is Promise<TResult> promise)
+			{
+				return promise;
+			}
+			return new Promise<TResult>();
 		}
 
 		public static void Release(IPromise promise)
@@ -31,7 +41,9 @@ namespace Chlorine.Pools
 			{
 				throw new ArgumentNullException(nameof(promise));
 			}
-			SharedPool.UnsafeRelease(promise.GetType(), promise, true);
+			Type promiseType = promise.GetType();
+			PromiseTypes.Add(promiseType);
+			SharedPool.UnsafeRelease(promiseType, promise, true);
 		}
 	}
 }

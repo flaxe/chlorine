@@ -4,15 +4,16 @@ namespace Chlorine.Pools
 {
 	public static class WeakReferencePool<T> where T : class
 	{
+		private static readonly Type Type = typeof(WeakReference<T>);
+
 		public static void Clear()
 		{
-			SharedPool.Clear(typeof(WeakReference<T>));
+			SharedPool.Clear(Type);
 		}
 
 		public static WeakReference<T> Pull(T target)
 		{
-			WeakReference<T> reference = SharedPool.Pull<WeakReference<T>>();
-			if (reference != null)
+			if (SharedPool.Pull(Type) is WeakReference<T> reference)
 			{
 				reference.SetTarget(target);
 				return reference;

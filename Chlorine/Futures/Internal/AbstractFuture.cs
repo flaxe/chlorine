@@ -32,6 +32,7 @@ namespace Chlorine.Futures.Internal
 	public abstract class AbstractFuture<TResult> : AbstractFalseFuture, IFuture<TResult>
 	{
 		private FutureResolved<TResult> _resultResolved;
+
 		private List<IFutureHandler<TResult>> _resultHandlers;
 
 		private TResult _result;
@@ -84,19 +85,20 @@ namespace Chlorine.Futures.Internal
 		{
 			base.Clear();
 			_resultResolved = null;
+			_resultHandlers?.Clear();
 		}
 
 		public IFuture Then(FuturePromised<TResult> promised)
 		{
 			PromiseFuture<TResult> future = Pool<PromiseFuture<TResult>>.Pull();
-			future.Init(this, promised);
+			future.Init(promised, this);
 			return future;
 		}
 
 		public IFuture<T> Then<T>(FutureResultPromised<T, TResult> promised)
 		{
 			PromiseFutureResult<T, TResult> future = Pool<PromiseFutureResult<T, TResult>>.Pull();
-			future.Init(this, promised);
+			future.Init(promised, this);
 			return future;
 		}
 

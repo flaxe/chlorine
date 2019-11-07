@@ -12,27 +12,12 @@ namespace Chlorine.Pools
 			StackByType.Clear();
 		}
 
-		public static void Clear<T>() where T : class
-		{
-			Clear(typeof(T));
-		}
-
 		public static void Clear(Type type)
 		{
 			StackByType.Remove(type);
 		}
 
-		internal static T Pull<T>() where T : class
-		{
-			object obj = Pull(typeof(T));
-			if (obj != null && obj is T value)
-			{
-				return value;
-			}
-			return default;
-		}
-
-		internal static object Pull(Type type)
+		public static object Pull(Type type)
 		{
 			if (StackByType.TryGetValue(type, out Stack<object> stack) && stack.Count > 0)
 			{
@@ -41,7 +26,7 @@ namespace Chlorine.Pools
 			return default;
 		}
 
-		internal static void Release(object value, bool reset = true)
+		public static void Release(object value, bool reset = true)
 		{
 			if (value == null)
 			{

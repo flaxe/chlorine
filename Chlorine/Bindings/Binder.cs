@@ -13,8 +13,6 @@ namespace Chlorine.Bindings
 		private readonly Dictionary<Type, IProvider> _providerByType;
 		private readonly Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
 
-		private bool _bindingsCompleted;
-
 #if DEBUG
 		private Type _bindingType;
 #endif
@@ -86,16 +84,11 @@ namespace Chlorine.Bindings
 
 		public void Bind(Type type, object id, IProvider provider)
 		{
-			if (_bindingsCompleted)
-			{
-				throw new ContainerException(ContainerErrorCode.BindingsAlreadyCompleted,
-						$"Cannot bind '{type.Name}' after Inject/Instantiate/Resolve.");
-			}
 #if DEBUG
 			if (_bindingType != null && _bindingType != type)
 			{
 				throw new ContainerException(ContainerErrorCode.UnexpectedBinding,
-						$"Unexpected '{type.Name}'. Finish '{_bindingType.Name}' binding.");
+						$"Unexpected '{type.Name}'. Complete '{_bindingType.Name}' binding first.");
 			}
 			_bindingType = null;
 #endif
@@ -132,10 +125,9 @@ namespace Chlorine.Bindings
 			if (_bindingType != null)
 			{
 				throw new ContainerException(ContainerErrorCode.IncompleteBinding,
-						$"Incomplete binding. Finish '{_bindingType.Name}' binding.");
+						$"Incomplete binding. Complete '{_bindingType.Name}' binding first");
 			}
 #endif
-			_bindingsCompleted = true;
 			if (TryGetTypeProvider(type, id, out IProvider provider))
 			{
 				instance = provider.Provide();
