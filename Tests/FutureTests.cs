@@ -216,11 +216,95 @@ namespace Chlorine.Tests
 				});
 			}
 		}
+		
+		[TestFixture]
+		private class FutureAllTests
+		{
+			[Test]
+			public void FutureAllResolve_IsResolved()
+			{
+				SharedPool.Clear();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture futureAll = FuturePool.Pull(new []
+				{
+					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(secondPromise)
+				});
+
+				firstPromise.Resolve();
+				Assert.IsTrue(futureAll.IsPending);
+				
+				secondPromise.Resolve();
+				Assert.IsTrue(futureAll.IsResolved);
+			}
+			
+			[Test]
+			public void ResultFutureAllResolve_IsResolved()
+			{
+				SharedPool.Clear();
+				Promise<uint> firstPromise = PromisePool.Pull<uint>();
+				Promise<uint> secondPromise = PromisePool.Pull<uint>();
+				IFuture futureAll = FuturePool.Pull(new []
+				{
+					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(secondPromise)
+				});
+
+				firstPromise.Resolve(Result);
+				Assert.IsTrue(futureAll.IsPending);
+				
+				secondPromise.Resolve(Result);
+				Assert.IsTrue(futureAll.IsResolved);
+			}
+			
+			[Test]
+			public void FutureAllReject_IsRejected()
+			{
+				SharedPool.Clear();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture futureAll = FuturePool.Pull(new []
+				{
+					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(secondPromise)
+				});
+
+				firstPromise.Reject(Reason);
+				Assert.IsTrue(futureAll.IsRejected);
+
+				secondPromise.Resolve();
+				Assert.IsTrue(futureAll.IsRejected);
+				Assert.AreEqual(Reason, futureAll.Reason);
+			}
+			
+			[Test]
+			public void ResultFutureAllReject_IsRejected()
+			{
+				SharedPool.Clear();
+				Promise<uint> firstPromise = PromisePool.Pull<uint>();
+				Promise<uint> secondPromise = PromisePool.Pull<uint>();
+				IFuture futureAll = FuturePool.Pull(new []
+				{
+					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(secondPromise)
+				});
+
+				firstPromise.Reject(Reason);
+				Assert.IsTrue(futureAll.IsRejected);
+
+				secondPromise.Resolve(Result);
+				Assert.IsTrue(futureAll.IsRejected);
+				Assert.AreEqual(Reason, futureAll.Reason);
+			}
+		}
 
 		private class Handler
 		{
 			public bool IsResolved { get; private set; }
 			public bool IsRejected { get; private set; }
+
+			public bool IsPending => !IsResolved && !IsRejected;
 
 			public Error Error { get; private set; }
 
@@ -240,6 +324,8 @@ namespace Chlorine.Tests
 		{
 			public bool IsResolved { get; private set; }
 			public bool IsRejected { get; private set; }
+			
+			public bool IsPending => !IsResolved && !IsRejected;
 
 			public T Value { get; private set; }
 			public Error Error { get; private set; }
@@ -432,10 +518,10 @@ namespace Chlorine.Tests
 		}
 
 		[TestFixture]
-		private class ChainTests
+		private class ThenFutureChainTests
 		{
 			[Test]
-			public void ChainFutureToFutureResolve_Invoke()
+			public void ThenChainFutureToFutureResolve_Invoke()
 			{
 				SharedPool.Clear();
 				Handler handler = new Handler();
@@ -450,7 +536,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainResultFutureToFutureResolve_Invoke()
+			public void ThenChainResultFutureToFutureResolve_Invoke()
 			{
 				SharedPool.Clear();
 				Handler handler = new Handler();
@@ -465,7 +551,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainFutureToResultFutureResolve_Invoke()
+			public void ThenChainFutureToResultFutureResolve_Invoke()
 			{
 				SharedPool.Clear();
 				Handler<uint> handler = new Handler<uint>();
@@ -481,7 +567,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainResultFutureToResultFutureResolve_Invoke()
+			public void ThenChainResultFutureToResultFutureResolve_Invoke()
 			{
 				SharedPool.Clear();
 				Handler<uint> handler = new Handler<uint>();
@@ -497,7 +583,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainFutureToFutureFirstReject_Invoke()
+			public void ThenChainFutureToFutureFirstReject_Invoke()
 			{
 				SharedPool.Clear();
 				Handler handler = new Handler();
@@ -512,7 +598,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainFutureToFutureSecondReject_Invoke()
+			public void ThenChainFutureToFutureSecondReject_Invoke()
 			{
 				SharedPool.Clear();
 				Handler handler = new Handler();
@@ -528,7 +614,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainResultFutureToFutureFirstReject_Invoke()
+			public void ThenChainResultFutureToFutureFirstReject_Invoke()
 			{
 				SharedPool.Clear();
 				Handler handler = new Handler();
@@ -543,7 +629,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainResultFutureToFutureSecondReject_Invoke()
+			public void ThenChainResultFutureToFutureSecondReject_Invoke()
 			{
 				SharedPool.Clear();
 				Handler handler = new Handler();
@@ -559,7 +645,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainFutureToResultFutureFirstReject_Invoke()
+			public void ThenChainFutureToResultFutureFirstReject_Invoke()
 			{
 				SharedPool.Clear();
 				Handler<uint> handler = new Handler<uint>();
@@ -574,7 +660,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainFutureToResultFutureSecondReject_Invoke()
+			public void ThenChainFutureToResultFutureSecondReject_Invoke()
 			{
 				SharedPool.Clear();
 				Handler<uint> handler = new Handler<uint>();
@@ -590,7 +676,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainResultFutureToResultFutureFirstReject_Invoke()
+			public void ThenChainResultFutureToResultFutureFirstReject_Invoke()
 			{
 				SharedPool.Clear();
 				Handler<uint> handler = new Handler<uint>();
@@ -605,7 +691,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ChainResultFutureToResultFutureSecondReject_Invoke()
+			public void ThenChainResultFutureToResultFutureSecondReject_Invoke()
 			{
 				SharedPool.Clear();
 				Handler<uint> handler = new Handler<uint>();
@@ -656,6 +742,86 @@ namespace Chlorine.Tests
 					Assert.IsNotNull(future);
 					Assert.IsTrue(future.IsPending);
 				}
+			}
+		}
+
+		[TestFixture]
+		private class ThenFutureAllTests
+		{
+			[Test]
+			public void ThenBeforeFutureAllResolve_Invoke()
+			{
+				SharedPool.Clear();
+				Handler handler = new Handler();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture futureAll = FuturePool.Pull(new []
+				{
+					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(secondPromise)
+				});
+				futureAll.Then(handler.OnResolve, handler.OnReject);
+				firstPromise.Resolve();
+				secondPromise.Resolve();
+				
+				Assert.IsTrue(handler.IsResolved);
+			}
+			
+			[Test]
+			public void ThenAfterFutureAllResolve_Invoke()
+			{
+				SharedPool.Clear();
+				Handler handler = new Handler();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture futureAll = FuturePool.Pull(new []
+				{
+					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(secondPromise)
+				});
+				firstPromise.Resolve();
+				secondPromise.Resolve();
+				futureAll.Then(handler.OnResolve, handler.OnReject);
+
+				Assert.IsTrue(handler.IsResolved);
+			}
+			
+			[Test]
+			public void ThenBeforeFutureAllReject_Invoke()
+			{
+				SharedPool.Clear();
+				Handler handler = new Handler();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture futureAll = FuturePool.Pull(new []
+				{
+					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(secondPromise)
+				});
+				futureAll.Then(handler.OnResolve, handler.OnReject);
+				firstPromise.Reject(Reason);
+
+				Assert.IsTrue(handler.IsRejected);
+				Assert.AreEqual(Reason, handler.Error);
+			}
+			
+			[Test]
+			public void ThenAfterFutureAllReject_Invoke()
+			{
+				SharedPool.Clear();
+				Handler handler = new Handler();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture futureAll = FuturePool.Pull(new []
+				{
+					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(secondPromise)
+				});
+				firstPromise.Reject(Reason);
+				futureAll.Then(handler.OnResolve, handler.OnReject);
+
+				Assert.IsTrue(handler.IsRejected);
+				Assert.AreEqual(Reason, handler.Error);
 			}
 		}
 	}

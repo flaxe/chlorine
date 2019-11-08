@@ -93,16 +93,16 @@ namespace Chlorine.Futures
 				SharedPool.UnsafeRelease(_parent.GetType(), _parent, true);
 				_parent = null;
 			}
-			if (_internal != null)
-			{
-				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
-				_internal = null;
-			}
 		}
 
 		public override void Clear()
 		{
 			base.Clear();
+			if (_internal != null)
+			{
+				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
+				_internal = null;
+			}
 			_promised = null;
 		}
 
@@ -156,16 +156,16 @@ namespace Chlorine.Futures
 				SharedPool.UnsafeRelease(_parent.GetType(), _parent, true);
 				_parent = null;
 			}
-			if (_internal != null)
-			{
-				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
-				_internal = null;
-			}
 		}
 
 		public override void Clear()
 		{
 			base.Clear();
+			if (_internal != null)
+			{
+				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
+				_internal = null;
+			}
 			_promised = null;
 		}
 

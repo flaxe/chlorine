@@ -167,10 +167,12 @@ namespace Chlorine.Futures.Internal
 		{
 			if (_handlers != null && _handlers.Count > 0)
 			{
-				foreach (IFutureHandler handler in _handlers)
+				List<IFutureHandler> handlers = ListPool<IFutureHandler>.Pull(_handlers);
+				foreach (IFutureHandler handler in handlers)
 				{
 					handler.HandleFuture(this);
 				}
+				ListPool<IFutureHandler>.Release(handlers);
 			}
 		}
 
