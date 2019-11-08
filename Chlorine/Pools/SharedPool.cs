@@ -12,7 +12,7 @@ namespace Chlorine.Pools
 			StackByType.Clear();
 		}
 
-		public static void Clear(Type type)
+		public static void ClearByType(Type type)
 		{
 			StackByType.Remove(type);
 		}

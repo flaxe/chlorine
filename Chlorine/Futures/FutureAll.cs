@@ -16,12 +16,15 @@ namespace Chlorine.Futures
 		public override void Clear()
 		{
 			base.Clear();
-			foreach (IFuture future in _futures)
+			if (_futures != null)
 			{
-				FuturePool.Release(future);
+				foreach (IFuture future in _futures)
+				{
+					FuturePool.Release(future);
+				}
+				ListPool<IFuture>.Release(_futures);
+				_futures = null;	
 			}
-			ListPool<IFuture>.Release(_futures);
-			_futures = null;
 		}
 
 		internal void Init(IEnumerable<IFuture> futures)

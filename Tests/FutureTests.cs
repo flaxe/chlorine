@@ -705,44 +705,6 @@ namespace Chlorine.Tests
 				Assert.IsTrue(handler.IsRejected);
 				Assert.AreEqual(Reason, handler.Error);
 			}
-
-			[Test]
-			public void ResolvedChainFutureToFutureRelease_Release()
-			{
-				SharedPool.Clear();
-				Promise firstPromise = PromisePool.Pull();
-				Promise secondPromise = PromisePool.Pull();
-				IFuture chain = FuturePool.Pull(firstPromise).Then(() => FuturePool.Pull(secondPromise));
-				firstPromise.Resolve();
-				secondPromise.Resolve();
-				FuturePool.Release(chain);
-
-				for (int i = 0; i < 2; i++)
-				{
-					IFuture future = SharedPool.Pull(typeof(Future)) as IFuture;
-					Assert.IsNotNull(future);
-					Assert.IsTrue(future.IsPending);
-				}
-			}
-
-			[Test]
-			public void ResolvedChainResultFutureToResultFuture_Release()
-			{
-				SharedPool.Clear();
-				Promise<uint> firstPromise = PromisePool.Pull<uint>();
-				Promise<uint> secondPromise = PromisePool.Pull<uint>();
-				IFuture<uint> chain = FuturePool.Pull(firstPromise).Then(result => FuturePool.Pull(secondPromise));
-				firstPromise.Resolve(Result);
-				secondPromise.Resolve(Result);
-				FuturePool.Release(chain);
-
-				for (int i = 0; i < 2; i++)
-				{
-					IFuture<uint> future = SharedPool.Pull(typeof(Future<uint>)) as IFuture<uint>;
-					Assert.IsNotNull(future);
-					Assert.IsTrue(future.IsPending);
-				}
-			}
 		}
 
 		[TestFixture]

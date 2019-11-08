@@ -90,14 +90,20 @@ namespace Chlorine.Futures.Internal
 
 		public IFuture Then(FuturePromised<TResult> promised)
 		{
-			PromiseFuture<TResult> future = Pool<PromiseFuture<TResult>>.Pull();
+			if (!(SharedPool.Pull(typeof(PromiseFuture<TResult>)) is PromiseFuture<TResult> future))
+			{
+				future = new PromiseFuture<TResult>();
+			}
 			future.Init(promised, this);
 			return future;
 		}
 
 		public IFuture<T> Then<T>(FutureResultPromised<T, TResult> promised)
 		{
-			PromiseFutureResult<T, TResult> future = Pool<PromiseFutureResult<T, TResult>>.Pull();
+			if (!(SharedPool.Pull(typeof(PromiseFutureResult<T, TResult>)) is PromiseFutureResult<T, TResult> future))
+			{
+				future = new PromiseFutureResult<T, TResult>();
+			}
 			future.Init(promised, this);
 			return future;
 		}

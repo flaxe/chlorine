@@ -12,7 +12,7 @@ namespace Chlorine.Pools
 		{
 			foreach (Type futureType in FutureTypes)
 			{
-				SharedPool.Clear(futureType);
+				SharedPool.ClearByType(futureType);
 			}
 			FutureTypes.Clear();
 		}
@@ -41,7 +41,7 @@ namespace Chlorine.Pools
 
 		public static IFuture Pull(IEnumerable<IFuture> futures)
 		{
-			Type futureType = typeof(Future);
+			Type futureType = typeof(FutureAll);
 			if (SharedPool.Pull(futureType) is FutureAll future)
 			{
 				future.Init(futures);

@@ -12,7 +12,7 @@ namespace Chlorine.Pools
 		{
 			foreach (Type promiseType in PromiseTypes)
 			{
-				SharedPool.Clear(promiseType);
+				SharedPool.ClearByType(promiseType);
 			}
 			PromiseTypes.Clear();
 		}
