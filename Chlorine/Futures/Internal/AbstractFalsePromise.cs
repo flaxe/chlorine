@@ -46,14 +46,9 @@ namespace Chlorine.Futures.Internal
 
 		public virtual void Reset()
 		{
-			Clear();
+			HandleClear();
 			_status = PromiseStatus.Pending;
 			_reason = default;
-		}
-
-		public virtual void Clear()
-		{
-			_futures?.Clear();
 		}
 
 		public void Fulfill(Future future)
@@ -91,7 +86,12 @@ namespace Chlorine.Futures.Internal
 			_status = PromiseStatus.Rejected;
 			_reason = reason;
 			HandleReject();
-			Clear();
+			HandleClear();
+		}
+
+		protected virtual void HandleClear()
+		{
+			_futures?.Clear();
 		}
 
 		protected virtual void HandleResolve()

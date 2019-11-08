@@ -8,8 +8,6 @@ namespace Chlorine.Futures
 
 		Error Reason { get; }
 
-		void Clear();
-
 		void Fulfill(Future future);
 		void Revoke(Future future);
 	}

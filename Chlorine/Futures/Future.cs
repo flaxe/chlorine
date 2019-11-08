@@ -31,9 +31,9 @@ namespace Chlorine.Futures
 			_promise.Fulfill(this);
 		}
 
-		public override void Clear()
+		protected override void HandleClear()
 		{
-			base.Clear();
+			base.HandleClear();
 			if (_promise != null)
 			{
 				if (_promise.IsPending)
@@ -72,9 +72,9 @@ namespace Chlorine.Futures
 			_promise.Fulfill(this);
 		}
 
-		public override void Clear()
+		protected override void HandleClear()
 		{
-			base.Clear();
+			base.HandleClear();
 			if (_promise != null)
 			{
 				if (_promise.IsPending)

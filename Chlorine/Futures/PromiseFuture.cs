@@ -37,9 +37,9 @@ namespace Chlorine.Futures
 			}
 		}
 
-		public override void Clear()
+		protected override void HandleClear()
 		{
-			base.Clear();
+			base.HandleClear();
 			_promised = null;
 		}
 
@@ -95,9 +95,9 @@ namespace Chlorine.Futures
 			}
 		}
 
-		public override void Clear()
+		protected override void HandleClear()
 		{
-			base.Clear();
+			base.HandleClear();
 			if (_internal != null)
 			{
 				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
@@ -106,7 +106,7 @@ namespace Chlorine.Futures
 			_promised = null;
 		}
 
-		public void HandleFuture(IFuture future)
+		void IFutureHandler.HandleFuture(IFuture future)
 		{
 			if (future.IsRejected)
 			{
@@ -158,9 +158,9 @@ namespace Chlorine.Futures
 			}
 		}
 
-		public override void Clear()
+		protected override void HandleClear()
 		{
-			base.Clear();
+			base.HandleClear();
 			if (_internal != null)
 			{
 				SharedPool.UnsafeRelease(_internal.GetType(), _internal, true);
@@ -226,13 +226,13 @@ namespace Chlorine.Futures
 			}
 		}
 
-		public override void Clear()
+		protected override void HandleClear()
 		{
-			base.Clear();
+			base.HandleClear();
 			_promised = null;
 		}
 
-		public void HandleFuture(IFuture future)
+		void IFutureHandler.HandleFuture(IFuture future)
 		{
 			if (future.IsRejected)
 			{

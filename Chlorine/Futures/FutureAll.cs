@@ -13,20 +13,6 @@ namespace Chlorine.Futures
 			Init(futures);
 		}
 
-		public override void Clear()
-		{
-			base.Clear();
-			if (_futures != null)
-			{
-				foreach (IFuture future in _futures)
-				{
-					FuturePool.Release(future);
-				}
-				ListPool<IFuture>.Release(_futures);
-				_futures = null;	
-			}
-		}
-
 		internal void Init(IEnumerable<IFuture> futures)
 		{
 			_futures = ListPool<IFuture>.Pull(futures);
@@ -55,6 +41,20 @@ namespace Chlorine.Futures
 				case FutureStatus.Rejected:
 					Reject(error);
 					break;
+			}
+		}
+
+		protected override void HandleClear()
+		{
+			base.HandleClear();
+			if (_futures != null)
+			{
+				foreach (IFuture future in _futures)
+				{
+					FuturePool.Release(future);
+				}
+				ListPool<IFuture>.Release(_futures);
+				_futures = null;
 			}
 		}
 

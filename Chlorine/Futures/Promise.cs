@@ -19,7 +19,7 @@ namespace Chlorine.Futures
 			}
 			Status = PromiseStatus.Resolved;
 			HandleResolve();
-			Clear();
+			HandleClear();
 		}
 	}
 
@@ -88,12 +88,6 @@ namespace Chlorine.Futures
 			_resultFutures?.Remove(future);
 		}
 
-		public override void Clear()
-		{
-			base.Clear();
-			_resultFutures?.Clear();
-		}
-
 		public void Resolve(TResult result)
 		{
 			if (Status != PromiseStatus.Pending)
@@ -104,7 +98,13 @@ namespace Chlorine.Futures
 			Status = PromiseStatus.Resolved;
 			_result = result;
 			HandleResolve();
-			Clear();
+			HandleClear();
+		}
+
+		protected override void HandleClear()
+		{
+			base.HandleClear();
+			_resultFutures?.Clear();
 		}
 
 		protected override void HandleResolve()

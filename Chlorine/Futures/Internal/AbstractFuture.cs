@@ -25,7 +25,7 @@ namespace Chlorine.Futures.Internal
 			Status = FutureStatus.Resolved;
 			HandleResolve();
 			HandleFinalize();
-			Clear();
+			HandleClear();
 		}
 	}
 
@@ -79,13 +79,6 @@ namespace Chlorine.Futures.Internal
 		{
 			base.Reset();
 			_result = default;
-		}
-
-		public override void Clear()
-		{
-			base.Clear();
-			_resultResolved = null;
-			_resultHandlers?.Clear();
 		}
 
 		public IFuture Then(FuturePromised<TResult> promised)
@@ -162,7 +155,14 @@ namespace Chlorine.Futures.Internal
 			_result = result;
 			HandleResolve();
 			HandleFinalize();
-			Clear();
+			HandleClear();
+		}
+
+		protected override void HandleClear()
+		{
+			base.HandleClear();
+			_resultResolved = null;
+			_resultHandlers?.Clear();
 		}
 
 		protected override void HandleResolve()

@@ -8,8 +8,6 @@ namespace Chlorine.Futures
 
 		Error Reason { get; }
 
-		void Clear();
-
 		IFuture Then(FuturePromised promised);
 		IFuture<T> Then<T>(FutureResultPromised<T> promised);
 		void Then(FutureResolved resolved, FutureRejected rejected);
