@@ -280,5 +280,89 @@ namespace Chlorine.Tests
 				});
 			}
 		}
+
+		[TestFixture]
+		private class PoolTests
+		{
+			[Test]
+			public void ResolvedPromise_Release()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				promise.Resolve();
+				PromisePool.Release(promise);
+
+				Promise reusedPromise = PromisePool.Pull();
+				Assert.IsTrue(reusedPromise.IsPending);
+				Assert.AreSame(promise, reusedPromise);
+			}
+
+			[Test]
+			public void ResolvedResultPromise_Release()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				promise.Resolve(Result);
+				PromisePool.Release(promise);
+
+				Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+				Assert.IsTrue(reusedPromise.IsPending);
+				Assert.AreSame(promise, reusedPromise);
+			}
+
+			[Test]
+			public void RejectedPromise_Release()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				promise.Reject(Reason);
+				PromisePool.Release(promise);
+
+				Promise reusedPromise = PromisePool.Pull();
+				Assert.IsTrue(reusedPromise.IsPending);
+				Assert.AreSame(promise, reusedPromise);
+			}
+
+			[Test]
+			public void RejectedResultPromise_Release()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				promise.Reject(Reason);
+				PromisePool.Release(promise);
+
+				Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+				Assert.IsTrue(reusedPromise.IsPending);
+				Assert.AreSame(promise, reusedPromise);
+			}
+		}
+
+		[TestFixture]
+		private class ClearTests
+		{
+			[Test]
+			public void ClearPromisePool_Empty()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				PromisePool.Release(promise);
+				PromisePool.Clear();
+
+				Promise reusedPromise = PromisePool.Pull();
+				Assert.AreNotSame(promise, reusedPromise);
+			}
+
+			[Test]
+			public void ClearResultPromisePool_Empty()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				PromisePool.Release(promise);
+				PromisePool.Clear();
+
+				Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+				Assert.AreNotSame(promise, reusedPromise);
+			}
+		}
 	}
 }

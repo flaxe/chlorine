@@ -216,7 +216,7 @@ namespace Chlorine.Tests
 				});
 			}
 		}
-		
+
 		[TestFixture]
 		private class FutureAllTests
 		{
@@ -228,17 +228,17 @@ namespace Chlorine.Tests
 				Promise secondPromise = PromisePool.Pull();
 				IFuture futureAll = FuturePool.Pull(new []
 				{
-					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(firstPromise),
 					FuturePool.Pull(secondPromise)
 				});
 
 				firstPromise.Resolve();
 				Assert.IsTrue(futureAll.IsPending);
-				
+
 				secondPromise.Resolve();
 				Assert.IsTrue(futureAll.IsResolved);
 			}
-			
+
 			[Test]
 			public void ResultFutureAllResolve_IsResolved()
 			{
@@ -247,17 +247,17 @@ namespace Chlorine.Tests
 				Promise<uint> secondPromise = PromisePool.Pull<uint>();
 				IFuture futureAll = FuturePool.Pull(new []
 				{
-					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(firstPromise),
 					FuturePool.Pull(secondPromise)
 				});
 
 				firstPromise.Resolve(Result);
 				Assert.IsTrue(futureAll.IsPending);
-				
+
 				secondPromise.Resolve(Result);
 				Assert.IsTrue(futureAll.IsResolved);
 			}
-			
+
 			[Test]
 			public void FutureAllReject_IsRejected()
 			{
@@ -266,7 +266,7 @@ namespace Chlorine.Tests
 				Promise secondPromise = PromisePool.Pull();
 				IFuture futureAll = FuturePool.Pull(new []
 				{
-					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(firstPromise),
 					FuturePool.Pull(secondPromise)
 				});
 
@@ -277,7 +277,7 @@ namespace Chlorine.Tests
 				Assert.IsTrue(futureAll.IsRejected);
 				Assert.AreEqual(Reason, futureAll.Reason);
 			}
-			
+
 			[Test]
 			public void ResultFutureAllReject_IsRejected()
 			{
@@ -286,7 +286,7 @@ namespace Chlorine.Tests
 				Promise<uint> secondPromise = PromisePool.Pull<uint>();
 				IFuture futureAll = FuturePool.Pull(new []
 				{
-					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(firstPromise),
 					FuturePool.Pull(secondPromise)
 				});
 
@@ -324,7 +324,7 @@ namespace Chlorine.Tests
 		{
 			public bool IsResolved { get; private set; }
 			public bool IsRejected { get; private set; }
-			
+
 			public bool IsPending => !IsResolved && !IsRejected;
 
 			public T Value { get; private set; }
@@ -719,16 +719,16 @@ namespace Chlorine.Tests
 				Promise secondPromise = PromisePool.Pull();
 				IFuture futureAll = FuturePool.Pull(new []
 				{
-					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(firstPromise),
 					FuturePool.Pull(secondPromise)
 				});
 				futureAll.Then(handler.OnResolve, handler.OnReject);
 				firstPromise.Resolve();
 				secondPromise.Resolve();
-				
+
 				Assert.IsTrue(handler.IsResolved);
 			}
-			
+
 			[Test]
 			public void ThenAfterFutureAllResolve_Invoke()
 			{
@@ -738,7 +738,7 @@ namespace Chlorine.Tests
 				Promise secondPromise = PromisePool.Pull();
 				IFuture futureAll = FuturePool.Pull(new []
 				{
-					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(firstPromise),
 					FuturePool.Pull(secondPromise)
 				});
 				firstPromise.Resolve();
@@ -747,7 +747,7 @@ namespace Chlorine.Tests
 
 				Assert.IsTrue(handler.IsResolved);
 			}
-			
+
 			[Test]
 			public void ThenBeforeFutureAllReject_Invoke()
 			{
@@ -757,7 +757,7 @@ namespace Chlorine.Tests
 				Promise secondPromise = PromisePool.Pull();
 				IFuture futureAll = FuturePool.Pull(new []
 				{
-					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(firstPromise),
 					FuturePool.Pull(secondPromise)
 				});
 				futureAll.Then(handler.OnResolve, handler.OnReject);
@@ -766,7 +766,7 @@ namespace Chlorine.Tests
 				Assert.IsTrue(handler.IsRejected);
 				Assert.AreEqual(Reason, handler.Error);
 			}
-			
+
 			[Test]
 			public void ThenAfterFutureAllReject_Invoke()
 			{
@@ -776,7 +776,7 @@ namespace Chlorine.Tests
 				Promise secondPromise = PromisePool.Pull();
 				IFuture futureAll = FuturePool.Pull(new []
 				{
-					FuturePool.Pull(firstPromise), 
+					FuturePool.Pull(firstPromise),
 					FuturePool.Pull(secondPromise)
 				});
 				firstPromise.Reject(Reason);
@@ -784,6 +784,274 @@ namespace Chlorine.Tests
 
 				Assert.IsTrue(handler.IsRejected);
 				Assert.AreEqual(Reason, handler.Error);
+			}
+		}
+
+		[TestFixture]
+		private class PoolTests
+		{
+			[Test]
+			public void ResolvedFuture_Release()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				IFuture future = FuturePool.Pull(promise);
+				promise.Resolve();
+				FuturePool.Release(future);
+
+				Promise reusedPromise = PromisePool.Pull();
+				IFuture reusedFuture = FuturePool.Pull(reusedPromise);
+				Assert.IsTrue(reusedFuture.IsPending);
+				Assert.AreSame(future, reusedFuture);
+			}
+
+			[Test]
+			public void ResolvedResultFuture_Release()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				IFuture<uint> future = FuturePool.Pull(promise);
+				promise.Resolve(Result);
+				FuturePool.Release(future);
+
+				Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+				IFuture<uint> reusedFuture = FuturePool.Pull(reusedPromise);
+				Assert.IsTrue(reusedFuture.IsPending);
+				Assert.AreSame(future, reusedFuture);
+			}
+
+			[Test]
+			public void RejectedFuture_Release()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				IFuture future = FuturePool.Pull(promise);
+				promise.Reject(Reason);
+				FuturePool.Release(future);
+
+				Promise reusedPromise = PromisePool.Pull();
+				IFuture reusedFuture = FuturePool.Pull(reusedPromise);
+				Assert.IsTrue(reusedFuture.IsPending);
+				Assert.AreSame(future, reusedFuture);
+			}
+
+			[Test]
+			public void RejectedResultFuture_Release()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				IFuture<uint> future = FuturePool.Pull(promise);
+				promise.Reject(Reason);
+				FuturePool.Release(future);
+
+				Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+				IFuture<uint> reusedFuture = FuturePool.Pull(reusedPromise);
+				Assert.IsTrue(reusedFuture.IsPending);
+				Assert.AreSame(future, reusedFuture);
+			}
+
+			[Test]
+			public void PendingChainFutureToFuture_Release()
+			{
+				SharedPool.Clear();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture firstFuture = FuturePool.Pull(firstPromise);
+				IFuture secondFuture = null;
+				IFuture chainFuture = firstFuture.Then(() => secondFuture = FuturePool.Pull(secondPromise));
+				firstPromise.Resolve();
+				FuturePool.Release(chainFuture);
+
+				for (int i = 0; i < 2; i++)
+				{
+					Promise reusedPromise = PromisePool.Pull();
+					IFuture reusedFuture = FuturePool.Pull(reusedPromise);
+					Assert.IsTrue(reusedFuture.IsPending);
+					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
+				}
+			}
+
+			[Test]
+			public void ResolvedChainFutureToFuture_Release()
+			{
+				SharedPool.Clear();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture firstFuture = FuturePool.Pull(firstPromise);
+				IFuture secondFuture = null;
+				IFuture chainFuture = firstFuture.Then(() => secondFuture = FuturePool.Pull(secondPromise));
+				firstPromise.Resolve();
+				secondPromise.Resolve();
+				FuturePool.Release(chainFuture);
+
+				for (int i = 0; i < 2; i++)
+				{
+					Promise reusedPromise = PromisePool.Pull();
+					IFuture reusedFuture = FuturePool.Pull(reusedPromise);
+					Assert.IsTrue(reusedFuture.IsPending);
+					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
+				}
+			}
+
+			[Test]
+			public void PendingChainResultFutureToResultFuture_Release()
+			{
+				SharedPool.Clear();
+				Promise<uint> firstPromise = PromisePool.Pull<uint>();
+				Promise<uint> secondPromise = PromisePool.Pull<uint>();
+				IFuture<uint> firstFuture = FuturePool.Pull(firstPromise);
+				IFuture<uint> secondFuture = null;
+				IFuture<uint> chainFuture = firstFuture.Then(result => secondFuture = FuturePool.Pull(secondPromise));
+				firstPromise.Resolve(Result);
+				FuturePool.Release(chainFuture);
+
+				for (int i = 0; i < 2; i++)
+				{
+					Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+					IFuture<uint> reusedFuture = FuturePool.Pull(reusedPromise);
+					Assert.IsTrue(reusedFuture.IsPending);
+					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
+				}
+			}
+
+			[Test]
+			public void ResolvedChainResultFutureToResultFuture_Release()
+			{
+				SharedPool.Clear();
+				Promise<uint> firstPromise = PromisePool.Pull<uint>();
+				Promise<uint> secondPromise = PromisePool.Pull<uint>();
+				IFuture<uint> firstFuture = FuturePool.Pull(firstPromise);
+				IFuture<uint> secondFuture = null;
+				IFuture<uint> chainFuture = firstFuture.Then(result => secondFuture = FuturePool.Pull(secondPromise));
+				firstPromise.Resolve(Result);
+				secondPromise.Resolve(Result);
+				FuturePool.Release(chainFuture);
+
+				for (int i = 0; i < 2; i++)
+				{
+					Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+					IFuture<uint> reusedFuture = FuturePool.Pull(reusedPromise);
+					Assert.IsTrue(reusedFuture.IsPending);
+					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
+				}
+			}
+
+			[Test]
+			public void PendingFutureAll_Release()
+			{
+				SharedPool.Clear();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture firstFuture = FuturePool.Pull(firstPromise);
+				IFuture secondFuture = FuturePool.Pull(secondPromise);
+				IFuture futureAll = FuturePool.Pull(new[] {firstFuture, secondFuture});
+				FuturePool.Release(futureAll);
+
+				for (int i = 0; i < 2; i++)
+				{
+					Promise reusedPromise = PromisePool.Pull();
+					IFuture reusedFuture = FuturePool.Pull(reusedPromise);
+					Assert.IsTrue(reusedFuture.IsPending);
+					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
+				}
+			}
+
+			[Test]
+			public void ResolvedFutureAll_Release()
+			{
+				SharedPool.Clear();
+				Promise firstPromise = PromisePool.Pull();
+				Promise secondPromise = PromisePool.Pull();
+				IFuture firstFuture = FuturePool.Pull(firstPromise);
+				IFuture secondFuture = FuturePool.Pull(secondPromise);
+				IFuture futureAll = FuturePool.Pull(new[] {firstFuture, secondFuture});
+				firstPromise.Resolve();
+				secondPromise.Resolve();
+				FuturePool.Release(futureAll);
+
+				for (int i = 0; i < 2; i++)
+				{
+					Promise reusedPromise = PromisePool.Pull();
+					IFuture reusedFuture = FuturePool.Pull(reusedPromise);
+					Assert.IsTrue(reusedFuture.IsPending);
+					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
+				}
+			}
+
+			[Test]
+			public void PendingResultFutureAll_Release()
+			{
+				SharedPool.Clear();
+				Promise<uint> firstPromise = PromisePool.Pull<uint>();
+				Promise<uint> secondPromise = PromisePool.Pull<uint>();
+				IFuture<uint> firstFuture = FuturePool.Pull(firstPromise);
+				IFuture<uint> secondFuture = FuturePool.Pull(secondPromise);
+				IFuture futureAll = FuturePool.Pull(new[] {firstFuture, secondFuture});
+				FuturePool.Release(futureAll);
+
+				for (int i = 0; i < 2; i++)
+				{
+					Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+					IFuture<uint> reusedFuture = FuturePool.Pull(reusedPromise);
+					Assert.IsTrue(reusedFuture.IsPending);
+					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
+				}
+			}
+
+			[Test]
+			public void ResolvedResultFutureAll_Release()
+			{
+				SharedPool.Clear();
+				Promise<uint> firstPromise = PromisePool.Pull<uint>();
+				Promise<uint> secondPromise = PromisePool.Pull<uint>();
+				IFuture<uint> firstFuture = FuturePool.Pull(firstPromise);
+				IFuture<uint> secondFuture = FuturePool.Pull(secondPromise);
+				IFuture futureAll = FuturePool.Pull(new[] {firstFuture, secondFuture});
+				firstPromise.Resolve(Result);
+				secondPromise.Resolve(Result);
+				FuturePool.Release(futureAll);
+
+				for (int i = 0; i < 2; i++)
+				{
+					Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+					IFuture<uint> reusedFuture = FuturePool.Pull(reusedPromise);
+					Assert.IsTrue(reusedFuture.IsPending);
+					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
+				}
+			}
+		}
+
+		[TestFixture]
+		private class ClearTests
+		{
+			[Test]
+			public void ClearFuturePool_Empty()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				IFuture future = FuturePool.Pull(promise);
+				FuturePool.Release(future);
+				FuturePool.Clear();
+
+				Promise reusedPromise = PromisePool.Pull();
+				IFuture reusedFuture = FuturePool.Pull(reusedPromise);
+				Assert.IsTrue(reusedFuture.IsPending);
+				Assert.AreNotSame(future, reusedFuture);
+			}
+
+			[Test]
+			public void ClearResultFuturePool_Empty()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				IFuture<uint> future = FuturePool.Pull(promise);
+				FuturePool.Release(future);
+				FuturePool.Clear();
+
+				Promise<uint> reusedPromise = PromisePool.Pull<uint>();
+				IFuture<uint> reusedFuture = FuturePool.Pull(reusedPromise);
+				Assert.IsTrue(reusedFuture.IsPending);
+				Assert.AreNotSame(future, reusedFuture);
 			}
 		}
 	}
