@@ -45,15 +45,18 @@ namespace Chlorine.Controller.Supervisors
 
 		private bool TryStack(ref TAction action, out Promise promise)
 		{
-			foreach (IActionDelegate<TAction> currentDelegate in CurrentDelegates)
+			if (CurrentDelegates != null)
 			{
-				if (currentDelegate.IsPending &&
-						currentDelegate is IStackable<TAction> stackable &&
-						stackable.Stack(action) &&
-						TryGetPromise(currentDelegate, out Promise currentPromise))
+				foreach (IActionDelegate<TAction> currentDelegate in CurrentDelegates)
 				{
-					promise = currentPromise;
-					return true;
+					if (currentDelegate.IsPending &&
+							currentDelegate is IStackable<TAction> stackable &&
+							stackable.Stack(action) &&
+							TryGetPromise(currentDelegate, out Promise currentPromise))
+					{
+						promise = currentPromise;
+						return true;
+					}
 				}
 			}
 			promise = default;
@@ -113,15 +116,18 @@ namespace Chlorine.Controller.Supervisors
 
 		private bool TryStack(ref TAction action, out Promise<TResult> promise)
 		{
-			foreach (IActionDelegate<TAction, TResult> currentDelegate in CurrentDelegates)
+			if (CurrentDelegates != null)
 			{
-				if (currentDelegate.IsPending &&
-						currentDelegate is IStackable<TAction> stackable &&
-						stackable.Stack(action) &&
-						TryGetPromise(currentDelegate, out Promise<TResult> currentPromise))
+				foreach (IActionDelegate<TAction, TResult> currentDelegate in CurrentDelegates)
 				{
-					promise = currentPromise;
-					return true;
+					if (currentDelegate.IsPending &&
+							currentDelegate is IStackable<TAction> stackable &&
+							stackable.Stack(action) &&
+							TryGetPromise(currentDelegate, out Promise<TResult> currentPromise))
+					{
+						promise = currentPromise;
+						return true;
+					}
 				}
 			}
 			promise = default;

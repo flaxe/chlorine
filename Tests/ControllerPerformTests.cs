@@ -8,9 +8,6 @@ namespace Chlorine.Tests
 {
 	internal class ControllerPerformTests
 	{
-		private static readonly Foo Action = new Foo(43);
-		private static readonly Bar Result = new Bar(10);
-
 		private static readonly Error Reason = new Error(-100, "Test");
 		private static readonly Exception Exception = new Exception("Test");
 
@@ -24,6 +21,8 @@ namespace Chlorine.Tests
 			}
 		}
 
+		private static readonly Foo Action = new Foo(43);
+
 		private struct Bar
 		{
 			public readonly int Code;
@@ -34,48 +33,103 @@ namespace Chlorine.Tests
 			}
 		}
 
-		private interface IExecutableDelegate : IExecutable
+		private static readonly Bar Result = new Bar(10);
+
+		private class Executable : IExecutable
 		{
+			private enum DelegateStatus
+			{
+				Pending,
+				Succeed,
+				Failed
+			}
+
+			private IExecutionHandler _handler;
+			private DelegateStatus _status = DelegateStatus.Pending;
+
+			public bool IsPending => _status == DelegateStatus.Pending;
+			public bool IsSucceed => _status == DelegateStatus.Succeed;
+			public bool IsFailed => _status == DelegateStatus.Failed;
+
+			public Error Error { get; private set; }
+
+			public virtual void Execute(IExecutionHandler handler)
+			{
+				_handler = handler;
+			}
+
+			public void Complete()
+			{
+				_status = DelegateStatus.Succeed;
+				_handler.HandleComplete(this);
+			}
+
+			public void Fail(Error error)
+			{
+				_status = DelegateStatus.Failed;
+				Error = error;
+				_handler.HandleComplete(this);
+			}
 		}
 
-		private class Executor : IExecutor<IExecutableDelegate>
+		private class ManualExecutor : IExecutor<Executable>
 		{
-			public void Execute(IExecutableDelegate command, IExecutionHandler handler)
+			private Executable _currentExecutable;
+
+			public void Execute(Executable executable, IExecutionHandler handler)
 			{
-				command.Execute(handler);
+				if (_currentExecutable != null)
+				{
+					throw new Exception("Current executable not completed.");
+				}
+				_currentExecutable = executable;
+				_currentExecutable.Execute(handler);
+			}
+
+			public void CompleteCurrent()
+			{
+				if (_currentExecutable != null)
+				{
+					_currentExecutable.Complete();
+					_currentExecutable = null;
+				}
+			}
+
+			public void FailCurrent(Error reason)
+			{
+				if (_currentExecutable != null)
+				{
+					_currentExecutable.Fail(reason);
+					_currentExecutable = null;
+				}
+			}
+		}
+
+		private class InstantExecutor : IExecutor<Executable>
+		{
+			public void Execute(Executable executable, IExecutionHandler handler)
+			{
+				executable.Execute(handler);
+				executable.Complete();
 			}
 		}
 
 		[TestFixture]
 		private class InitializationTests
 		{
-			private class InitializationDelegate : IExecutableDelegate
+			private class SucceedInitializationDelegate : Executable, IActionDelegate<Foo, Foo>
 			{
-				public bool IsPending => true;
-				public bool IsSucceed => false;
-				public bool IsFailed => false;
-
-				public Error Error => default;
-
-				public void Execute(IExecutionHandler handler)
-				{
-				}
-			}
-
-			private class SucceedInitializationDelegate : InitializationDelegate, IActionDelegate<Foo>
-			{
-				public static SucceedInitializationDelegate Instance { get; private set; }
-
-				public Foo Action { get; private set; }
-
-				public SucceedInitializationDelegate()
-				{
-					Instance = this;
-				}
+				private Foo _action;
 
 				public bool Init(Foo action)
 				{
-					Action = action;
+					_action = action;
+					return true;
+				}
+
+				public bool TryGetResult(out Foo result)
+				{
+					result = _action;
 					return true;
 				}
 			}
@@ -85,16 +139,16 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
-				container.BindAction<Foo>().To<SucceedInitializationDelegate>().AsTransient();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
+				container.BindAction<Foo>().With<Foo>().To<SucceedInitializationDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
-				controller.Perform(Action);
+				IFuture<Foo> future = controller.Perform<Foo, Foo>(Action);
 
-				Assert.AreEqual(Action, SucceedInitializationDelegate.Instance.Action);
+				Assert.AreEqual(Action, future.Result);
 			}
 
-			private class FailedInitializationDelegate : InitializationDelegate, IActionDelegate<Foo>
+			private class FailedInitializationDelegate : Executable, IActionDelegate<Foo>
 			{
 				public bool Init(Foo action)
 				{
@@ -107,7 +161,7 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
 				container.BindAction<Foo>().To<FailedInitializationDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
@@ -116,7 +170,7 @@ namespace Chlorine.Tests
 				Assert.IsTrue(future.IsRejected);
 			}
 
-			private class ExceptionalInitializationDelegate : InitializationDelegate, IActionDelegate<Foo>
+			private class ExceptionalInitializationDelegate : Executable, IActionDelegate<Foo>
 			{
 				public bool Init(Foo action)
 				{
@@ -129,7 +183,7 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
 				container.BindAction<Foo>().To<ExceptionalInitializationDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
@@ -143,52 +197,8 @@ namespace Chlorine.Tests
 		[TestFixture]
 		private class ExecutionTests
 		{
-			private enum DelegateStatus
+			private class ActionDelegate : Executable, IActionDelegate<Foo, Bar>
 			{
-				Pending,
-				Succeed,
-				Failed
-			}
-
-			private class ExecutionDelegate : IExecutableDelegate
-			{
-				private IExecutionHandler _handler;
-				private DelegateStatus _status = DelegateStatus.Pending;
-
-				public bool IsPending => _status == DelegateStatus.Pending;
-				public bool IsSucceed => _status == DelegateStatus.Succeed;
-				public bool IsFailed => _status == DelegateStatus.Failed;
-
-				public Error Error { get; private set; }
-
-				public virtual void Execute(IExecutionHandler handler)
-				{
-					_handler = handler;
-				}
-
-				public void Complete()
-				{
-					_status = DelegateStatus.Succeed;
-					_handler.HandleComplete(this);
-				}
-
-				public void Fail(Error error)
-				{
-					_status = DelegateStatus.Failed;
-					Error = error;
-					_handler.HandleComplete(this);
-				}
-			}
-
-			private class ManualExecutionDelegate : ExecutionDelegate, IActionDelegate<Foo, Bar>
-			{
-				public static ManualExecutionDelegate Instance { get; private set; }
-
-				public ManualExecutionDelegate()
-				{
-					Instance = this;
-				}
-
 				public bool Init(Foo action)
 				{
 					return true;
@@ -206,14 +216,15 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
-				container.BindAction<Foo>().To<ManualExecutionDelegate>().AsTransient();
+				ManualExecutor executor = new ManualExecutor();
+				container.BindExecutable<Executable>().ToInstance(executor);
+				container.BindAction<Foo>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture future = controller.Perform(Action);
 				Assert.IsTrue(future.IsPending);
 
-				ManualExecutionDelegate.Instance.Complete();
+				executor.CompleteCurrent();
 				Assert.IsTrue(future.IsResolved);
 			}
 
@@ -222,43 +233,17 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
-				container.BindAction<Foo>().With<Bar>().To<ManualExecutionDelegate>().AsTransient();
+				ManualExecutor executor = new ManualExecutor();
+				container.BindExecutable<Executable>().ToInstance(executor);
+				container.BindAction<Foo>().With<Bar>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
 				Assert.IsTrue(future.IsPending);
 
-				ManualExecutionDelegate.Instance.Complete();
+				executor.CompleteCurrent();
 				Assert.IsTrue(future.IsResolved);
 				Assert.AreEqual(Result, future.Result);
-			}
-
-			private class InstantExecutionDelegate : ExecutionDelegate, IActionDelegate<Foo, Bar>
-			{
-				public static InstantExecutionDelegate Instance { get; private set; }
-
-				public InstantExecutionDelegate()
-				{
-					Instance = this;
-				}
-
-				public bool Init(Foo action)
-				{
-					return true;
-				}
-
-				public override void Execute(IExecutionHandler handler)
-				{
-					base.Execute(handler);
-					Complete();
-				}
-
-				public bool TryGetResult(out Bar result)
-				{
-					result = Result;
-					return true;
-				}
 			}
 
 			[Test]
@@ -266,8 +251,8 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
-				container.BindAction<Foo>().To<InstantExecutionDelegate>().AsTransient();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
+				container.BindAction<Foo>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture future = controller.Perform(Action);
@@ -279,8 +264,8 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
-				container.BindAction<Foo>().With<Bar>().To<InstantExecutionDelegate>().AsTransient();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
+				container.BindAction<Foo>().With<Bar>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
@@ -293,14 +278,15 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
-				container.BindAction<Foo>().To<ManualExecutionDelegate>().AsTransient();
+				ManualExecutor executor = new ManualExecutor();
+				container.BindExecutable<Executable>().ToInstance(executor);
+				container.BindAction<Foo>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture future = controller.Perform(Action);
 				Assert.IsTrue(future.IsPending);
 
-				ManualExecutionDelegate.Instance.Fail(Reason);
+				executor.FailCurrent(Reason);
 				Assert.IsTrue(future.IsRejected);
 				Assert.AreEqual(Reason, future.Reason);
 			}
@@ -310,19 +296,20 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
-				container.BindAction<Foo>().With<Bar>().To<ManualExecutionDelegate>().AsTransient();
+				ManualExecutor executor = new ManualExecutor();
+				container.BindExecutable<Executable>().ToInstance(executor);
+				container.BindAction<Foo>().With<Bar>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
 				Assert.IsTrue(future.IsPending);
 
-				ManualExecutionDelegate.Instance.Fail(Reason);
+				executor.FailCurrent(Reason);
 				Assert.IsTrue(future.IsRejected);
 				Assert.AreEqual(Reason, future.Reason);
 			}
 
-			private class ExceptionalExecutionDelegate : ExecutionDelegate, IActionDelegate<Foo>
+			private class ExceptionalActionDelegate : Executable, IActionDelegate<Foo>
 			{
 				public bool Init(Foo action)
 				{
@@ -340,8 +327,8 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
-				container.BindAction<Foo>().To<ExceptionalExecutionDelegate>().AsTransient();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
+				container.BindAction<Foo>().To<ExceptionalActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture future = controller.Perform(Action);
@@ -354,20 +341,7 @@ namespace Chlorine.Tests
 		[TestFixture]
 		private class GetResultTests
 		{
-			private class ResultDelegate : IExecutableDelegate
-			{
-				public bool IsPending => false;
-				public bool IsSucceed => true;
-				public bool IsFailed => false;
-
-				public Error Error => default;
-
-				public void Execute(IExecutionHandler handler)
-				{
-				}
-			}
-
-			private class SucceedResultDelegate : ResultDelegate, IActionDelegate<Foo, Bar>
+			private class SucceedResultDelegate : Executable, IActionDelegate<Foo, Bar>
 			{
 				public bool Init(Foo action)
 				{
@@ -386,7 +360,7 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
 				container.BindAction<Foo>().With<Bar>().To<SucceedResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
@@ -395,7 +369,7 @@ namespace Chlorine.Tests
 				Assert.AreEqual(Result, future.Result);
 			}
 
-			private class FailedResultDelegate : ResultDelegate, IActionDelegate<Foo, Bar>
+			private class FailedResultDelegate : Executable, IActionDelegate<Foo, Bar>
 			{
 				public bool Init(Foo action)
 				{
@@ -414,7 +388,7 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
 				container.BindAction<Foo>().With<Bar>().To<FailedResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
@@ -422,7 +396,7 @@ namespace Chlorine.Tests
 				Assert.IsTrue(future.IsRejected);
 			}
 
-			private class ExceptionalResultDelegate : ResultDelegate, IActionDelegate<Foo, Bar>
+			private class ExceptionalResultDelegate : Executable, IActionDelegate<Foo, Bar>
 			{
 				public bool Init(Foo action)
 				{
@@ -440,7 +414,7 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindExecutable<IExecutableDelegate>().To<Executor>().AsSingleton();
+				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
 				container.BindAction<Foo>().With<Bar>().To<ExceptionalResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();

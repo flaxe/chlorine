@@ -26,7 +26,7 @@ namespace Chlorine.Controller.Supervisors.Internal
 			_provider = provider;
 		}
 
-		protected IEnumerable<TActionDelegate> CurrentDelegates => _promiseByActionDelegate.Keys;
+		protected IEnumerable<TActionDelegate> CurrentDelegates => _promiseByActionDelegate?.Keys;
 
 		protected bool TryGetPromise(TActionDelegate actionDelegate, out TPromise promise)
 		{
