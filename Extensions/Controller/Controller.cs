@@ -38,7 +38,7 @@ namespace Chlorine.Controller
 			{
 				return FuturePool.Pull(promise);
 			}
-			throw (ControllerException)expectedPromise.Error;
+			throw new ControllerException(expectedPromise.Error);
 		}
 
 		public IFuture<TResult> Perform<TAction, TResult>(TAction action) where TAction : struct
@@ -55,7 +55,7 @@ namespace Chlorine.Controller
 				{
 					return FuturePool.Pull(promise);
 				}
-				throw (ControllerException)expectedPromise.Error;
+				throw new ControllerException(expectedPromise.Error);
 			}
 			throw new ControllerException(ControllerErrorCode.ActionDoesNotReturnResult,
 					$"Unable to perform '{typeof(TAction).Name}'. Action does not return '{typeof(TResult).Name}'.");

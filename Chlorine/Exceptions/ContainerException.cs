@@ -26,5 +26,10 @@ namespace Chlorine.Exceptions
 				base((int)code, message, innerException)
 		{
 		}
+
+		public ContainerException(Error error) :
+				base(error)
+		{
+		}
 	}
 }

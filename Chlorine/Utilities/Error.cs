@@ -1,68 +1,65 @@
 using System;
 using System.Text;
-using Chlorine.Exceptions;
 
 namespace Chlorine
 {
 	public struct Error
 	{
-		public readonly int Code;
-		public readonly string Message;
-
-		public readonly Exception Exception;
+		private readonly int _code;
+		private readonly string _message;
+		private readonly Exception _exception;
 
 		public Error(string message)
 		{
-			Code = -1;
-			Message = message;
-			Exception = null;
+			_code = -1;
+			_message = message;
+			_exception = null;
 		}
 
 		public Error(int code, string message)
 		{
-			Code = code;
-			Message = message;
-			Exception = null;
+			_code = code;
+			_message = message;
+			_exception = null;
 		}
 
 		public Error(int code, string message, Exception exception)
 		{
-			Code = code;
-			Message = message;
-			Exception = exception;
+			_code = code;
+			_message = message;
+			_exception = exception;
 		}
 
 		public Error(Exception exception)
 		{
-			Code = exception.HResult;
-			Message = null;
-			Exception = exception;
+			_code = exception.HResult;
+			_message = null;
+			_exception = exception;
 		}
+
+		public int Code => _code;
+		public string Message => _message;
+		public Exception Exception => _exception;
 
 		public override string ToString()
 		{
 			StringBuilder builder = new StringBuilder();
-			if (!string.IsNullOrEmpty(Message))
+			if (!string.IsNullOrEmpty(_message))
 			{
-				builder.Append(Message);
-				builder.Append('(').Append(Code.ToString()).Append(')');
+				builder.Append(_message);
+				builder.Append('(').Append(_code.ToString()).Append(')');
 			}
-			if (Exception != null)
+			if (_exception != null)
 			{
 				if (builder.Length > 0)
 				{
 					builder.Append(Environment.NewLine);
 				}
-				builder.Append(Exception.Message);
+				builder.Append(_exception.Message);
 				builder.Append(Environment.NewLine);
-				builder.Append(Exception.StackTrace);
+				builder.Append(_exception.StackTrace);
 			}
 			return builder.ToString();
-		}
-
-		public static implicit operator Exception(Error error)
-		{
-			return error.Exception ?? new ChlorineException(error.Code, error.Message);
 		}
 	}
 }

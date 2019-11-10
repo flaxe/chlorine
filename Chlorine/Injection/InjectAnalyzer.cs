@@ -180,14 +180,14 @@ namespace Chlorine.Injection
 				List<InjectPropertyInfo> propertiesInfo = null;
 				foreach (PropertyInfo property in properties)
 				{
-					if (!property.CanWrite)
-					{
-						throw new InjectException(InjectErrorCode.ReadonlyProperty,
-								$"Property '{property.Name}' at class '{type.Name}' is readonly.");
-					}
 					Attribute[] attributes = Attribute.GetCustomAttributes(property, InjectAttributeType, false);
 					if (attributes.Length == 1)
 					{
+						if (!property.CanWrite)
+						{
+							throw new InjectException(InjectErrorCode.ReadonlyProperty,
+									$"Property '{property.Name}' at class '{type.Name}' is readonly.");
+						}
 						if (propertiesInfo == null)
 						{
 							propertiesInfo = new List<InjectPropertyInfo>();

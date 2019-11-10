@@ -25,5 +25,10 @@ namespace Chlorine.Controller.Exceptions
 				base((int)code, message, innerException)
 		{
 		}
+
+		public CommandException(Error error) :
+				base(error)
+		{
+		}
 	}
 }

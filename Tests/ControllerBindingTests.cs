@@ -2,6 +2,7 @@ using Chlorine.Controller;
 using Chlorine.Controller.Exceptions;
 using Chlorine.Controller.Execution;
 using Chlorine.Factories;
+using Chlorine.Futures;
 using NUnit.Framework;
 
 namespace Chlorine.Tests
@@ -206,6 +207,56 @@ namespace Chlorine.Tests
 
 				IController controller = container.Resolve<IController>();
 				Assert.Throws<ControllerException>(() => controller.Perform(new Foo()));
+			}
+		}
+
+		[TestFixture]
+		private class MissingTests
+		{
+			[Test]
+			public void MissingActionPerform_ExceptionThrown()
+			{
+				Container container = new Container();
+				container.Extend<ControllerExtension>();
+				container.BindExecutable<FooCommand>().To<FooExecutor>().AsSingleton();
+
+				IController controller = container.Resolve<IController>();
+				Assert.Throws<ControllerException>(() => controller.Perform(new Foo()));
+			}
+
+			[Test]
+			public void MissingActionTryPerform_IsRejected()
+			{
+				Container container = new Container();
+				container.Extend<ControllerExtension>();
+				container.BindExecutable<FooCommand>().To<FooExecutor>().AsSingleton();
+
+				IController controller = container.Resolve<IController>();
+				IFuture future = controller.TryPerform(new Foo());
+				Assert.IsTrue(future.IsRejected);
+			}
+
+			[Test]
+			public void MissingExecutablePerform_ExceptionThrown()
+			{
+				Container container = new Container();
+				container.Extend<ControllerExtension>();
+				container.BindAction<Foo>().To<FooCommand>().AsTransient();
+
+				IController controller = container.Resolve<IController>();
+				Assert.Throws<ControllerException>(() => controller.Perform(new Foo()));
+			}
+
+			[Test]
+			public void MissingExecutableTryPerform_IsRejected()
+			{
+				Container container = new Container();
+				container.Extend<ControllerExtension>();
+				container.BindAction<Foo>().To<FooCommand>().AsTransient();
+
+				IController controller = container.Resolve<IController>();
+				IFuture future = controller.TryPerform(new Foo());
+				Assert.IsTrue(future.IsRejected);
 			}
 		}
 	}

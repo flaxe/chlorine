@@ -22,13 +22,18 @@ namespace Chlorine.Exceptions
 		{
 		}
 
-		protected internal ChlorineException(int code, string message) :
+		public ChlorineException(Error error) :
+				this(error.Code, error.Message, error.Exception)
+		{
+		}
+
+		protected ChlorineException(int code, string message) :
 				base(message)
 		{
 			HResult = code;
 		}
 
-		protected internal ChlorineException(int code, string message, Exception innerException) :
+		protected ChlorineException(int code, string message, Exception innerException) :
 				base(message, innerException)
 		{
 			HResult = code;
