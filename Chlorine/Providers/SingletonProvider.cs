@@ -2,7 +2,7 @@ using System;
 
 namespace Chlorine.Providers
 {
-	internal sealed class SingletonProvider : IProvider, IDisposable
+	public sealed class SingletonProvider : IProvider, IDisposable
 	{
 		private readonly IProvider _provider;
 		private object _instance;

@@ -1,137 +1,140 @@
+using System;
+using System.Collections.Generic;
 using Chlorine.Controller.Bindings;
-using Chlorine.Controller.Exceptions;
+using Chlorine.Controller.Execution;
 using Chlorine.Controller.Providers;
 using Chlorine.Controller.Supervisors.Internal;
 using Chlorine.Futures;
+using Chlorine.Pools;
 
 namespace Chlorine.Controller.Supervisors
 {
 	internal sealed class StackableActionSupervisor<TAction> :
-			AbstractActionSupervisor<TAction>,
-			IActionSupervisor<TAction>
+			AbstractExecutionSupervisor,
+			IActionSupervisor<TAction>,
+			IDisposable
 			where TAction : struct
 	{
-		public StackableActionSupervisor(ControllerBinder binder, IProvider<IActionDelegate<TAction>> provider) :
-				base(binder, provider)
+		private readonly IDelegateProvider _delegateProvider;
+		private List<IStackableActionDelegate<TAction>> _delegates;
+
+		public StackableActionSupervisor(ControllerBinder binder, IDelegateProvider delegateProvider) :
+				base(binder)
 		{
+			_delegateProvider = delegateProvider;
 		}
 
-		public Expected<IPromise> Perform(ref TAction action)
+		~StackableActionSupervisor()
 		{
-			if (TryStack(ref action, out Promise stackPromise))
-			{
-				return new Expected<IPromise>(stackPromise);
-			}
-			if (TryPerform(ref action, out Promise performPromise, out Error error))
-			{
-				return new Expected<IPromise>(performPromise);
-			}
-			return error;
+			Dispose();
 		}
 
-		protected override Expected<IActionDelegate<TAction>> ProvideDelegate()
+		public void Dispose()
 		{
-			Expected<IActionDelegate<TAction>> expectedDelegate = base.ProvideDelegate();
-			if (expectedDelegate.TryGetValue(out IActionDelegate<TAction> actionDelegate))
+			if (_delegateProvider is IDisposable disposable)
 			{
-				if (!(actionDelegate is IStackable<TAction>))
+				disposable.Dispose();
+			}
+		}
+
+		public Expected<IFuture> Perform(ref TAction action)
+		{
+			if (_delegates != null && _delegates.Count > 0)
+			{
+				foreach (IStackableActionDelegate<TAction> pendingDelegate in _delegates)
 				{
-					return new Error((int)ControllerErrorCode.InvalidDelegate,
-							$"'{actionDelegate.GetType().Name}' is not stackable.");
-				}
-			}
-			return expectedDelegate;
-		}
-
-		private bool TryStack(ref TAction action, out Promise promise)
-		{
-			if (CurrentDelegates != null)
-			{
-				foreach (IActionDelegate<TAction> currentDelegate in CurrentDelegates)
-				{
-					if (currentDelegate.IsPending &&
-							currentDelegate is IStackable<TAction> stackable &&
-							stackable.Stack(action) &&
-							TryGetPromise(currentDelegate, out Promise currentPromise))
+					if (pendingDelegate.IsPending && pendingDelegate.Stack(action) &&
+							TryGetPromise(pendingDelegate, out Promise promise))
 					{
-						promise = currentPromise;
-						return true;
+						return new Expected<IFuture>(FuturePool.Pull(promise));
 					}
 				}
 			}
-			promise = default;
-			return false;
+			IStackableActionDelegate<TAction> actionDelegate = _delegateProvider.Provide() as IStackableActionDelegate<TAction>;
+			if (_delegates == null)
+			{
+				_delegates = new List<IStackableActionDelegate<TAction>>{ actionDelegate };
+			}
+			else
+			{
+				_delegates.Add(actionDelegate);
+			}
+			return Execute(ref action, actionDelegate);
+		}
+
+		protected override void HandleRelease(IExecutable executable)
+		{
+			_delegates.Remove(executable as IStackableActionDelegate<TAction>);
+			_delegateProvider.Release(executable);
 		}
 	}
 
 	internal sealed class StackableActionSupervisor<TAction, TResult> :
-			AbstractActionSupervisor<TAction, TResult>,
-			IActionSupervisor<TAction, TResult>
+			AbstractExecutionSupervisor<TResult>,
+			IActionSupervisor<TAction, TResult>,
+			IDisposable
 			where TAction : struct
 	{
-		public StackableActionSupervisor(ControllerBinder binder, IProvider<IActionDelegate<TAction, TResult>> provider) :
-				base(binder, provider)
+		private readonly IDelegateProvider _delegateProvider;
+		private List<IStackableActionDelegate<TAction, TResult>> _delegates;
+
+		public StackableActionSupervisor(ControllerBinder binder, IDelegateProvider delegateProvider) :
+				base(binder)
 		{
+			_delegateProvider = delegateProvider;
 		}
 
-		public Expected<IPromise<TResult>> Perform(ref TAction action)
+		~StackableActionSupervisor()
 		{
-			if (TryStack(ref action, out Promise<TResult> stackPromise))
-			{
-				return new Expected<IPromise<TResult>>(stackPromise);
-			}
-			if (TryPerform(ref action, out Promise<TResult> performPromise, out Error error))
-			{
-				return new Expected<IPromise<TResult>>(performPromise);
-			}
-			return error;
+			Dispose();
 		}
 
-		Expected<IPromise> IActionSupervisor<TAction>.Perform(ref TAction action)
+		public void Dispose()
 		{
-			if (TryStack(ref action, out Promise<TResult> stackPromise))
+			if (_delegateProvider is IDisposable disposable)
 			{
-				return new Expected<IPromise>(stackPromise);
+				disposable.Dispose();
 			}
-			if (TryPerform(ref action, out Promise<TResult> performPromise, out Error error))
-			{
-				return new Expected<IPromise>(performPromise);
-			}
-			return error;
 		}
 
-		protected override Expected<IActionDelegate<TAction, TResult>> ProvideDelegate()
+		public Expected<IFuture<TResult>> Perform(ref TAction action)
 		{
-			Expected<IActionDelegate<TAction, TResult>> expectedDelegate = base.ProvideDelegate();
-			if (expectedDelegate.TryGetValue(out IActionDelegate<TAction, TResult> actionDelegate))
+			if (_delegates != null && _delegates.Count > 0)
 			{
-				if (!(actionDelegate is IStackable<TAction>))
+				foreach (IStackableActionDelegate<TAction, TResult> pendingDelegate in _delegates)
 				{
-					return new Error((int)ControllerErrorCode.InvalidDelegate,
-							$"'{actionDelegate.GetType().Name}' is not stackable.");
-				}
-			}
-			return expectedDelegate;
-		}
-
-		private bool TryStack(ref TAction action, out Promise<TResult> promise)
-		{
-			if (CurrentDelegates != null)
-			{
-				foreach (IActionDelegate<TAction, TResult> currentDelegate in CurrentDelegates)
-				{
-					if (currentDelegate.IsPending &&
-							currentDelegate is IStackable<TAction> stackable &&
-							stackable.Stack(action) &&
-							TryGetPromise(currentDelegate, out Promise<TResult> currentPromise))
+					if (pendingDelegate.IsPending && pendingDelegate.Stack(action) &&
+							TryGetPromise(pendingDelegate, out Promise<TResult> promise))
 					{
-						promise = currentPromise;
-						return true;
+						return new Expected<IFuture<TResult>>(FuturePool.Pull(promise));
 					}
 				}
 			}
-			promise = default;
-			return false;
+			IStackableActionDelegate<TAction, TResult> actionDelegate =
+					_delegateProvider.Provide() as IStackableActionDelegate<TAction, TResult>;
+			if (_delegates == null)
+			{
+				_delegates = new List<IStackableActionDelegate<TAction, TResult>>{ actionDelegate };
+			}
+			else
+			{
+				_delegates.Add(actionDelegate);
+			}
+			return Execute(ref action, actionDelegate);;
+		}
+
+		Expected<IFuture> IActionSupervisor<TAction>.Perform(ref TAction action)
+		{
+			Expected<IFuture<TResult>> expected = Perform(ref action);
+			return expected.TryGetValue(out IFuture<TResult> future) ?
+					new Expected<IFuture>(future) :
+					new Expected<IFuture>(expected.Error);
+		}
+
+		protected override void HandleRelease(IExecutable executable)
+		{
+			_delegates.Remove(executable as IStackableActionDelegate<TAction, TResult>);
+			_delegateProvider.Release(executable);
 		}
 	}
 }

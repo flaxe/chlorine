@@ -61,14 +61,14 @@ namespace Chlorine.Tests
 			public void Complete()
 			{
 				_status = DelegateStatus.Succeed;
-				_handler.HandleComplete(this);
+				_handler.HandleExecutable(this);
 			}
 
 			public void Fail(Error error)
 			{
 				_status = DelegateStatus.Failed;
 				Error = error;
-				_handler.HandleComplete(this);
+				_handler.HandleExecutable(this);
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace Chlorine.Tests
 				IFuture future = controller.Perform(Action);
 
 				Assert.IsTrue(future.IsRejected);
-				Assert.AreEqual(Exception, future.Reason.Exception.InnerException);
+				Assert.AreEqual(Exception, future.Reason.ToException());
 			}
 		}
 
@@ -334,7 +334,7 @@ namespace Chlorine.Tests
 				IFuture future = controller.Perform(Action);
 
 				Assert.IsTrue(future.IsRejected);
-				Assert.AreEqual(Exception, future.Reason.Exception.InnerException);
+				Assert.AreEqual(Exception, future.Reason.ToException());
 			}
 		}
 

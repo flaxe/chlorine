@@ -41,7 +41,7 @@ namespace Chlorine.Controller.Commands
 			}
 		}
 
-		void IExecutionHandler.HandleComplete(IExecutable executable)
+		void IExecutionHandler.HandleExecutable(IExecutable executable)
 		{
 			if (!_handlerByExecutable.TryGetValue(executable, out IExecutionHandler handler))
 			{
@@ -50,7 +50,7 @@ namespace Chlorine.Controller.Commands
 			}
 			_handlerByExecutable.Remove(executable);
 			_queue.Dequeue(executable);
-			handler.HandleComplete(executable);
+			handler.HandleExecutable(executable);
 			HandleExecute();
 		}
 	}

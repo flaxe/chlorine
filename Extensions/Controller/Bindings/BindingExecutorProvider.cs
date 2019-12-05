@@ -1,5 +1,5 @@
 using Chlorine.Controller.Execution;
-using Chlorine.Controller.Providers;
+using Chlorine.Providers;
 
 namespace Chlorine.Controller.Bindings
 {
@@ -7,24 +7,23 @@ namespace Chlorine.Controller.Bindings
 			where TExecutable : class, IExecutable
 	{
 		private readonly ControllerBinder _binder;
+		private readonly IProvider _executorProvider;
 
-		private readonly IProvider<IExecutor<TExecutable>> _provider;
-
-		internal BindingExecutorProvider(ControllerBinder binder, IProvider<IExecutor<TExecutable>> provider)
+		internal BindingExecutorProvider(ControllerBinder binder, IProvider executorProvider)
 		{
 			_binder = binder;
-			_provider = provider;
+			_executorProvider = executorProvider;
 		}
 
 		public void AsSingleton()
 		{
-			_binder.BindExecutable(new ExecutionDelegate<TExecutable>(
-					new SingletonProvider<IExecutor<TExecutable>>(_provider)));
+			_binder.RegisterExecutable(typeof(TExecutable),
+					new ExecutionDelegate<TExecutable>(new SingletonProvider(_executorProvider)));
 		}
 
 		public void AsTransient()
 		{
-			_binder.BindExecutable(new ExecutionDelegate<TExecutable>(_provider));
+			_binder.RegisterExecutable(typeof(TExecutable), new ExecutionDelegate<TExecutable>(_executorProvider));
 		}
 	}
 }

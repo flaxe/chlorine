@@ -1,6 +1,6 @@
 using Chlorine.Controller.Execution;
-using Chlorine.Controller.Providers;
 using Chlorine.Factories;
+using Chlorine.Providers;
 
 namespace Chlorine.Controller.Bindings
 {
@@ -19,21 +19,20 @@ namespace Chlorine.Controller.Bindings
 		public BindingExecutorProvider<TExecutable> To<TExecutor>()
 				where TExecutor : class, IExecutor<TExecutable>
 		{
-			return new BindingExecutorProvider<TExecutable>(_binder,
-					new InstanceProvider<TExecutor, IExecutor<TExecutable>>(_container));
+			return new BindingExecutorProvider<TExecutable>(_binder, new TypeProvider(typeof(TExecutor), _container));
 		}
 
 		public BindingExecutorProvider<TExecutable> FromFactory<TExecutorFactory>()
 				where TExecutorFactory : class, IFactory<IExecutor<TExecutable>>
 		{
 			return new BindingExecutorProvider<TExecutable>(_binder,
-					new FromFactoryProvider<TExecutorFactory, IExecutor<TExecutable>>(_container));
+					new FromFactoryTypeProvider<IExecutor<TExecutable>>(typeof(TExecutorFactory), _container));
 		}
 
 		public void ToInstance(IExecutor<TExecutable> executor)
 		{
-			_binder.BindExecutable(new ExecutionDelegate<TExecutable>(
-					new InstanceProvider<IExecutor<TExecutable>>(executor)));
+			_binder.RegisterExecutable(typeof(TExecutable),
+					new ExecutionDelegate<TExecutable>(new InstanceProvider(executor)));
 		}
 	}
 }

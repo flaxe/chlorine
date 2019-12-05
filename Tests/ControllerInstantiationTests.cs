@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using Chlorine.Controller;
 using Chlorine.Controller.Execution;
+using Chlorine.Factories;
 using Chlorine.Pools;
 using NUnit.Framework;
 
 namespace Chlorine.Tests
 {
-	internal class ControllerInstatiationTests
+	internal class ControllerInstantiationTests
 	{
 		private static readonly Error Reason = new Error(-100, "Test");
 
@@ -51,14 +52,14 @@ namespace Chlorine.Tests
 			public void Complete()
 			{
 				_status = DelegateStatus.Succeed;
-				_handler.HandleComplete(this);
+				_handler.HandleExecutable(this);
 			}
 
 			public void Fail(Error error)
 			{
 				_status = DelegateStatus.Failed;
 				Error = error;
-				_handler.HandleComplete(this);
+				_handler.HandleExecutable(this);
 			}
 		}
 
@@ -115,6 +116,22 @@ namespace Chlorine.Tests
 				}
 			}
 
+			private class TransientDelegateFactory : IFactory<TransientDelegate>
+			{
+				public TransientDelegate Create()
+				{
+					return new TransientDelegate();
+				}
+			}
+
+			private class TransientResultDelegateFactory : IFactory<TransientResultDelegate>
+			{
+				public TransientResultDelegate Create()
+				{
+					return new TransientResultDelegate();
+				}
+			}
+
 			[Test]
 			public void RepeatSucceedTransientAction_AreNotSame()
 			{
@@ -138,6 +155,28 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
+			public void RepeatSucceedFromFactoryTransientAction_AreNotSame()
+			{
+				SharedPool.Clear();
+				Container container = new Container();
+				container.Extend<ControllerExtension>();
+				Executor executor = new Executor();
+				container.BindExecutable<Executable>().ToInstance(executor);
+				container.BindAction<Foo>().FromFactory<TransientDelegateFactory>().AsTransient();
+
+				IController controller = container.Resolve<IController>();
+
+				controller.Perform(new Foo());
+				Executable firstExecutable = executor.CurrentExecutable;
+				executor.CompleteCurrent();
+
+				controller.Perform(new Foo());
+				Executable secondExecutable = executor.CurrentExecutable;
+
+				Assert.AreNotSame(firstExecutable, secondExecutable);
+			}
+
+			[Test]
 			public void RepeatSucceedTransientActionWithResult_AreNotSame()
 			{
 				SharedPool.Clear();
@@ -146,6 +185,28 @@ namespace Chlorine.Tests
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
 				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().AsTransient();
+
+				IController controller = container.Resolve<IController>();
+
+				controller.Perform<Foo, Bar>(new Foo());
+				Executable firstExecutable = executor.CurrentExecutable;
+				executor.CompleteCurrent();
+
+				controller.Perform<Foo, Bar>(new Foo());
+				Executable secondExecutable = executor.CurrentExecutable;
+
+				Assert.AreNotSame(firstExecutable, secondExecutable);
+			}
+
+			[Test]
+			public void RepeatSucceedFromFactoryTransientActionWithResult_AreNotSame()
+			{
+				SharedPool.Clear();
+				Container container = new Container();
+				container.Extend<ControllerExtension>();
+				Executor executor = new Executor();
+				container.BindExecutable<Executable>().ToInstance(executor);
+				container.BindAction<Foo>().With<Bar>().FromFactory<TransientResultDelegateFactory>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -211,7 +272,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().To<TransientDelegate>().WithPool().AsTransient();
+				container.BindAction<Foo>().To<TransientDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -233,7 +294,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().WithPool().AsTransient();
+				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -255,7 +316,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().To<TransientDelegate>().WithPool().AsTransient();
+				container.BindAction<Foo>().To<TransientDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -277,7 +338,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().WithPool().AsTransient();
+				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -295,7 +356,7 @@ namespace Chlorine.Tests
 		[TestFixture]
 		private class StackableTests
 		{
-			private class StackableDelegate : Executable, IActionDelegate<Foo>, IStackable<Foo>
+			private class StackableDelegate : Executable, IStackableActionDelegate<Foo>
 			{
 				public readonly List<int> Codes = new List<int>();
 
@@ -312,12 +373,28 @@ namespace Chlorine.Tests
 				}
 			}
 
-			private class StackableResultDelegate : StackableDelegate, IActionDelegate<Foo, Bar>
+			private class StackableResultDelegate : StackableDelegate, IStackableActionDelegate<Foo, Bar>
 			{
 				public bool TryGetResult(out Bar result)
 				{
 					result = new Bar();
 					return true;
+				}
+			}
+
+			private class StackableDelegateFactory : IFactory<StackableDelegate>
+			{
+				public StackableDelegate Create()
+				{
+					return new StackableDelegate();
+				}
+			}
+
+			private class StackableResultDelegateFactory : IFactory<StackableResultDelegate>
+			{
+				public StackableResultDelegate Create()
+				{
+					return new StackableResultDelegate();
 				}
 			}
 
@@ -329,7 +406,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().To<StackableDelegate>().AsStackable();
+				container.BindAction<Foo>().ToStackable<StackableDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -352,7 +429,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<StackableResultDelegate>().AsStackable();
+				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -375,7 +452,29 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().To<StackableDelegate>().AsStackable();
+				container.BindAction<Foo>().ToStackable<StackableDelegate>().AsTransient();
+
+				IController controller = container.Resolve<IController>();
+
+				controller.Perform(new Foo(10));
+				Executable firstExecutable = executor.CurrentExecutable;
+				executor.CompleteCurrent();
+
+				controller.Perform(new Foo(20));
+				Executable secondExecutable = executor.CurrentExecutable;
+
+				Assert.AreNotSame(firstExecutable, secondExecutable);
+			}
+
+			[Test]
+			public void RepeatSucceedFromFactoryStackableAction_AreNotSame()
+			{
+				SharedPool.Clear();
+				Container container = new Container();
+				container.Extend<ControllerExtension>();
+				Executor executor = new Executor();
+				container.BindExecutable<Executable>().ToInstance(executor);
+				container.BindAction<Foo>().FromStackableFactory<StackableDelegateFactory>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -397,7 +496,29 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<StackableResultDelegate>().AsStackable();
+				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsTransient();
+
+				IController controller = container.Resolve<IController>();
+
+				controller.Perform<Foo, Bar>(new Foo(10));
+				Executable firstExecutable = executor.CurrentExecutable;
+				executor.CompleteCurrent();
+
+				controller.Perform<Foo, Bar>(new Foo(20));
+				Executable secondExecutable = executor.CurrentExecutable;
+
+				Assert.AreNotSame(firstExecutable, secondExecutable);
+			}
+
+			[Test]
+			public void RepeatSucceedFromFactoryStackableActionWithResult_AreNotSame()
+			{
+				SharedPool.Clear();
+				Container container = new Container();
+				container.Extend<ControllerExtension>();
+				Executor executor = new Executor();
+				container.BindExecutable<Executable>().ToInstance(executor);
+				container.BindAction<Foo>().With<Bar>().FromStackableFactory<StackableResultDelegateFactory>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -419,7 +540,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().To<StackableDelegate>().AsStackable();
+				container.BindAction<Foo>().ToStackable<StackableDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -441,7 +562,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<StackableResultDelegate>().AsStackable();
+				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -456,14 +577,14 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void RepeatSucceedStackableActionWithPool_AreSame()
+			public void RepeatSucceedReusableStackableAction_AreSame()
 			{
 				SharedPool.Clear();
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().To<StackableDelegate>().WithPool().AsStackable();
+				container.BindAction<Foo>().ToStackable<StackableDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -478,14 +599,14 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void RepeatSucceedStackableActionWithResultWithPool_AreSame()
+			public void RepeatSucceedReusableStackableActionWithResult_AreSame()
 			{
 				SharedPool.Clear();
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<StackableResultDelegate>().WithPool().AsStackable();
+				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -500,14 +621,14 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void RepeatFailedStackableActionWithPool_AreSame()
+			public void RepeatFailedReusableStackableAction_AreSame()
 			{
 				SharedPool.Clear();
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().To<StackableDelegate>().WithPool().AsStackable();
+				container.BindAction<Foo>().ToStackable<StackableDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -522,14 +643,14 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void RepeatFailedStackableActionWithResultWithPool_AreSame()
+			public void RepeatFailedReusableStackableActionWithResult_AreSame()
 			{
 				SharedPool.Clear();
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<StackableResultDelegate>().WithPool().AsStackable();
+				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 

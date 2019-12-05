@@ -1,23 +1,40 @@
+using System;
 using Chlorine.Controller.Exceptions;
-using Chlorine.Controller.Providers;
+using Chlorine.Providers;
 
 namespace Chlorine.Controller.Execution
 {
-	internal class ExecutionDelegate<TExecutable> : IExecutionDelegate
+	internal sealed class ExecutionDelegate<TExecutable> :
+			IExecutionDelegate,
+			IDisposable
 			where TExecutable : class, IExecutable
 	{
-		private readonly IProvider<IExecutor<TExecutable>> _provider;
+		private readonly IProvider _provider;
 
-		public ExecutionDelegate(IProvider<IExecutor<TExecutable>> provider)
+		public ExecutionDelegate(IProvider provider)
 		{
 			_provider = provider;
 		}
 
+		~ExecutionDelegate()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			if (_provider is IDisposable disposable)
+			{
+				disposable.Dispose();
+			}
+		}
+
 		public void Execute(IExecutable executable, IExecutionHandler handler)
 		{
-			if (executable is TExecutable instance)
+			object executor = _provider.Provide();
+			if (executable is TExecutable concreteExecutable && executor is IExecutor<TExecutable> concreteExecutor)
 			{
-				_provider.Provide().Execute(instance, handler);
+				concreteExecutor.Execute(concreteExecutable, handler);
 			}
 			else
 			{

@@ -10,4 +10,9 @@ namespace Chlorine.Controller.Execution
 
 		void Execute(IExecutionHandler handler);
 	}
+
+	public interface IExecutable<TResult> : IExecutable
+	{
+		bool TryGetResult(out TResult result);
+	}
 }

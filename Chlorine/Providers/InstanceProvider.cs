@@ -1,6 +1,6 @@
 namespace Chlorine.Providers
 {
-	internal sealed class InstanceProvider : IProvider
+	public sealed class InstanceProvider : IProvider
 	{
 		private readonly object _instance;
 

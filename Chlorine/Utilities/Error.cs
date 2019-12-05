@@ -39,16 +39,30 @@ namespace Chlorine
 
 		public int Code => _code;
 		public string Message => _message;
-		public Exception Exception => _exception;
+
+		public Exception ToException()
+		{
+			if (_exception != null)
+			{
+				return _exception;
+			}
+			StringBuilder builder = new StringBuilder();
+			if (!string.IsNullOrWhiteSpace(_message))
+			{
+				builder.Append(_message);
+			}
+			builder.Append('(').Append(_code.ToString()).Append(')');
+			return new Exception(builder.ToString());
+		}
 
 		public override string ToString()
 		{
 			StringBuilder builder = new StringBuilder();
-			if (!string.IsNullOrEmpty(_message))
+			if (!string.IsNullOrWhiteSpace(_message))
 			{
 				builder.Append(_message);
-				builder.Append('(').Append(_code.ToString()).Append(')');
 			}
+			builder.Append('(').Append(_code.ToString()).Append(')');
 			if (_exception != null)
 			{
 				if (builder.Length > 0)

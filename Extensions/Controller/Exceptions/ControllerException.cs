@@ -6,11 +6,10 @@ namespace Chlorine.Controller.Exceptions
 	public enum ControllerErrorCode
 	{
 		ActionNotRegistered = -0xC0001,
-		ActionDoesNotReturnResult = -0xC0002,
+		ActionHasNoResult = -0xC0002,
 		ActionAlreadyRegistered = -0xC0003,
-		InvalidDelegate = -0xC0004,
-		ExecutorNotRegistered = -0xC0005,
-		ExecutorAlreadyRegistered = -0xC0006,
+		ExecutorNotRegistered = -0xC0004,
+		ExecutorAlreadyRegistered = -0xC0005,
 
 		IncompleteBinding = -0xC0101,
 		UnexpectedBinding = -0xC0102,
@@ -19,7 +18,7 @@ namespace Chlorine.Controller.Exceptions
 		ExecutionFailed = -0xC0202,
 		GetResultFailed = -0xC0203,
 
-		UnexpectedAction = -0xC0F01,
+		UnexpectedExecutable = -0xC0F01,
 		InvalidType = -0xC0F02
 	}
 
@@ -32,11 +31,6 @@ namespace Chlorine.Controller.Exceptions
 
 		public ControllerException(ControllerErrorCode code, string message, Exception innerException) :
 				base((int)code, message, innerException)
-		{
-		}
-
-		public ControllerException(Error error) :
-				base(error)
 		{
 		}
 	}

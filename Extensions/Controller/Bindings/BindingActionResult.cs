@@ -1,5 +1,5 @@
-using Chlorine.Controller.Providers;
 using Chlorine.Factories;
+using Chlorine.Providers;
 
 namespace Chlorine.Controller.Bindings
 {
@@ -19,14 +19,28 @@ namespace Chlorine.Controller.Bindings
 				where TActionDelegate : class, IActionDelegate<TAction, TResult>
 		{
 			return new BindingActionDelegate<TAction, TResult>(_binder,
-					new InstanceProvider<TActionDelegate, IActionDelegate<TAction, TResult>>(_container));
+					new TypeProvider(typeof(TActionDelegate), _container));
+		}
+
+		public BindingStackableActionDelegate<TAction, TResult> ToStackable<TActionDelegate>()
+				where TActionDelegate : class, IStackableActionDelegate<TAction, TResult>
+		{
+			return new BindingStackableActionDelegate<TAction, TResult>(_binder,
+					new TypeProvider(typeof(TActionDelegate), _container));
 		}
 
 		public BindingActionDelegate<TAction, TResult> FromFactory<TActionDelegateFactory>()
 				where TActionDelegateFactory : class, IFactory<IActionDelegate<TAction, TResult>>
 		{
 			return new BindingActionDelegate<TAction, TResult>(_binder,
-					new FromFactoryProvider<TActionDelegateFactory, IActionDelegate<TAction, TResult>>(_container));
+					new FromFactoryTypeProvider<IActionDelegate<TAction, TResult>>(typeof(TActionDelegateFactory), _container));
+		}
+
+		public BindingStackableActionDelegate<TAction, TResult> FromStackableFactory<TActionDelegateFactory>()
+				where TActionDelegateFactory : class, IFactory<IStackableActionDelegate<TAction, TResult>>
+		{
+			return new BindingStackableActionDelegate<TAction, TResult>(_binder,
+					new FromFactoryTypeProvider<IActionDelegate<TAction, TResult>>(typeof(TActionDelegateFactory), _container));
 		}
 	}
 }

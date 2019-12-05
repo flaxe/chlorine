@@ -94,7 +94,7 @@ namespace Chlorine.Controller.Commands
 			}
 			_status = CommandStatus.Canceled;
 			_error = error;
-			_handler.HandleComplete(this);
+			_handler.HandleExecutable(this);
 		}
 
 		public void Fail(Error error)
@@ -107,7 +107,7 @@ namespace Chlorine.Controller.Commands
 			_status = CommandStatus.Failed;
 			_error = error;
 			HandleFault(_error);
-			_handler.HandleComplete(this);
+			_handler.HandleExecutable(this);
 		}
 
 		public void Apply()
@@ -119,7 +119,7 @@ namespace Chlorine.Controller.Commands
 			}
 			_status = CommandStatus.Succeed;
 			HandleApply();
-			_handler.HandleComplete(this);
+			_handler.HandleExecutable(this);
 		}
 
 		protected abstract void HandleReset();

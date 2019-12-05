@@ -60,10 +60,5 @@ namespace Chlorine
 			value = default;
 			return false;
 		}
-
-		public static implicit operator Expected<T>(Error error)
-		{
-			return new Expected<T>(error);
-		}
 	}
 }

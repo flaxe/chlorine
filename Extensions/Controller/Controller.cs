@@ -28,72 +28,74 @@ namespace Chlorine.Controller
 
 		public IFuture Perform<TAction>(TAction action) where TAction : struct
 		{
-			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
+			if (_binder.TryResolveSupervisor(typeof(TAction), out object value) &&
+					value is IActionSupervisor<TAction> actionSupervisor)
 			{
-				throw new ControllerException(ControllerErrorCode.ActionNotRegistered,
-						$"Unable to perform '{typeof(TAction).Name}'. Action not registered.");
+				Expected<IFuture> expected = actionSupervisor.Perform(ref action);
+				if (expected.TryGetValue(out IFuture future))
+				{
+					return future;
+				}
+				throw expected.Error.ToException();
 			}
-			Expected<IPromise> expectedPromise = actionSupervisor.Perform(ref action);
-			if (expectedPromise.TryGetValue(out IPromise promise))
-			{
-				return FuturePool.Pull(promise);
-			}
-			throw new ControllerException(expectedPromise.Error);
+			throw new ControllerException(ControllerErrorCode.ActionNotRegistered,
+					$"Unable to perform '{typeof(TAction).Name}'. Action not registered.");
 		}
 
 		public IFuture<TResult> Perform<TAction, TResult>(TAction action) where TAction : struct
 		{
-			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
+			if (_binder.TryResolveSupervisor(typeof(TAction), out object value))
 			{
-				throw new ControllerException(ControllerErrorCode.ActionNotRegistered,
-						$"Unable to perform '{typeof(TAction).Name}'. Action not registered.");
-			}
-			if (actionSupervisor is IActionSupervisor<TAction, TResult> actionResultSupervisor)
-			{
-				Expected<IPromise<TResult>> expectedPromise = actionResultSupervisor.Perform(ref action);
-				if (expectedPromise.TryGetValue(out IPromise<TResult> promise))
+				if (value is IActionSupervisor<TAction, TResult> actionSupervisor)
 				{
-					return FuturePool.Pull(promise);
+					Expected<IFuture<TResult>> expected = actionSupervisor.Perform(ref action);
+					if (expected.TryGetValue(out IFuture<TResult> future))
+					{
+						return future;
+					}
+					throw expected.Error.ToException();
 				}
-				throw new ControllerException(expectedPromise.Error);
+				throw new ControllerException(ControllerErrorCode.ActionHasNoResult,
+						$"Unable to perform '{typeof(TAction).Name}'. Action has no result '{typeof(TResult).Name}'.");
 			}
-			throw new ControllerException(ControllerErrorCode.ActionDoesNotReturnResult,
-					$"Unable to perform '{typeof(TAction).Name}'. Action does not return '{typeof(TResult).Name}'.");
+			throw new ControllerException(ControllerErrorCode.ActionNotRegistered,
+					$"Unable to perform '{typeof(TAction).Name}'. Action not registered.");
 		}
 
 		public IFuture TryPerform<TAction>(TAction action) where TAction : struct
 		{
-			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
+			if (_binder.TryResolveSupervisor(typeof(TAction), out object value) &&
+					value is IActionSupervisor<TAction> actionSupervisor)
 			{
-				return FuturePool.PullRejected(new Error((int)ControllerErrorCode.ActionNotRegistered,
-						$"Unable to perform '{typeof(TAction).Name}'. Action not registered."));
+				Expected<IFuture> expected = actionSupervisor.Perform(ref action);
+				if (expected.TryGetValue(out IFuture future))
+				{
+					return future;
+				}
+				return FuturePool.PullRejected(expected.Error);
 			}
-			Expected<IPromise> expectedPromise = actionSupervisor.Perform(ref action);
-			if (expectedPromise.TryGetValue(out IPromise promise))
-			{
-				return FuturePool.Pull(promise);
-			}
-			return FuturePool.PullRejected(expectedPromise.Error);
+			return FuturePool.PullRejected(new Error((int)ControllerErrorCode.ActionNotRegistered,
+					$"Unable to perform '{typeof(TAction).Name}'. Action not registered."));
 		}
 
 		public IFuture<TResult> TryPerform<TAction, TResult>(TAction action) where TAction : struct
 		{
-			if (!_binder.TryResolveSupervisor(out IActionSupervisor<TAction> actionSupervisor))
+			if (_binder.TryResolveSupervisor(typeof(TAction), out object value))
 			{
-				return FuturePool.PullRejected<TResult>(new Error((int)ControllerErrorCode.ActionNotRegistered,
-						$"Unable to perform '{typeof(TAction).Name}'. Action not registered."));
-			}
-			if (actionSupervisor is IActionSupervisor<TAction, TResult> actionResultSupervisor)
-			{
-				Expected<IPromise<TResult>> expectedPromise = actionResultSupervisor.Perform(ref action);
-				if (expectedPromise.TryGetValue(out IPromise<TResult> promise))
+				if (value is IActionSupervisor<TAction, TResult> actionSupervisor)
 				{
-					return FuturePool.Pull(promise);
+					Expected<IFuture<TResult>> expected = actionSupervisor.Perform(ref action);
+					if (expected.TryGetValue(out IFuture<TResult> future))
+					{
+						return future;
+					}
+					return FuturePool.PullRejected<TResult>(expected.Error);
 				}
-				return FuturePool.PullRejected<TResult>(expectedPromise.Error);
+				return FuturePool.PullRejected<TResult>(new Error((int)ControllerErrorCode.ActionHasNoResult,
+						$"Unable to perform '{typeof(TAction).Name}'. Action has no result '{typeof(TResult).Name}'."));
 			}
-			return FuturePool.PullRejected<TResult>(new Error((int)ControllerErrorCode.ActionDoesNotReturnResult,
-					$"Unable to perform '{typeof(TAction).Name}'. Action does not return '{typeof(TResult).Name}'."));
+			return FuturePool.PullRejected<TResult>(new Error((int)ControllerErrorCode.ActionNotRegistered,
+					$"Unable to perform '{typeof(TAction).Name}'. Action not registered."));
 		}
 	}
 }

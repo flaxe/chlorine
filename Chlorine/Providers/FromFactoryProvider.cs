@@ -3,7 +3,7 @@ using Chlorine.Factories;
 
 namespace Chlorine.Providers
 {
-	internal sealed class FromFactoryProvider<T> : IProvider
+	public sealed class FromFactoryProvider<T> : IProvider
 			where T : class
 	{
 		private readonly IFactory<T> _factory;
@@ -19,7 +19,7 @@ namespace Chlorine.Providers
 		}
 	}
 
-	internal sealed class FromFactoryTypeProvider<T> : IProvider, IDisposable
+	public sealed class FromFactoryTypeProvider<T> : IProvider, IDisposable
 			where T : class
 	{
 		private readonly Type _factoryType;
@@ -60,7 +60,7 @@ namespace Chlorine.Providers
 		}
 	}
 
-	internal sealed class FromFactoryMethodProvider<T> : IProvider
+	public sealed class FromFactoryMethodProvider<T> : IProvider
 			where T : class
 	{
 		private readonly FactoryMethod<T> _factoryMethod;

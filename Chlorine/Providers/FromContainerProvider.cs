@@ -2,7 +2,7 @@ using System;
 
 namespace Chlorine.Providers
 {
-	internal sealed class FromContainerProvider : IProvider
+	public sealed class FromContainerProvider : IProvider
 	{
 		private readonly IContainer _container;
 		private readonly Type _type;

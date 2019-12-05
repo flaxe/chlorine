@@ -21,12 +21,12 @@ namespace Chlorine.Bindings
 
 		public void AsSingleton()
 		{
-			_binder.Bind(_type, _id, new SingletonProvider(_provider));
+			_binder.Register(_type, _id, new SingletonProvider(_provider));
 		}
 
 		public void AsTransient()
 		{
-			_binder.Bind(_type, _id, _provider);
+			_binder.Register(_type, _id, _provider);
 		}
 	}
 }

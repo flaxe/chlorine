@@ -31,10 +31,5 @@ namespace Chlorine.Exceptions
 				base((int)code, message, innerException)
 		{
 		}
-
-		public InjectException(Error error) :
-				base(error)
-		{
-		}
 	}
 }

@@ -4,13 +4,13 @@ using Chlorine.Providers;
 
 namespace Chlorine.Controller.Bindings
 {
-	public struct BindingActionDelegate<TAction>
+	public struct BindingStackableActionDelegate<TAction>
 			where TAction : struct
 	{
 		private readonly ControllerBinder _binder;
 		private readonly IProvider _delegateProvider;
 
-		internal BindingActionDelegate(ControllerBinder binder, IProvider delegateProvider)
+		internal BindingStackableActionDelegate(ControllerBinder binder, IProvider delegateProvider)
 		{
 			_binder = binder;
 			_delegateProvider = delegateProvider;
@@ -19,23 +19,23 @@ namespace Chlorine.Controller.Bindings
 		public void AsTransient()
 		{
 			_binder.RegisterAction(typeof(TAction),
-					new ActionSupervisor<TAction>(_binder, new TransientDelegateProvider(_delegateProvider)));
+					new StackableActionSupervisor<TAction>(_binder, new TransientDelegateProvider(_delegateProvider)));
 		}
 
 		public void AsReusable()
 		{
 			_binder.RegisterAction(typeof(TAction),
-					new ActionSupervisor<TAction>(_binder, new ReusableDelegateProvider(_delegateProvider)));
+					new StackableActionSupervisor<TAction>(_binder, new ReusableDelegateProvider(_delegateProvider)));
 		}
 	}
 
-	public struct BindingActionDelegate<TAction, TResult>
+	public struct BindingStackableActionDelegate<TAction, TResult>
 			where TAction : struct
 	{
 		private readonly ControllerBinder _binder;
 		private readonly IProvider _delegateProvider;
 
-		internal BindingActionDelegate(ControllerBinder binder, IProvider delegateProvider)
+		internal BindingStackableActionDelegate(ControllerBinder binder, IProvider delegateProvider)
 		{
 			_binder = binder;
 			_delegateProvider = delegateProvider;
@@ -44,13 +44,13 @@ namespace Chlorine.Controller.Bindings
 		public void AsTransient()
 		{
 			_binder.RegisterAction(typeof(TAction),
-					new ActionSupervisor<TAction, TResult>(_binder, new TransientDelegateProvider(_delegateProvider)));
+					new StackableActionSupervisor<TAction, TResult>(_binder, new TransientDelegateProvider(_delegateProvider)));
 		}
 
 		public void AsReusable()
 		{
 			_binder.RegisterAction(typeof(TAction),
-					new ActionSupervisor<TAction, TResult>(_binder, new ReusableDelegateProvider(_delegateProvider)));
+					new StackableActionSupervisor<TAction, TResult>(_binder, new ReusableDelegateProvider(_delegateProvider)));
 		}
 	}
 }

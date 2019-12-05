@@ -42,32 +42,32 @@ namespace Chlorine.Bindings
 
 		public void FromResolve<TResolve>(object id = null) where TResolve : class, T
 		{
-			_binder.Bind(typeof(T), new FromContainerProvider(_container, typeof(TResolve), id));
+			_binder.Register(typeof(T), new FromContainerProvider(_container, typeof(TResolve), id));
 		}
 
 		public void FromContainer(Container container)
 		{
-			_binder.Bind(typeof(T), new FromContainerProvider(container, typeof(T)));
+			_binder.Register(typeof(T), new FromContainerProvider(container, typeof(T)));
 		}
 
 		public void FromContainerResolve<TResolve>(Container container, object id = null) where TResolve : class, T
 		{
-			_binder.Bind(typeof(T), new FromContainerProvider(container, typeof(TResolve), id));
+			_binder.Register(typeof(T), new FromContainerProvider(container, typeof(TResolve), id));
 		}
 
 		public void ToInstance(T instance)
 		{
-			_binder.Bind(typeof(T), new InstanceProvider(instance));
+			_binder.Register(typeof(T), new InstanceProvider(instance));
 		}
 
 		public void AsSingleton()
 		{
-			_binder.Bind(typeof(T), new SingletonProvider(new TypeProvider(typeof(T), _container)));
+			_binder.Register(typeof(T), new SingletonProvider(new TypeProvider(typeof(T), _container)));
 		}
 
 		public void AsTransient()
 		{
-			_binder.Bind(typeof(T), new TypeProvider(typeof(T), _container));
+			_binder.Register(typeof(T), new TypeProvider(typeof(T), _container));
 		}
 	}
 }

@@ -77,12 +77,12 @@ namespace Chlorine.Bindings
 			return new BindingType<T>(container, this);
 		}
 
-		public void Bind(Type type, IProvider provider)
+		internal void Register(Type type, IProvider provider)
 		{
-			Bind(type, null, provider);
+			Register(type, null, provider);
 		}
 
-		public void Bind(Type type, object id, IProvider provider)
+		internal void Register(Type type, object id, IProvider provider)
 		{
 #if DEBUG
 			if (_bindingType != null && _bindingType != type)
@@ -119,7 +119,7 @@ namespace Chlorine.Bindings
 			}
 		}
 
-		public bool TryResolveType(Type type, object id, out object instance)
+		internal bool TryResolveType(Type type, object id, out object instance)
 		{
 #if DEBUG
 			if (_bindingType != null)
