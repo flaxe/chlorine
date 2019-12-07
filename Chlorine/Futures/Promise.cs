@@ -14,8 +14,8 @@ namespace Chlorine.Futures
 		{
 			if (Status != PromiseStatus.Pending)
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
-						"Invalid operation. Promise already resolved or rejected.");
+				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+						"Promise already resolved or rejected.");
 			}
 			Status = PromiseStatus.Resolved;
 			HandleResolve();
@@ -39,8 +39,8 @@ namespace Chlorine.Futures
 			{
 				if (Status != PromiseStatus.Resolved)
 				{
-					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
-							"Invalid operation. Promise was not resolved.");
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise was not resolved.");
 				}
 				return _result;
 			}
@@ -92,8 +92,8 @@ namespace Chlorine.Futures
 		{
 			if (Status != PromiseStatus.Pending)
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
-						"Invalid operation. Promise already resolved or rejected.");
+				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+						"Promise already resolved or rejected.");
 			}
 			Status = PromiseStatus.Resolved;
 			_result = result;

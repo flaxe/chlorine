@@ -37,8 +37,8 @@ namespace Chlorine.Futures.Internal
 			{
 				if (_status != PromiseStatus.Rejected)
 				{
-					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
-							"Invalid operation. Promise was not rejected.");
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise was not rejected.");
 				}
 				return _reason;
 			}
@@ -80,8 +80,8 @@ namespace Chlorine.Futures.Internal
 		{
 			if (_status != PromiseStatus.Pending)
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
-						"Invalid operation. Promise already resolved or rejected.");
+				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+						"Promise already resolved or rejected.");
 			}
 			_status = PromiseStatus.Rejected;
 			_reason = reason;

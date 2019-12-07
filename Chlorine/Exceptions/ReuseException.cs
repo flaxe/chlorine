@@ -2,17 +2,18 @@ using System;
 
 namespace Chlorine.Exceptions
 {
-	public class ReuseException : ChlorineException
+	public class ReuseException : ForbiddenOperationException
 	{
 		public ReuseException(object instance) :
-				base(ChlorineErrorCode.NotResetBeforeReuse, 
-						$"Instance '{instance.GetType().Name}' was not reset before reuse.")
+				base(ForbiddenOperationErrorCode.AlreadyInitialized,
+						$"Instance '{instance.GetType().Name}' already initialized. Try reset before reuse.")
 		{
 		}
 
 		public ReuseException(object instance, Exception innerException) :
-				base(ChlorineErrorCode.NotResetBeforeReuse, 
-						$"Instance '{instance.GetType().Name}' was not reset before reuse.", innerException)
+				base(ForbiddenOperationErrorCode.AlreadyInitialized,
+						$"Instance '{instance.GetType().Name}' already initialized. Try reset before reuse.",
+						innerException)
 		{
 		}
 	}

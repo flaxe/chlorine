@@ -15,7 +15,7 @@ namespace Chlorine.Exceptions
 		InvalidOperation = -0xA0F01
 	}
 
-	public class ContainerException : ChlorineException
+	public class ContainerException : AbstractException
 	{
 		public ContainerException(ContainerErrorCode code, string message) :
 				base((int)code, message)

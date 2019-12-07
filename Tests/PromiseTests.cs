@@ -30,7 +30,7 @@ namespace Chlorine.Tests
 				Promise promise = PromisePool.Pull();
 				promise.Resolve();
 
-				Assert.Throws<ChlorineException>(() => promise.Resolve());
+				Assert.Throws<ForbiddenOperationException>(() => promise.Resolve());
 			}
 
 			[Test]
@@ -40,7 +40,7 @@ namespace Chlorine.Tests
 				Promise promise = PromisePool.Pull();
 				promise.Reject(Reason);
 
-				Assert.Throws<ChlorineException>(() => promise.Resolve());
+				Assert.Throws<ForbiddenOperationException>(() => promise.Resolve());
 			}
 
 			[Test]
@@ -60,7 +60,7 @@ namespace Chlorine.Tests
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
-				Assert.Throws<ChlorineException>(() => promise.Resolve(Result));
+				Assert.Throws<ForbiddenOperationException>(() => promise.Resolve(Result));
 			}
 
 			[Test]
@@ -70,7 +70,7 @@ namespace Chlorine.Tests
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
-				Assert.Throws<ChlorineException>(() => promise.Resolve(Result));
+				Assert.Throws<ForbiddenOperationException>(() => promise.Resolve(Result));
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace Chlorine.Tests
 				Promise promise = PromisePool.Pull();
 				promise.Reject(Reason);
 
-				Assert.Throws<ChlorineException>(() => promise.Reject(Reason));
+				Assert.Throws<ForbiddenOperationException>(() => promise.Reject(Reason));
 			}
 
 			[Test]
@@ -104,7 +104,7 @@ namespace Chlorine.Tests
 				Promise promise = PromisePool.Pull();
 				promise.Resolve();
 
-				Assert.Throws<ChlorineException>(() => promise.Reject(Reason));
+				Assert.Throws<ForbiddenOperationException>(() => promise.Reject(Reason));
 			}
 
 			[Test]
@@ -124,7 +124,7 @@ namespace Chlorine.Tests
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
-				Assert.Throws<ChlorineException>(() => promise.Reject(Reason));
+				Assert.Throws<ForbiddenOperationException>(() => promise.Reject(Reason));
 			}
 
 			[Test]
@@ -134,7 +134,7 @@ namespace Chlorine.Tests
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
-				Assert.Throws<ChlorineException>(() => promise.Reject(Reason));
+				Assert.Throws<ForbiddenOperationException>(() => promise.Reject(Reason));
 			}
 		}
 
@@ -168,7 +168,7 @@ namespace Chlorine.Tests
 				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					uint _ = promise.Result;
 				});
@@ -190,7 +190,7 @@ namespace Chlorine.Tests
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Reject(Reason);
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					uint _ = promise.Result;
 				});
@@ -236,7 +236,7 @@ namespace Chlorine.Tests
 				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					Error _ = promise.Reason;
 				});
@@ -248,7 +248,7 @@ namespace Chlorine.Tests
 				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					Error _ = promise.Reason;
 				});
@@ -261,7 +261,7 @@ namespace Chlorine.Tests
 				Promise promise = PromisePool.Pull();
 				promise.Resolve();
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					Error _ = promise.Reason;
 				});
@@ -274,7 +274,7 @@ namespace Chlorine.Tests
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				promise.Resolve(Result);
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					Error _ = promise.Reason;
 				});

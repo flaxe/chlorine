@@ -22,7 +22,7 @@ namespace Chlorine.Controller.Exceptions
 		InvalidType = -0xC0F02
 	}
 
-	public class ControllerException : ChlorineException
+	public class ControllerException : AbstractException
 	{
 		public ControllerException(ControllerErrorCode code, string message) :
 				base((int)code, message)

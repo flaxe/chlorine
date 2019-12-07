@@ -30,7 +30,7 @@ namespace Chlorine
 			{
 				if (!_hasValue)
 				{
-					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
 							"Invalid operation. Expected has no value.");
 				}
 				return _value;
@@ -43,7 +43,7 @@ namespace Chlorine
 			{
 				if (_hasValue)
 				{
-					throw new ChlorineException(ChlorineErrorCode.InvalidOperation,
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
 							"Invalid operation. Expected has no error.");
 				}
 				return _error;

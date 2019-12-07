@@ -95,7 +95,7 @@ namespace Chlorine.Tests
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				IFuture<uint> future = FuturePool.Pull(promise);
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					uint _ = future.Result;
 				});
@@ -119,7 +119,7 @@ namespace Chlorine.Tests
 				IFuture<uint> future = FuturePool.Pull(promise);
 				promise.Reject(Reason);
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					uint _ = future.Result;
 				});
@@ -169,7 +169,7 @@ namespace Chlorine.Tests
 				Promise promise = PromisePool.Pull();
 				IFuture future = FuturePool.Pull(promise);
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					Error _ = future.Reason;
 				});
@@ -182,7 +182,7 @@ namespace Chlorine.Tests
 				Promise<uint> promise = PromisePool.Pull<uint>();
 				IFuture<uint> future = FuturePool.Pull(promise);
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					Error _ = future.Reason;
 				});
@@ -196,7 +196,7 @@ namespace Chlorine.Tests
 				IFuture future = FuturePool.Pull(promise);
 				promise.Resolve();
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					Error _ = future.Reason;
 				});
@@ -210,7 +210,7 @@ namespace Chlorine.Tests
 				IFuture<uint> future = FuturePool.Pull(promise);
 				promise.Resolve(Result);
 
-				Assert.Throws<ChlorineException>(() =>
+				Assert.Throws<ForbiddenOperationException>(() =>
 				{
 					Error _ = future.Reason;
 				});

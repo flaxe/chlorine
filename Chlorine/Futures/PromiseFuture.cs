@@ -61,8 +61,7 @@ namespace Chlorine.Futures
 			}
 			else
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState,
-						"Invalid state. Unexpected future.");
+				throw new InvalidArgumentException(InvalidArgumentErrorCode.UnexpectedArgument, "Unexpected future.");
 			}
 		}
 	}
@@ -124,8 +123,7 @@ namespace Chlorine.Futures
 			}
 			else
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState,
-						"Invalid state. Unexpected future.");
+				throw new InvalidArgumentException(InvalidArgumentErrorCode.UnexpectedArgument, "Unexpected future.");
 			}
 		}
 	}
@@ -187,8 +185,7 @@ namespace Chlorine.Futures
 			}
 			else
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState,
-						"Invalid state. Unexpected future.");
+				throw new InvalidArgumentException(InvalidArgumentErrorCode.UnexpectedArgument, "Unexpected future.");
 			}
 		}
 	}
@@ -250,8 +247,7 @@ namespace Chlorine.Futures
 			}
 			else
 			{
-				throw new ChlorineException(ChlorineErrorCode.InvalidState,
-						"Invalid state. Unexpected future.");
+				throw new InvalidArgumentException(InvalidArgumentErrorCode.UnexpectedArgument, "Unexpected future.");
 			}
 		}
 	}

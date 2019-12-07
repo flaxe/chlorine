@@ -20,7 +20,7 @@ namespace Chlorine.Exceptions
 		InvalidType = -0xADF01
 	}
 
-	public class InjectException : ChlorineException
+	public class InjectException : AbstractException
 	{
 		public InjectException(InjectErrorCode code, string message) :
 				base((int)code, message)

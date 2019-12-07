@@ -14,7 +14,7 @@ namespace Chlorine.Controller.Exceptions
 		InvalidOperation = -0xCCF02
 	}
 
-	public class CommandException : ChlorineException
+	public class CommandException : AbstractException
 	{
 		public CommandException(CommandErrorCode code, string message) :
 				base((int)code, message)
