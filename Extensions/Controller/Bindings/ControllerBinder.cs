@@ -55,6 +55,8 @@ namespace Chlorine.Controller.Bindings
 				}
 				_actionSupervisorByType.Clear();
 			}
+			_executionDelegateCache = null;
+			_missingExecutorsCache = null;
 		}
 
 		public BindingAction<TAction> BindAction<TAction>(Container container)

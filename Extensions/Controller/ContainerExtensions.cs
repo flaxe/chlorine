@@ -3,7 +3,7 @@ using Chlorine.Controller.Execution;
 
 namespace Chlorine.Controller
 {
-	public static class ControllerExtensions
+	public static class ContainerExtensions
 	{
 		public static BindingAction<TAction> BindAction<TAction>(this Container container)
 				where TAction : struct

@@ -4,7 +4,8 @@ namespace Chlorine.Exceptions
 {
 	public enum InvalidArgumentErrorCode
 	{
-		UnexpectedArgument = -0xFE001
+		InvalidType = -0xFE001,
+		UnexpectedArgument = -0xFE002
 	}
 
 	public class InvalidArgumentException : AbstractException

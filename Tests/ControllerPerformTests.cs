@@ -33,7 +33,7 @@ namespace Chlorine.Tests
 			}
 		}
 
-		private static readonly Bar Result = new Bar(10);
+		private static readonly Bar ActionResult = new Bar(10);
 
 		private class Executable : IExecutable
 		{
@@ -127,11 +127,7 @@ namespace Chlorine.Tests
 					return true;
 				}
 
-				public bool TryGetResult(out Foo result)
-				{
-					result = _action;
-					return true;
-				}
+				public Foo Result => _action;
 			}
 
 			[Test]
@@ -204,11 +200,7 @@ namespace Chlorine.Tests
 					return true;
 				}
 
-				public bool TryGetResult(out Bar result)
-				{
-					result = Result;
-					return true;
-				}
+				public Bar Result => ActionResult;
 			}
 
 			[Test]
@@ -243,7 +235,7 @@ namespace Chlorine.Tests
 
 				executor.CompleteCurrent();
 				Assert.IsTrue(future.IsResolved);
-				Assert.AreEqual(Result, future.Result);
+				Assert.AreEqual(ActionResult, future.Result);
 			}
 
 			[Test]
@@ -270,7 +262,7 @@ namespace Chlorine.Tests
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
 				Assert.IsTrue(future.IsResolved);
-				Assert.AreEqual(Result, future.Result);
+				Assert.AreEqual(ActionResult, future.Result);
 			}
 
 			[Test]
@@ -341,85 +333,28 @@ namespace Chlorine.Tests
 		[TestFixture]
 		private class GetResultTests
 		{
-			private class SucceedResultDelegate : Executable, IActionDelegate<Foo, Bar>
+			private class ResultDelegate : Executable, IActionDelegate<Foo, Bar>
 			{
 				public bool Init(Foo action)
 				{
 					return true;
 				}
 
-				public bool TryGetResult(out Bar result)
-				{
-					result = Result;
-					return true;
-				}
+				public Bar Result => ActionResult;
 			}
 
 			[Test]
-			public void ActionWithResultSucceedGetResult_AreEqual()
+			public void ActionWithResultGetResult_AreEqual()
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
 				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
-				container.BindAction<Foo>().With<Bar>().To<SucceedResultDelegate>().AsTransient();
+				container.BindAction<Foo>().With<Bar>().To<ResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
 				Assert.IsTrue(future.IsResolved);
-				Assert.AreEqual(Result, future.Result);
-			}
-
-			private class FailedResultDelegate : Executable, IActionDelegate<Foo, Bar>
-			{
-				public bool Init(Foo action)
-				{
-					return true;
-				}
-
-				public bool TryGetResult(out Bar result)
-				{
-					result = default;
-					return false;
-				}
-			}
-
-			[Test]
-			public void ActionWithResultFailedGetResult_IsRejected()
-			{
-				Container container = new Container();
-				container.Extend<ControllerExtension>();
-				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
-				container.BindAction<Foo>().With<Bar>().To<FailedResultDelegate>().AsTransient();
-
-				IController controller = container.Resolve<IController>();
-				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
-				Assert.IsTrue(future.IsRejected);
-			}
-
-			private class ExceptionalResultDelegate : Executable, IActionDelegate<Foo, Bar>
-			{
-				public bool Init(Foo action)
-				{
-					return true;
-				}
-
-				public bool TryGetResult(out Bar result)
-				{
-					throw Exception;
-				}
-			}
-
-			[Test]
-			public void ActionWithResultGetResultWithException_IsRejected()
-			{
-				Container container = new Container();
-				container.Extend<ControllerExtension>();
-				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
-				container.BindAction<Foo>().With<Bar>().To<ExceptionalResultDelegate>().AsTransient();
-
-				IController controller = container.Resolve<IController>();
-				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
-				Assert.IsTrue(future.IsRejected);
+				Assert.AreEqual(ActionResult, future.Result);
 			}
 		}
 	}

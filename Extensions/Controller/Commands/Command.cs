@@ -39,8 +39,8 @@ namespace Chlorine.Controller.Commands
 			{
 				if (_status != CommandStatus.Failed)
 				{
-					throw new CommandException(CommandErrorCode.InvalidOperation,
-							$"Invalid operation. Command '{GetType().Name}' was not failed.");
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							$"Command '{GetType().Name}' was not failed.");
 				}
 				return _error;
 			}
@@ -89,8 +89,8 @@ namespace Chlorine.Controller.Commands
 		{
 			if (_status != CommandStatus.Pending)
 			{
-				throw new CommandException(CommandErrorCode.InvalidOperation,
-						$"Invalid operation. Can not cancel not pending command '{GetType().Name}'.");
+				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+						$"Can not cancel not pending command '{GetType().Name}'.");
 			}
 			_status = CommandStatus.Canceled;
 			_error = error;
@@ -101,8 +101,8 @@ namespace Chlorine.Controller.Commands
 		{
 			if (_status != CommandStatus.Executed)
 			{
-				throw new CommandException(CommandErrorCode.InvalidOperation,
-						$"Invalid operation. Can not fail not executed command '{GetType().Name}'.");
+				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+						$"Can not fail not executed command '{GetType().Name}'.");
 			}
 			_status = CommandStatus.Failed;
 			_error = error;
@@ -114,8 +114,8 @@ namespace Chlorine.Controller.Commands
 		{
 			if (_status != CommandStatus.Executed)
 			{
-				throw new CommandException(CommandErrorCode.InvalidOperation,
-						$"Invalid operation. Can not apply not executed command '{GetType().Name}'.");
+				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+						$"Can not apply not executed command '{GetType().Name}'.");
 			}
 			_status = CommandStatus.Succeed;
 			HandleApply();
@@ -156,8 +156,8 @@ namespace Chlorine.Controller.Commands
 				{
 					if (_succeed)
 					{
-						throw new CommandException(CommandErrorCode.InvalidOperation,
-								"Invalid operation. Check result has no error.");
+						throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+								"Check result has no error.");
 					}
 					return _error;
 				}
@@ -200,8 +200,8 @@ namespace Chlorine.Controller.Commands
 				{
 					if (_status != ExecutionStatus.Failed)
 					{
-						throw new CommandException(CommandErrorCode.InvalidOperation,
-								"Invalid operation. Execution result has no error.");
+						throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+								"Execution result has no error.");
 					}
 					return _error;
 				}

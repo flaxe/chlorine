@@ -31,6 +31,7 @@ namespace Chlorine.Extensions
 				{
 					extending.Dispose();
 				}
+				_extendingByType.Clear();
 			}
 		}
 

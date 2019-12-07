@@ -173,15 +173,7 @@ namespace Chlorine.Controller.Supervisors.Internal
 				{
 					try
 					{
-						if (resultExecutable.TryGetResult(out TResult result))
-						{
-							promise.Resolve(result);
-						}
-						else
-						{
-							promise.Reject(new Error((int)ControllerErrorCode.GetResultFailed,
-									$"Failed to get result '{typeof(TResult).Name}' from '{executable.GetType().Name}'."));
-						}
+						promise.Resolve(resultExecutable.Result);
 					}
 					catch (Exception exception)
 					{

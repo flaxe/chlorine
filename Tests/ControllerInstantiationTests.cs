@@ -109,11 +109,7 @@ namespace Chlorine.Tests
 
 			private class TransientResultDelegate : TransientDelegate, IActionDelegate<Foo, Bar>
 			{
-				public bool TryGetResult(out Bar result)
-				{
-					result = new Bar();
-					return true;
-				}
+				public Bar Result => new Bar();
 			}
 
 			private class TransientDelegateFactory : IFactory<TransientDelegate>
@@ -375,11 +371,7 @@ namespace Chlorine.Tests
 
 			private class StackableResultDelegate : StackableDelegate, IStackableActionDelegate<Foo, Bar>
 			{
-				public bool TryGetResult(out Bar result)
-				{
-					result = new Bar();
-					return true;
-				}
+				public Bar Result => new Bar();
 			}
 
 			private class StackableDelegateFactory : IFactory<StackableDelegate>

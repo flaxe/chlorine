@@ -34,11 +34,7 @@ namespace Chlorine.Tests
 			{
 			}
 
-			public bool TryGetResult(out Bar result)
-			{
-				result = new Bar();
-				return true;
-			}
+			public Bar Result => new Bar();
 		}
 
 		private class FooExecutor : IExecutor<FooCommand>

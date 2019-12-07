@@ -11,7 +11,6 @@ namespace Chlorine.Controller.Exceptions
 		ExecutionFailed = -0xCCC02,
 
 		UnexpectedCommand = -0xCCF01,
-		InvalidOperation = -0xCCF02
 	}
 
 	public class CommandException : AbstractException
