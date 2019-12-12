@@ -34,9 +34,9 @@ namespace Chlorine.Controller.Supervisors
 			}
 		}
 
-		public Expected<IFuture> Perform(ref TAction action)
+		public Expected<IFuture> Perform(in TAction action)
 		{
-			return Execute(ref action, _delegateProvider.Provide() as IActionDelegate<TAction>);
+			return Execute(in action, _delegateProvider.Provide() as IActionDelegate<TAction>);
 		}
 
 		protected override void HandleRelease(IExecutable executable)
@@ -72,14 +72,14 @@ namespace Chlorine.Controller.Supervisors
 			}
 		}
 
-		public Expected<IFuture<TResult>> Perform(ref TAction action)
+		public Expected<IFuture<TResult>> Perform(in TAction action)
 		{
-			return Execute(ref action, _delegateProvider.Provide() as IActionDelegate<TAction, TResult>);
+			return Execute(in action, _delegateProvider.Provide() as IActionDelegate<TAction, TResult>);
 		}
 
-		Expected<IFuture> IActionSupervisor<TAction>.Perform(ref TAction action)
+		Expected<IFuture> IActionSupervisor<TAction>.Perform(in TAction action)
 		{
-			Expected<IFuture<TResult>> expected = Perform(ref action);
+			Expected<IFuture<TResult>> expected = Perform(in action);
 			return expected.TryGetValue(out IFuture<TResult> future) ?
 					new Expected<IFuture>(future) :
 					new Expected<IFuture>(expected.Error);

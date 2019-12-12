@@ -82,7 +82,7 @@ namespace Chlorine.Injection
 			{
 				foreach (InjectFieldInfo fieldInfo in fieldsInfo)
 				{
-					fieldInfo.Info.SetValue(instance, ResolveType(info, fieldInfo.Info.FieldType, fieldInfo.Attribute));
+					fieldInfo.Info.SetValue(instance, ResolveType(new InjectContext(info, fieldInfo)));
 				}
 			}
 			List<InjectPropertyInfo> propertiesInfo = info.Properties;
@@ -90,7 +90,7 @@ namespace Chlorine.Injection
 			{
 				foreach (InjectPropertyInfo propertyInfo in propertiesInfo)
 				{
-					propertyInfo.Info.SetValue(instance, ResolveType(info, propertyInfo.Info.PropertyType, propertyInfo.Attribute));
+					propertyInfo.Info.SetValue(instance, ResolveType(new InjectContext(info, propertyInfo)));
 				}
 			}
 			List<InjectMethodInfo> methodsInfo = info.Methods;
@@ -111,12 +111,12 @@ namespace Chlorine.Injection
 			}
 		}
 
-		private object ResolveType(InjectInfo info, Type type, InjectAttributeInfo attributeInfo)
+		private object ResolveType(in InjectContext context)
 		{
-			if (!_binder.TryResolveType(type, attributeInfo?.Id, out object instance) && (attributeInfo == null || !attributeInfo.Optional))
+			if (!_binder.TryResolveType(in context, out object instance) && !context.Optional)
 			{
 				throw new InjectException(InjectErrorCode.TypeNotRegistered,
-						$"Unable to resolve '{type.Name}'{(attributeInfo?.Id != null ? $" with attribute '{attributeInfo.Id}'" : "")} while processing '{info.Type.Name}'.");
+						$"Unable to resolve '{context.InjectType.Name}'{(context.InjectId != null ? $" with attribute '{context.InjectId}'" : "")} while processing '{context.SourceType.Name}'.");
 			}
 			return instance;
 		}
@@ -148,7 +148,7 @@ namespace Chlorine.Injection
 									break;
 								}
 							}
-							parameters[i] = parameter ?? ResolveType(info, parameterType, parameterInfo.Attribute);
+							parameters[i] = parameter ?? ResolveType(new InjectContext(info, parameterInfo));
 						}
 					}
 					finally
@@ -160,9 +160,7 @@ namespace Chlorine.Injection
 				{
 					for (int i = 0; i < parametersInfo.Count; i++)
 					{
-						InjectParameterInfo parameterInfo = parametersInfo[i];
-						Type parameterType = parameterInfo.Info.ParameterType;
-						parameters[i] = ResolveType(info, parameterType, parameterInfo.Attribute);
+						parameters[i] = ResolveType(new InjectContext(info, parametersInfo[i]));
 					}
 				}
 			}

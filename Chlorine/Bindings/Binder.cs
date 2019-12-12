@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Chlorine.Exceptions;
+using Chlorine.Injection;
 using Chlorine.Providers;
 
 namespace Chlorine.Bindings
@@ -119,7 +120,7 @@ namespace Chlorine.Bindings
 			}
 		}
 
-		internal bool TryResolveType(Type type, object id, out object instance)
+		internal bool TryResolveType(in InjectContext context, out object instance)
 		{
 #if DEBUG
 			if (_bindingType != null)
@@ -128,12 +129,14 @@ namespace Chlorine.Bindings
 						$"Incomplete binding. Complete '{_bindingType.Name}' binding first");
 			}
 #endif
+			Type type = context.InjectType;
+			object id = context.InjectId;
 			if (TryGetTypeProvider(type, id, out IProvider provider))
 			{
 				instance = provider.Provide();
 				return true;
 			}
-			if (_parent != null && _parent.TryResolveType(type, id, out instance))
+			if (_parent != null && _parent.TryResolveType(in context, out instance))
 			{
 				return true;
 			}

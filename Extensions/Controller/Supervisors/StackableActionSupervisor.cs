@@ -37,7 +37,7 @@ namespace Chlorine.Controller.Supervisors
 			}
 		}
 
-		public Expected<IFuture> Perform(ref TAction action)
+		public Expected<IFuture> Perform(in TAction action)
 		{
 			if (_delegates != null && _delegates.Count > 0)
 			{
@@ -59,7 +59,7 @@ namespace Chlorine.Controller.Supervisors
 			{
 				_delegates.Add(actionDelegate);
 			}
-			return Execute(ref action, actionDelegate);
+			return Execute(in action, actionDelegate);
 		}
 
 		protected override void HandleRelease(IExecutable executable)
@@ -97,7 +97,7 @@ namespace Chlorine.Controller.Supervisors
 			}
 		}
 
-		public Expected<IFuture<TResult>> Perform(ref TAction action)
+		public Expected<IFuture<TResult>> Perform(in TAction action)
 		{
 			if (_delegates != null && _delegates.Count > 0)
 			{
@@ -120,12 +120,12 @@ namespace Chlorine.Controller.Supervisors
 			{
 				_delegates.Add(actionDelegate);
 			}
-			return Execute(ref action, actionDelegate);;
+			return Execute(in action, actionDelegate);;
 		}
 
-		Expected<IFuture> IActionSupervisor<TAction>.Perform(ref TAction action)
+		Expected<IFuture> IActionSupervisor<TAction>.Perform(in TAction action)
 		{
-			Expected<IFuture<TResult>> expected = Perform(ref action);
+			Expected<IFuture<TResult>> expected = Perform(in action);
 			return expected.TryGetValue(out IFuture<TResult> future) ?
 					new Expected<IFuture>(future) :
 					new Expected<IFuture>(expected.Error);

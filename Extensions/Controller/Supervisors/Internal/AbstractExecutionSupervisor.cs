@@ -22,7 +22,7 @@ namespace Chlorine.Controller.Supervisors.Internal
 			return _promiseByExecutable.TryGetValue(executable, out promise);
 		}
 
-		protected Expected<IFuture> Execute<TAction>(ref TAction action, IActionDelegate<TAction> actionDelegate)
+		protected Expected<IFuture> Execute<TAction>(in TAction action, IActionDelegate<TAction> actionDelegate)
 				where TAction : struct
 		{
 			try
@@ -109,7 +109,7 @@ namespace Chlorine.Controller.Supervisors.Internal
 			return _promiseByExecutable.TryGetValue(executable, out promise);
 		}
 
-		protected Expected<IFuture<TResult>> Execute<TAction>(ref TAction action, IActionDelegate<TAction, TResult> actionDelegate)
+		protected Expected<IFuture<TResult>> Execute<TAction>(in TAction action, IActionDelegate<TAction, TResult> actionDelegate)
 				where TAction : struct
 		{
 			try

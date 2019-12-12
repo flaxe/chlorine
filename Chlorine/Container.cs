@@ -122,7 +122,7 @@ namespace Chlorine
 
 		public T Resolve<T>(object id = null) where T : class
 		{
-			if (_binder.TryResolveType(typeof(T), id, out object value) && value is T instance)
+			if (_binder.TryResolveType(new InjectContext(typeof(T), id, false), out object value) && value is T instance)
 			{
 				return instance;
 			}
@@ -132,7 +132,7 @@ namespace Chlorine
 
 		public object Resolve(Type type, object id = null)
 		{
-			if (_binder.TryResolveType(type, id, out object instance))
+			if (_binder.TryResolveType(new InjectContext(type, id, false), out object instance))
 			{
 				return instance;
 			}
@@ -142,12 +142,12 @@ namespace Chlorine
 
 		public T TryResolve<T>(object id = null) where T : class
 		{
-			return _binder.TryResolveType(typeof(T), id, out object instance) ? instance as T : default;
+			return _binder.TryResolveType(new InjectContext(typeof(T), id, false), out object instance) ? instance as T : default;
 		}
 
 		public object TryResolve(Type type, object id = null)
 		{
-			return _binder.TryResolveType(type, id, out object instance) ? instance : default;
+			return _binder.TryResolveType(new InjectContext(type, id, true), out object instance) ? instance : default;
 		}
 
 		public T Instantiate<T>(TypeValue[] arguments = null)

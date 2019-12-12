@@ -9,6 +9,7 @@ namespace Chlorine.Bindings
 		private readonly Container _container;
 		private readonly Binder _binder;
 
+
 		internal BindingType(Container container, Binder binder)
 		{
 			_container = container;
