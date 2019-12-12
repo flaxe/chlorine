@@ -5,17 +5,28 @@ namespace Chlorine.Pools
 {
 	public static class ArrayPool<T>
 	{
-		private static readonly List<Stack<T[]>> StackByLength = new List<Stack<T[]>>();
+		private static Stack<T[]>[] _stacks = Array.Empty<Stack<T[]>>();
 
 		public static void Clear()
 		{
-			StackByLength.Clear();
+			Array.Clear(_stacks, 0, _stacks.Length);
 		}
 
 		public static T[] Pull(int length)
 		{
-			Stack<T[]> stack = ResolveStack(length);
-			return stack.Count > 0 ? stack.Pop() : new T[length];
+			if (length > 0)
+			{
+				int index = length - 1;
+				if (index < _stacks.Length)
+				{
+					Stack<T[]> stack = _stacks[index];
+					if (stack != null && stack.Count > 0)
+					{
+						return stack.Pop();
+					}
+				}
+			}
+			return new T[length];
 		}
 
 		public static void Release(T[] array, bool clear = true)
@@ -25,39 +36,29 @@ namespace Chlorine.Pools
 				throw new ArgumentNullException(nameof(array));
 			}
 			int length = array.Length;
+			if (length == 0)
+			{
+				return;
+			}
 			if (clear)
 			{
 				Array.Clear(array, 0, length);
 			}
-			ResolveStack(length).Push(array);
-		}
-
-		private static Stack<T[]> ResolveStack(int length)
-		{
-			Stack<T[]> stack;
-			int capacity = length + 1;
-			if (StackByLength.Count < capacity)
+			int index = length - 1;
+			if (index >= _stacks.Length)
 			{
-				StackByLength.Capacity = capacity;
-				for (int i = StackByLength.Count; i < capacity; i++)
-				{
-					if (i == length)
-					{
-						stack = new Stack<T[]>();
-						StackByLength.Add(stack);
-						return stack;
-					}
-					StackByLength.Add(null);
-				}
+				int stackLength = Math.Max(_stacks.Length * 2, index + 1);
+				Stack<T[]>[] stacks = new Stack<T[]>[stackLength];
+				Array.Copy(_stacks, 0, stacks, 0, _stacks.Length);
+				_stacks = stacks;
 			}
-			stack = StackByLength[length];
-			if (stack != null)
+			Stack<T[]> stack = _stacks[index];
+			if (stack == null)
 			{
-				return stack;
+				stack = new Stack<T[]>();
+				_stacks[index] = stack;
 			}
-			stack = new Stack<T[]>();
-			StackByLength[length] = stack;
-			return stack;
+			stack.Push(array);
 		}
 	}
 }

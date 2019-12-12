@@ -5,11 +5,11 @@ namespace Chlorine.Pools
 {
 	public static class ListPool<T>
 	{
-		private static readonly List<List<T>> Lists = new List<List<T>>();
+		private static Stack<List<T>>[] _stacks = Array.Empty<Stack<List<T>>>();
 
 		public static void Clear()
 		{
-			Lists.Clear();
+			Array.Clear(_stacks, 0, _stacks.Length);
 		}
 
 		public static List<T> Pull(IEnumerable<T> enumerable)
@@ -18,40 +18,33 @@ namespace Chlorine.Pools
 			{
 				throw new ArgumentNullException(nameof(enumerable));
 			}
-			int capacity = 0;
-			if (enumerable is ICollection<T> collection)
-			{
-				capacity = collection.Count;
-			}
-			List<T> list = Pull(capacity);
+			List<T> list = enumerable is ICollection<T> collection ? Pull(collection.Count, true) : Pull();
 			list.AddRange(enumerable);
 			return list;
 		}
 
-		public static List<T> Pull(int capacity = 0)
+		public static List<T> Pull(int capacity = 0, bool strict = false)
 		{
-			if (Lists.Count > 0)
+			if (capacity > 0)
 			{
-				if (capacity > 0)
+				int index = capacity - 1;
+				if (index < _stacks.Length)
 				{
-					int index = GetIndex(capacity);
-					if (index != -1)
+					Stack<List<T>> stack = _stacks[index];
+					if (stack != null && stack.Count > 0)
 					{
-						List<T> list = Lists[index];
-						Lists[index] = null;
-						return list;
+						return stack.Pop();
 					}
 				}
-				else
+			}
+			if (!strict)
+			{
+				for (int i = capacity; i < _stacks.Length; i++)
 				{
-					for (int i = 0; i < Lists.Count; i++)
+					Stack<List<T>> stack = _stacks[i];
+					if (stack != null && stack.Count > 0)
 					{
-						List<T> list = Lists[i];
-						if (list != null)
-						{
-							Lists[i] = null;
-							return list;
-						}
+						return stack.Pop();
 					}
 				}
 			}
@@ -64,49 +57,30 @@ namespace Chlorine.Pools
 			{
 				throw new ArgumentNullException(nameof(list));
 			}
+			int capacity = list.Capacity;
+			if (capacity == 0)
+			{
+				return;
+			}
 			if (clear)
 			{
 				list.Clear();
 			}
-			for (int i = 0; i < Lists.Count; i++)
+			int index = capacity - 1;
+			if (index >= _stacks.Length)
 			{
-				if (Lists[i] == null)
-				{
-					Lists[i] = list;
-					return;
-				}
+				int stackLength = Math.Max(_stacks.Length * 2, index + 1);
+				Stack<List<T>>[] stacks = new Stack<List<T>>[stackLength];
+				Array.Copy(_stacks, 0, stacks, 0, _stacks.Length);
+				_stacks = stacks;
 			}
-			Lists.Add(list);
-		}
-
-		private static int GetIndex(int minCapacity)
-		{
-			int index = -1;
-			int capacityDifference = int.MaxValue;
-			for (int i = 0; i < Lists.Count; i++)
+			Stack<List<T>> stack = _stacks[index];
+			if (stack == null)
 			{
-				List<T> list = Lists[i];
-				if (list == null)
-				{
-					continue;
-				}
-				int capacity = list.Capacity;
-				if (capacity < minCapacity)
-				{
-					continue;
-				}
-				if (capacity == minCapacity)
-				{
-					return index;
-				}
-				int difference = capacity - minCapacity;
-				if (difference < capacityDifference)
-				{
-					index = i;
-					capacityDifference = difference;
-				}
+				stack = new Stack<List<T>>();
+				_stacks[index] = stack;
 			}
-			return index;
+			stack.Push(list);
 		}
 	}
 }
