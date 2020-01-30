@@ -22,7 +22,7 @@ namespace Chlorine
 			_binder = new Binder(this);
 			_extender = new Extender(this);
 			_injector = new Injector(new InjectAnalyzer(), _binder);
-			_binder.Register(typeof(IContainer), new InstanceProvider(this));
+			_binder.Register(typeof(IContainer), null, null, new InstanceProvider(this));
 		}
 
 		private Container(Container parent)
@@ -31,7 +31,7 @@ namespace Chlorine
 			_binder = new Binder(this, _parent._binder);
 			_extender = new Extender(this, _parent._extender);
 			_injector = new Injector(_parent._injector.Analyzer, _binder);
-			_binder.Register(typeof(IContainer), new InstanceProvider(this));
+			_binder.Register(typeof(IContainer), null, null, new InstanceProvider(this));
 		}
 
 		~Container()

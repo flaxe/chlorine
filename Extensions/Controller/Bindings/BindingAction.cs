@@ -15,11 +15,6 @@ namespace Chlorine.Controller.Bindings
 			_binder = binder;
 		}
 
-		public BindingActionResult<TAction, TResult> With<TResult>()
-		{
-			return new BindingActionResult<TAction, TResult>(_container, _binder);
-		}
-
 		public BindingActionDelegate<TAction> To<TActionDelegate>()
 				where TActionDelegate : class, IActionDelegate<TAction>
 		{

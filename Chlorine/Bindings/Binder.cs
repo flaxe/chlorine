@@ -78,12 +78,7 @@ namespace Chlorine.Bindings
 			return new BindingType<T>(container, this);
 		}
 
-		internal void Register(Type type, IProvider provider)
-		{
-			Register(type, null, provider);
-		}
-
-		internal void Register(Type type, object id, IProvider provider)
+		internal void Register(Type type, object id, BindingCondition condition, IProvider provider)
 		{
 #if DEBUG
 			if (_bindingType != null && _bindingType != type)

@@ -180,7 +180,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().To<TransientResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -202,7 +202,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().FromFactory<TransientResultDelegateFactory>().AsTransient();
+				container.BindAction<Foo, Bar>().FromFactory<TransientResultDelegateFactory>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -246,7 +246,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().To<TransientResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -290,7 +290,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().AsReusable();
+				container.BindAction<Foo, Bar>().To<TransientResultDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -334,7 +334,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<TransientResultDelegate>().AsReusable();
+				container.BindAction<Foo, Bar>().To<TransientResultDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -421,7 +421,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().ToStackable<StackableResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -488,7 +488,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().ToStackable<StackableResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -510,7 +510,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().FromStackableFactory<StackableResultDelegateFactory>().AsTransient();
+				container.BindAction<Foo, Bar>().FromStackableFactory<StackableResultDelegateFactory>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -554,7 +554,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().ToStackable<StackableResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 
@@ -598,7 +598,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsReusable();
+				container.BindAction<Foo, Bar>().ToStackable<StackableResultDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 
@@ -642,7 +642,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				Executor executor = new Executor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().ToStackable<StackableResultDelegate>().AsReusable();
+				container.BindAction<Foo, Bar>().ToStackable<StackableResultDelegate>().AsReusable();
 
 				IController controller = container.Resolve<IController>();
 

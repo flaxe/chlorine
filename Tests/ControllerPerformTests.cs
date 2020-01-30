@@ -136,7 +136,7 @@ namespace Chlorine.Tests
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
 				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
-				container.BindAction<Foo>().With<Foo>().To<SucceedInitializationDelegate>().AsTransient();
+				container.BindAction<Foo, Foo>().To<SucceedInitializationDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Foo> future = controller.Perform<Foo, Foo>(Action);
@@ -227,7 +227,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				ManualExecutor executor = new ManualExecutor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<ActionDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
@@ -257,7 +257,7 @@ namespace Chlorine.Tests
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
 				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
-				container.BindAction<Foo>().With<Bar>().To<ActionDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
@@ -290,7 +290,7 @@ namespace Chlorine.Tests
 				container.Extend<ControllerExtension>();
 				ManualExecutor executor = new ManualExecutor();
 				container.BindExecutable<Executable>().ToInstance(executor);
-				container.BindAction<Foo>().With<Bar>().To<ActionDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().To<ActionDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);
@@ -349,7 +349,7 @@ namespace Chlorine.Tests
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
 				container.BindExecutable<Executable>().To<InstantExecutor>().AsSingleton();
-				container.BindAction<Foo>().With<Bar>().To<ResultDelegate>().AsTransient();
+				container.BindAction<Foo, Bar>().To<ResultDelegate>().AsTransient();
 
 				IController controller = container.Resolve<IController>();
 				IFuture<Bar> future = controller.Perform<Foo, Bar>(Action);

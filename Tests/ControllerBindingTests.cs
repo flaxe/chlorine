@@ -52,7 +52,7 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindAction<Foo>().With<Bar>().To<FooCommand>().AsTransient();
+				container.BindAction<Foo, Bar>().To<FooCommand>().AsTransient();
 
 				Assert.Throws<ControllerException>(() => container.BindAction<Foo>().To<FooCommand>().AsTransient());
 			}
@@ -127,7 +127,7 @@ namespace Chlorine.Tests
 			{
 				Container container = new Container();
 				container.Extend<ControllerExtension>();
-				container.BindAction<Foo>().With<Bar>();
+				container.BindAction<Foo, Bar>();
 
 				Assert.Throws<ControllerException>(() => container.BindAction<Bar>().To<BarCommand>().AsTransient());
 			}

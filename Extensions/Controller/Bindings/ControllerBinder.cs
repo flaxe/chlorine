@@ -73,6 +73,20 @@ namespace Chlorine.Controller.Bindings
 			return new BindingAction<TAction>(container, this);
 		}
 
+		public BindingActionResult<TAction, TResult> BindAction<TAction, TResult>(Container container)
+				where TAction : struct
+		{
+#if DEBUG
+			if (_bindingType != null)
+			{
+				throw new ControllerException(ControllerErrorCode.IncompleteBinding,
+						$"Incomplete binding. Finish '{_bindingType.Name}' binding.");
+			}
+			_bindingType = typeof(TAction);
+#endif
+			return new BindingActionResult<TAction, TResult>(container, this);
+		}
+
 		public BindingExecutable<TExecutable> BindExecutable<TExecutable>(Container container)
 				where TExecutable : class, IExecutable
 		{
