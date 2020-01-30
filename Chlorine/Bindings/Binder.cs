@@ -11,8 +11,8 @@ namespace Chlorine.Bindings
 		private readonly WeakReference<Container> _container;
 		private readonly Binder _parent;
 
-		private readonly Dictionary<Type, IProvider> _providerByType;
-		private readonly Dictionary<Type, Dictionary<object, IProvider>> _providerByTypeAndId;
+		private readonly Dictionary<Type, IBindingProvider> _providerByType;
+		private readonly Dictionary<Type, Dictionary<object, IBindingProvider>> _providerByTypeAndId;
 
 #if DEBUG
 		private Type _bindingType;
@@ -22,8 +22,8 @@ namespace Chlorine.Bindings
 		{
 			_container = new WeakReference<Container>(container);
 			_parent = parent;
-			_providerByType = new Dictionary<Type, IProvider>();
-			_providerByTypeAndId = new Dictionary<Type, Dictionary<object, IProvider>>();
+			_providerByType = new Dictionary<Type, IBindingProvider>();
+			_providerByTypeAndId = new Dictionary<Type, Dictionary<object, IBindingProvider>>();
 		}
 
 		~Binder()
@@ -35,25 +35,19 @@ namespace Chlorine.Bindings
 		{
 			if (_providerByType.Count > 0)
 			{
-				foreach (IProvider provider in _providerByType.Values)
+				foreach (IBindingProvider provider in _providerByType.Values)
 				{
-					if (provider is IDisposable disposable)
-					{
-						disposable.Dispose();
-					}
+					provider.Dispose();
 				}
 				_providerByType.Clear();
 			}
 			if (_providerByTypeAndId.Count > 0)
 			{
-				foreach (Dictionary<object, IProvider> providerById in _providerByTypeAndId.Values)
+				foreach (Dictionary<object, IBindingProvider> providerById in _providerByTypeAndId.Values)
 				{
-					foreach (IProvider provider in providerById.Values)
+					foreach (IBindingProvider provider in providerById.Values)
 					{
-						if (provider is IDisposable disposable)
-						{
-							disposable.Dispose();
-						}
+						provider.Dispose();
 					}
 				}
 				_providerByTypeAndId.Clear();
@@ -90,27 +84,72 @@ namespace Chlorine.Bindings
 #endif
 			if (id == null)
 			{
-				if (_providerByType.ContainsKey(type))
+				if (condition == null)
 				{
-					throw new ContainerException(ContainerErrorCode.TypeAlreadyRegistered,
-							$"Type '{type.Name}' with empty id is already registered.");
-				}
-				_providerByType.Add(type, provider);
-			}
-			else
-			{
-				if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
-				{
-					if (providerById.ContainsKey(id))
+					if (_providerByType.ContainsKey(type))
 					{
 						throw new ContainerException(ContainerErrorCode.TypeAlreadyRegistered,
-								$"Type '{type.Name}' with id '{id}' is already registered.");
+								$"Type '{type.Name}' with empty id is already registered.");
 					}
-					providerById.Add(id, provider);
+					_providerByType.Add(type, new PermanentProvider(provider));
+				}
+				else if (_providerByType.TryGetValue(type, out IBindingProvider bindingProvider))
+				{
+					if (!(bindingProvider is ConditionalProvider conditionalProvider) ||
+							!conditionalProvider.TryRegister(condition, provider))
+					{
+						throw new ContainerException(ContainerErrorCode.TypeAlreadyRegistered,
+								$"Type '{type.Name}' with empty id is already registered.");
+					}
 				}
 				else
 				{
-					_providerByTypeAndId.Add(type, new Dictionary<object, IProvider> {{id, provider}});
+					_providerByType.Add(type, new ConditionalProvider(condition, provider));
+				}
+			}
+			else
+			{
+				if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IBindingProvider> providerById))
+				{
+					if (condition == null)
+					{
+						if (providerById.ContainsKey(id))
+						{
+							throw new ContainerException(ContainerErrorCode.TypeAlreadyRegistered,
+									$"Type '{type.Name}' with id '{id}' is already registered.");
+						}
+						providerById.Add(id, new PermanentProvider(provider));
+					}
+					else if (providerById.TryGetValue(id, out IBindingProvider bindingProvider))
+					{
+						if (!(bindingProvider is ConditionalProvider conditionalProvider) ||
+								!conditionalProvider.TryRegister(condition, provider))
+						{
+							throw new ContainerException(ContainerErrorCode.TypeAlreadyRegistered,
+									$"Type '{type.Name}' with id '{id}' is already registered.");
+						}
+					}
+					else
+					{
+						providerById.Add(type, new ConditionalProvider(condition, provider));
+					}
+				}
+				else
+				{
+					if (condition == null)
+					{
+						_providerByTypeAndId.Add(type, new Dictionary<object, IBindingProvider>
+						{
+								{id, new PermanentProvider(provider)}
+						});
+					}
+					else
+					{
+						_providerByTypeAndId.Add(type, new Dictionary<object, IBindingProvider>
+						{
+								{id, new ConditionalProvider(condition, provider)}
+						});
+					}
 				}
 			}
 		}
@@ -126,9 +165,9 @@ namespace Chlorine.Bindings
 #endif
 			Type type = context.InjectType;
 			object id = context.InjectId;
-			if (TryGetTypeProvider(type, id, out IProvider provider))
+			if (TryGetTypeProvider(type, id, out IBindingProvider provider) &&
+					provider.TryProvide(in context, out instance))
 			{
-				instance = provider.Provide();
 				return true;
 			}
 			if (_parent != null && _parent.TryResolveType(in context, out instance))
@@ -139,7 +178,7 @@ namespace Chlorine.Bindings
 			return false;
 		}
 
-		private bool TryGetTypeProvider(Type type, object id, out IProvider provider)
+		private bool TryGetTypeProvider(Type type, object id, out IBindingProvider provider)
 		{
 			if (id == null)
 			{
@@ -148,7 +187,7 @@ namespace Chlorine.Bindings
 					return true;
 				}
 			}
-			else if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IProvider> providerById))
+			else if (_providerByTypeAndId.TryGetValue(type, out Dictionary<object, IBindingProvider> providerById))
 			{
 				if (providerById.TryGetValue(id, out provider))
 				{
@@ -157,6 +196,83 @@ namespace Chlorine.Bindings
 			}
 			provider = default;
 			return false;
+		}
+
+		private interface IBindingProvider : IDisposable
+		{
+			bool TryProvide(in InjectContext context, out object instance);
+		}
+
+		private sealed class PermanentProvider : IBindingProvider
+		{
+			private readonly IProvider _provider;
+
+			public PermanentProvider(IProvider provider)
+			{
+				_provider = provider;
+			}
+
+			public void Dispose()
+			{
+				if (_provider is IDisposable disposable)
+				{
+					disposable.Dispose();
+				}
+			}
+
+			public bool TryProvide(in InjectContext context, out object instance)
+			{
+				instance = _provider.Provide();
+				return true;
+			}
+		}
+
+		private sealed class ConditionalProvider : IBindingProvider
+		{
+			private readonly Dictionary<BindingCondition, IProvider> _providerByCondition;
+
+			public ConditionalProvider(BindingCondition condition, IProvider provider)
+			{
+				_providerByCondition = new Dictionary<BindingCondition, IProvider>
+				{
+						{condition, provider}
+				};
+			}
+
+			public void Dispose()
+			{
+				foreach (KeyValuePair<BindingCondition, IProvider> providerPair in _providerByCondition)
+				{
+					if (providerPair.Value is IDisposable disposable)
+					{
+						disposable.Dispose();
+					}
+				}
+			}
+
+			public bool TryRegister(BindingCondition condition, IProvider provider)
+			{
+				if (_providerByCondition.ContainsKey(condition))
+				{
+					return false;
+				}
+				_providerByCondition.Add(condition, provider);
+				return true;
+			}
+
+			public bool TryProvide(in InjectContext context, out object instance)
+			{
+				foreach (KeyValuePair<BindingCondition,IProvider> providerPair in _providerByCondition)
+				{
+					if (providerPair.Key.Invoke(in context))
+					{
+						instance = providerPair.Value.Provide();
+						return true;
+					}
+				}
+				instance = default;
+				return false;
+			}
 		}
 	}
 }
