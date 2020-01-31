@@ -1,4 +1,5 @@
 using System;
+using Chlorine.Exceptions;
 
 namespace Chlorine.Providers
 {
@@ -9,6 +10,11 @@ namespace Chlorine.Providers
 
 		public TypeProvider(Type type, IContainer container)
 		{
+			if (type.IsInterface || type.IsAbstract)
+			{
+				throw new InvalidArgumentException(InvalidArgumentErrorCode.InvalidType,
+						$"Type '{type.Name}' is abstract.");
+			}
 			_type = type;
 			_container = container;
 		}

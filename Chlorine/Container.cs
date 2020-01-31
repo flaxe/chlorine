@@ -142,7 +142,7 @@ namespace Chlorine
 
 		public T TryResolve<T>(object id = null) where T : class
 		{
-			return _binder.TryResolveType(new InjectContext(typeof(T), id, false), out object instance) ? instance as T : default;
+			return _binder.TryResolveType(new InjectContext(typeof(T), id, true), out object instance) ? instance as T : default;
 		}
 
 		public object TryResolve(Type type, object id = null)

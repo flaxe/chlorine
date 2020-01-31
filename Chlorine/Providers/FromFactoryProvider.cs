@@ -1,4 +1,5 @@
 using System;
+using Chlorine.Exceptions;
 using Chlorine.Factories;
 
 namespace Chlorine.Providers
@@ -29,6 +30,11 @@ namespace Chlorine.Providers
 
 		public FromFactoryTypeProvider(Type factoryType, IContainer container)
 		{
+			if (factoryType.IsInterface || factoryType.IsAbstract)
+			{
+				throw new InvalidArgumentException(InvalidArgumentErrorCode.InvalidType,
+						$"Type '{factoryType.Name}' is abstract.");
+			}
 			_factoryType = factoryType;
 			_container = container;
 		}

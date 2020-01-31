@@ -1,5 +1,4 @@
 using Chlorine.Factories;
-using Chlorine.Injection;
 using Chlorine.Providers;
 
 namespace Chlorine.Bindings
@@ -27,7 +26,7 @@ namespace Chlorine.Bindings
 		public BindingTypeConditional<T> WhenInjectInto<TContract>()
 		{
 			return new BindingTypeConditional<T>(_container, _binder, _id,
-					(in InjectContext context) => context.SourceType == typeof(TContract));
+					context => context.SourceType == typeof(TContract));
 		}
 
 		public BindingTypeProvider To<TConcrete>() where TConcrete : class, T

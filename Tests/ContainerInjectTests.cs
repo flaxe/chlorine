@@ -839,5 +839,130 @@ namespace Chlorine.Tests
 				Assert.Throws<InjectException>(() => container.Instantiate<Bazola>());
 			}
 		}
+
+		[TestFixture]
+		private class ConditionalTests
+		{
+			private class Xyzzy
+			{
+				[Inject]
+				public readonly Foo FooA = default;
+				[Inject(Optional = true)]
+				public readonly Foo FooB = default;
+				[Inject(Id = A)]
+				public readonly Bar BarA = default;
+				[Inject(Id = A, Optional = true)]
+				public readonly Bar BarB = default;
+			}
+
+			[Test]
+			public void Instantiate_AreSame()
+			{
+				Foo foo = new Foo();
+				Bar bar = new Bar();
+
+				Container container = new Container();
+				container.Bind<Foo>().When(context => !context.Optional).ToInstance(foo);
+				container.Bind<Bar>().WithId(A).When(context => !context.Optional).ToInstance(bar);
+
+				Xyzzy xyzzy = container.Instantiate<Xyzzy>();
+				Assert.NotNull(xyzzy);
+				Assert.AreSame(xyzzy.FooA, foo);
+				Assert.IsNull(xyzzy.FooB);
+				Assert.AreSame(xyzzy.BarA, bar);
+				Assert.IsNull(xyzzy.BarB);
+			}
+
+			[Test]
+			public void Inject_AreSame()
+			{
+				Foo foo = new Foo();
+				Bar bar = new Bar();
+
+				Container container = new Container();
+				container.Bind<Foo>().When(context => !context.Optional).ToInstance(foo);
+				container.Bind<Bar>().WithId(A).When(context => !context.Optional).ToInstance(bar);
+
+				Xyzzy xyzzy = new Xyzzy();
+				container.Inject(xyzzy);
+				Assert.NotNull(xyzzy);
+				Assert.AreSame(xyzzy.FooA, foo);
+				Assert.IsNull(xyzzy.FooB);
+				Assert.AreSame(xyzzy.BarA, bar);
+				Assert.IsNull(xyzzy.BarB);
+			}
+		}
+
+		[TestFixture]
+		private class WhenInjectedIntoTests
+		{
+			private class Xyzzy
+			{
+				[Inject]
+				public readonly Foo Foo = default;
+				[Inject(Id = A)]
+				public readonly Bar Bar = default;
+			}
+
+			private class Zzyzx
+			{
+				[Inject]
+				public readonly Foo Foo = default;
+				[Inject(Id = A)]
+				public readonly Bar Bar = default;
+			}
+
+			[Test]
+			public void Instantiate_AreSame()
+			{
+				Foo fooX = new Foo();
+				Foo fooZ = new Foo();
+				Bar barX = new Bar();
+				Bar barZ = new Bar();
+
+				Container container = new Container();
+				container.Bind<Foo>().WhenInjectInto<Xyzzy>().ToInstance(fooX);
+				container.Bind<Foo>().WhenInjectInto<Zzyzx>().ToInstance(fooZ);
+				container.Bind<Bar>().WithId(A).WhenInjectInto<Xyzzy>().ToInstance(barX);
+				container.Bind<Bar>().WithId(A).WhenInjectInto<Zzyzx>().ToInstance(barZ);
+
+				Xyzzy xyzzy = container.Instantiate<Xyzzy>();
+				Assert.NotNull(xyzzy);
+				Assert.AreSame(xyzzy.Foo, fooX);
+				Assert.AreSame(xyzzy.Bar, barX);
+
+				Zzyzx zzyzx = container.Instantiate<Zzyzx>();
+				Assert.NotNull(zzyzx);
+				Assert.AreSame(zzyzx.Foo, fooZ);
+				Assert.AreSame(zzyzx.Bar, barZ);
+			}
+
+			[Test]
+			public void Inject_AreSame()
+			{
+				Foo fooX = new Foo();
+				Foo fooZ = new Foo();
+				Bar barX = new Bar();
+				Bar barZ = new Bar();
+
+				Container container = new Container();
+				container.Bind<Foo>().WhenInjectInto<Xyzzy>().ToInstance(fooX);
+				container.Bind<Foo>().WhenInjectInto<Zzyzx>().ToInstance(fooZ);
+				container.Bind<Bar>().WithId(A).WhenInjectInto<Xyzzy>().ToInstance(barX);
+				container.Bind<Bar>().WithId(A).WhenInjectInto<Zzyzx>().ToInstance(barZ);
+
+				Xyzzy xyzzy = new Xyzzy();
+				container.Inject(xyzzy);
+				Assert.NotNull(xyzzy);
+				Assert.AreSame(xyzzy.Foo, fooX);
+				Assert.AreSame(xyzzy.Bar, barX);
+
+				Zzyzx zzyzx = new Zzyzx();
+				container.Inject(zzyzx);
+				Assert.NotNull(zzyzx);
+				Assert.AreSame(zzyzx.Foo, fooZ);
+				Assert.AreSame(zzyzx.Bar, barZ);
+			}
+		}
 	}
 }

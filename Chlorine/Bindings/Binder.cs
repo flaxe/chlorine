@@ -131,7 +131,7 @@ namespace Chlorine.Bindings
 					}
 					else
 					{
-						providerById.Add(type, new ConditionalProvider(condition, provider));
+						providerById.Add(id, new ConditionalProvider(condition, provider));
 					}
 				}
 				else
@@ -264,7 +264,7 @@ namespace Chlorine.Bindings
 			{
 				foreach (KeyValuePair<BindingCondition,IProvider> providerPair in _providerByCondition)
 				{
-					if (providerPair.Key.Invoke(in context))
+					if (providerPair.Key.Invoke(context))
 					{
 						instance = providerPair.Value.Provide();
 						return true;
