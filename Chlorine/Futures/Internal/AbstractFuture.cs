@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Chlorine.Exceptions;
 using Chlorine.Pools;
 
@@ -17,23 +16,24 @@ namespace Chlorine.Futures.Internal
 
 		public void Resolve()
 		{
-			if (Status != FutureStatus.Pending)
+			switch (Status)
 			{
-				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
-						"Future already resolved or rejected.");
+				case FutureStatus.Resolved:
+				case FutureStatus.Rejected:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future already resolved or rejected.");
+				default:
+					Status = FutureStatus.Resolved;
+					HandleResolve();
+					HandleClear();
+					break;
 			}
-			Status = FutureStatus.Resolved;
-			HandleResolve();
-			HandleFinalize();
-			HandleClear();
 		}
 	}
 
 	public abstract class AbstractFuture<TResult> : AbstractFalseFuture, IFuture<TResult>
 	{
 		private FutureResolved<TResult> _resultResolved;
-
-		private List<IFutureHandler<TResult>> _resultHandlers;
 
 		private TResult _result;
 
@@ -83,22 +83,40 @@ namespace Chlorine.Futures.Internal
 
 		public IFuture Then(FuturePromised<TResult> promised)
 		{
-			if (!(SharedPool.Pull(typeof(PromiseFuture<TResult>)) is PromiseFuture<TResult> future))
+			switch (Status)
 			{
-				future = new PromiseFuture<TResult>();
+				case FutureStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
+				case FutureStatus.Pending:
+					return FuturePool.Pull(promised, this);
+				case FutureStatus.Resolved:
+					TResult result = _result;
+					FuturePool.Release(this);
+					return promised.Invoke(result);
+				default:
+					return this;
 			}
-			future.Init(promised, this);
-			return future;
 		}
 
 		public IFuture<T> Then<T>(FutureResultPromised<T, TResult> promised)
 		{
-			if (!(SharedPool.Pull(typeof(PromiseFutureResult<T, TResult>)) is PromiseFutureResult<T, TResult> future))
+			switch (Status)
 			{
-				future = new PromiseFutureResult<T, TResult>();
+				case FutureStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
+				case FutureStatus.Pending:
+					return FuturePool.Pull(promised, this);
+				case FutureStatus.Resolved:
+					TResult result = _result;
+					FuturePool.Release(this);
+					return promised.Invoke(result);
+				default:
+					Error reason = Reason;
+					FuturePool.Release(this);
+					return FuturePool.PullRejected<T>(reason);
 			}
-			future.Init(promised, this);
-			return future;
 		}
 
 		public void Then(FutureResolved<TResult> resolved, FutureRejected rejected)
@@ -109,6 +127,9 @@ namespace Chlorine.Futures.Internal
 			}
 			switch (Status)
 			{
+				case FutureStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
 				case FutureStatus.Pending:
 					_resultResolved += resolved;
 					break;
@@ -119,69 +140,41 @@ namespace Chlorine.Futures.Internal
 			Catch(rejected);
 		}
 
-		public void Finally(IFutureHandler<TResult> handler)
-		{
-			if (handler == null)
-			{
-				throw new ArgumentNullException(nameof(handler));
-			}
-			switch (Status)
-			{
-				case FutureStatus.Pending:
-					if (_resultHandlers == null)
-					{
-						_resultHandlers = new List<IFutureHandler<TResult>>{ handler };
-					}
-					else
-					{
-						_resultHandlers.Add(handler);
-					}
-					break;
-				case FutureStatus.Resolved:
-				case FutureStatus.Rejected:
-					handler.HandleFuture(this);
-					break;
-			}
-		}
-
 		public void Resolve(TResult result)
 		{
-			if (Status != FutureStatus.Pending)
+			switch (Status)
 			{
-				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
-						"Future already resolved or rejected.");
+				case FutureStatus.Resolved:
+				case FutureStatus.Rejected:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future already resolved or rejected.");
+				default:
+					Status = FutureStatus.Resolved;
+					_result = result;
+					HandleResolve();
+					HandleClear();
+					break;
 			}
-			Status = FutureStatus.Resolved;
-			_result = result;
-			HandleResolve();
-			HandleFinalize();
-			HandleClear();
 		}
 
 		protected override void HandleClear()
 		{
 			base.HandleClear();
 			_resultResolved = null;
-			_resultHandlers?.Clear();
 		}
 
 		protected override void HandleResolve()
 		{
-			base.HandleResolve();
-			_resultResolved?.Invoke(_result);
-		}
-
-		protected override void HandleFinalize()
-		{
-			base.HandleFinalize();
-			if (_resultHandlers != null && _resultHandlers.Count > 0)
+			if (_resultResolved != null)
 			{
-				List<IFutureHandler<TResult>> handlers = ListPool<IFutureHandler<TResult>>.Pull(_resultHandlers);
-				foreach (IFutureHandler<TResult> handler in handlers)
-				{
-					handler.HandleFuture(this);
-				}
-				ListPool<IFutureHandler<TResult>>.Release(handlers);
+				TResult result = _result;
+				FutureResolved<TResult> resultResolved = _resultResolved;
+				base.HandleResolve();
+				resultResolved?.Invoke(result);
+			}
+			else
+			{
+				base.HandleResolve();
 			}
 		}
 	}

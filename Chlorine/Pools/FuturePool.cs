@@ -94,6 +94,50 @@ namespace Chlorine.Pools
 			return new Future<TResult>(reason);
 		}
 
+		internal static IFuture Pull(FuturePromised promised, IFuture parent)
+		{
+			Type futureType = typeof(PromiseFuture);
+			if (SharedPool.Pull(futureType) is PromiseFuture future)
+			{
+				future.Init(promised, parent);
+				return future;
+			}
+			return new PromiseFuture(promised, parent);
+		}
+
+		internal static IFuture Pull<TResult>(FuturePromised<TResult> promised, IFuture<TResult> parent)
+		{
+			Type futureType = typeof(PromiseFuture<TResult>);
+			if (SharedPool.Pull(futureType) is PromiseFuture<TResult> future)
+			{
+				future.Init(promised, parent);
+				return future;
+			}
+			return new PromiseFuture<TResult>(promised, parent);
+		}
+
+		internal static IFuture<T> Pull<T>(FutureResultPromised<T> promised, IFuture parent)
+		{
+			Type futureType = typeof(PromiseFutureResult<T>);
+			if (SharedPool.Pull(futureType) is PromiseFutureResult<T> future)
+			{
+				future.Init(promised, parent);
+				return future;
+			}
+			return new PromiseFutureResult<T>(promised, parent);
+		}
+
+		internal static IFuture<T> Pull<T, TResult>(FutureResultPromised<T, TResult> promised, IFuture<TResult> parent)
+		{
+			Type futureType = typeof(PromiseFutureResult<T, TResult>);
+			if (SharedPool.Pull(futureType) is PromiseFutureResult<T, TResult> future)
+			{
+				future.Init(promised, parent);
+				return future;
+			}
+			return new PromiseFutureResult<T, TResult>(promised, parent);
+		}
+
 		public static void Release(IFuture future)
 		{
 			if (future == null)

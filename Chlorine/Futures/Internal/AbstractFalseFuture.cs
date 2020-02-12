@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Chlorine.Exceptions;
 using Chlorine.Pools;
 
@@ -9,22 +8,23 @@ namespace Chlorine.Futures.Internal
 	{
 		protected enum FutureStatus
 		{
+			Empty,
 			Pending,
 			Resolved,
 			Rejected
 		}
 
-		private FutureStatus _status = FutureStatus.Pending;
+		private FutureStatus _status;
 
 		private FutureResolved _resolved;
 		private FutureRejected _rejected;
-
-		private List<IFutureHandler> _handlers;
+		private IFutureHandler _finalizer;
 
 		private Error _reason;
 
 		protected AbstractFalseFuture()
 		{
+			_status = FutureStatus.Empty;
 		}
 
 		protected AbstractFalseFuture(Error reason)
@@ -33,9 +33,44 @@ namespace Chlorine.Futures.Internal
 			_reason = reason;
 		}
 
-		public bool IsPending => _status == FutureStatus.Pending;
-		public bool IsResolved => _status == FutureStatus.Resolved;
-		public bool IsRejected => _status == FutureStatus.Rejected;
+		public bool IsPending
+		{
+			get
+			{
+				if (_status == FutureStatus.Empty)
+				{
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
+				}
+				return _status == FutureStatus.Pending;
+			}
+		}
+
+		public bool IsResolved
+		{
+			get
+			{
+				if (_status == FutureStatus.Empty)
+				{
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
+				}
+				return _status == FutureStatus.Resolved;
+			}
+		}
+
+		public bool IsRejected
+		{
+			get
+			{
+				if (_status == FutureStatus.Empty)
+				{
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
+				}
+				return _status == FutureStatus.Rejected;
+			}
+		}
 
 		protected FutureStatus Status
 		{
@@ -59,28 +94,44 @@ namespace Chlorine.Futures.Internal
 		public virtual void Reset()
 		{
 			HandleClear();
-			_status = FutureStatus.Pending;
+			_status = FutureStatus.Empty;
 			_reason = default;
 		}
 
 		public IFuture Then(FuturePromised promised)
 		{
-			if (!(SharedPool.Pull(typeof(PromiseFuture)) is PromiseFuture future))
+			switch (_status)
 			{
-				future = new PromiseFuture();
+				case FutureStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
+				case FutureStatus.Pending:
+					return FuturePool.Pull(promised, this);
+				case FutureStatus.Resolved:
+					FuturePool.Release(this);
+					return promised.Invoke();
+				default:
+					return this;
 			}
-			future.Init(promised, this);
-			return future;
 		}
 
 		public IFuture<T> Then<T>(FutureResultPromised<T> promised)
 		{
-			if (!(SharedPool.Pull(typeof(PromiseFutureResult<T>)) is PromiseFutureResult<T> future))
+			switch (_status)
 			{
-				future = new PromiseFutureResult<T>();
+				case FutureStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
+				case FutureStatus.Pending:
+					return FuturePool.Pull(promised, this);
+				case FutureStatus.Resolved:
+					FuturePool.Release(this);
+					return promised.Invoke();
+				default:
+					Error reason = _reason;
+					FuturePool.Release(this);
+					return FuturePool.PullRejected<T>(reason);
 			}
-			future.Init(promised, this);
-			return future;
 		}
 
 		public void Then(FutureResolved resolved, FutureRejected rejected)
@@ -91,6 +142,9 @@ namespace Chlorine.Futures.Internal
 			}
 			switch (_status)
 			{
+				case FutureStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
 				case FutureStatus.Pending:
 					_resolved += resolved;
 					break;
@@ -109,6 +163,9 @@ namespace Chlorine.Futures.Internal
 			}
 			switch (_status)
 			{
+				case FutureStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
 				case FutureStatus.Pending:
 					_rejected += rejected;
 					break;
@@ -118,73 +175,82 @@ namespace Chlorine.Futures.Internal
 			}
 		}
 
-		public void Finally(IFutureHandler handler)
+		public void Finally(IFutureHandler finalizer)
 		{
-			if (handler == null)
+			if (finalizer == null)
 			{
-				throw new ArgumentNullException(nameof(handler));
+				throw new ArgumentNullException(nameof(finalizer));
+			}
+			if (_finalizer != null)
+			{
+				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+						"Future already has finalizer.");
 			}
 			switch (_status)
 			{
+				case FutureStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future is empty.");
 				case FutureStatus.Pending:
-					if (_handlers == null)
-					{
-						_handlers = new List<IFutureHandler>{ handler };
-					}
-					else
-					{
-						_handlers.Add(handler);
-					}
+					_finalizer = finalizer;
 					break;
 				case FutureStatus.Resolved:
 				case FutureStatus.Rejected:
-					handler.HandleFuture(this);
+					finalizer.HandleFuture(this);
 					break;
 			}
 		}
 
 		public void Reject(Error reason)
 		{
-			if (_status != FutureStatus.Pending)
+			switch (_status)
 			{
-				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
-						"Future already resolved or rejected.");
+				case FutureStatus.Resolved:
+				case FutureStatus.Rejected:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Future already resolved or rejected.");
+				default:
+					_status = FutureStatus.Rejected;
+					_reason = reason;
+					HandleReject();
+					HandleClear();
+					break;
 			}
-			_status = FutureStatus.Rejected;
-			_reason = reason;
-			HandleReject();
-			HandleFinalize();
-			HandleClear();
+		}
+
+		protected void Init()
+		{
+			_status = FutureStatus.Pending;
 		}
 
 		protected virtual void HandleClear()
 		{
 			_resolved = null;
 			_rejected = null;
-			_handlers?.Clear();
+			_finalizer = null;
 		}
 
 		protected virtual void HandleResolve()
 		{
-			_resolved?.Invoke();
-		}
-
-		protected virtual void HandleFinalize()
-		{
-			if (_handlers != null && _handlers.Count > 0)
+			if (_resolved != null || _finalizer != null)
 			{
-				List<IFutureHandler> handlers = ListPool<IFutureHandler>.Pull(_handlers);
-				foreach (IFutureHandler handler in handlers)
-				{
-					handler.HandleFuture(this);
-				}
-				ListPool<IFutureHandler>.Release(handlers);
+				FutureResolved resolved = _resolved;
+				IFutureHandler finalizer = _finalizer;
+				resolved?.Invoke();
+				finalizer?.HandleFuture(this);
 			}
 		}
 
 		private void HandleReject()
 		{
-			_rejected?.Invoke(_reason);
+			if (_rejected != null || _finalizer != null)
+			{
+				Error reason = _reason;
+				FutureRejected rejected = _rejected;
+				IFutureHandler finalizer = _finalizer;
+				rejected?.Invoke(reason);
+				finalizer?.HandleFuture(this);
+			}
 		}
 	}
 }

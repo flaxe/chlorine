@@ -12,7 +12,7 @@ namespace Chlorine.Futures
 		IFuture<T> Then<T>(FutureResultPromised<T> promised);
 		void Then(FutureResolved resolved, FutureRejected rejected);
 		void Catch(FutureRejected rejected);
-		void Finally(IFutureHandler handler);
+		void Finally(IFutureHandler finalizer);
 	}
 
 	public interface IFuture<TResult> : IFuture
@@ -23,6 +23,5 @@ namespace Chlorine.Futures
 		IFuture Then(FuturePromised<TResult> promised);
 		IFuture<T> Then<T>(FutureResultPromised<T, TResult> promised);
 		void Then(FutureResolved<TResult> resolved, FutureRejected rejected);
-		void Finally(IFutureHandler<TResult> handler);
 	}
 }

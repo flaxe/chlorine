@@ -11,12 +11,18 @@ namespace Chlorine.Futures
 		private IFuture _parent;
 		private IFuture _internal;
 
+		internal PromiseFuture(FuturePromised promised, IFuture parent)
+		{
+			Init(promised, parent);
+		}
+
 		internal void Init(FuturePromised promised, IFuture parent)
 		{
 			if (_parent != null || _internal != null)
 			{
 				throw new ReuseException(this);
 			}
+			base.Init();
 			_promised = promised;
 			_parent = parent;
 			_parent.Finally(this);
@@ -73,12 +79,18 @@ namespace Chlorine.Futures
 		private IFuture<TInput> _parent;
 		private IFuture _internal;
 
+		internal PromiseFuture(FuturePromised<TInput> promised, IFuture<TInput> parent)
+		{
+			Init(promised, parent);
+		}
+
 		internal void Init(FuturePromised<TInput> promised, IFuture<TInput> parent)
 		{
 			if (_parent != null || _internal != null)
 			{
 				throw new ReuseException(this);
 			}
+			base.Init();
 			_promised = promised;
 			_parent = parent;
 			_parent.Finally(this);
@@ -135,12 +147,18 @@ namespace Chlorine.Futures
 		private IFuture _parent;
 		private IFuture<TOutput> _internal;
 
+		internal PromiseFutureResult(FutureResultPromised<TOutput> promised, IFuture parent)
+		{
+			Init(promised, parent);
+		}
+
 		internal void Init(FutureResultPromised<TOutput> promised, IFuture parent)
 		{
 			if (_parent != null || _internal != null)
 			{
 				throw new ReuseException(this);
 			}
+			base.Init();
 			_promised = promised;
 			_parent = parent;
 			_parent.Finally(this);
@@ -197,12 +215,18 @@ namespace Chlorine.Futures
 		private IFuture<TInput> _parent;
 		private IFuture<TOutput> _internal;
 
+		internal PromiseFutureResult(FutureResultPromised<TOutput, TInput> promised, IFuture<TInput> parent)
+		{
+			Init(promised, parent);
+		}
+
 		internal void Init(FutureResultPromised<TOutput, TInput> promised, IFuture<TInput> parent)
 		{
 			if (_parent != null || _internal != null)
 			{
 				throw new ReuseException(this);
 			}
+			base.Init();
 			_promised = promised;
 			_parent = parent;
 			_parent.Finally(this);

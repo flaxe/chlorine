@@ -4,9 +4,4 @@ namespace Chlorine.Futures
 	{
 		void HandleFuture(IFuture future);
 	}
-
-	public interface IFutureHandler<TResult>
-	{
-		void HandleFuture(IFuture<TResult> future);
-	}
 }

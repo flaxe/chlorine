@@ -15,6 +15,8 @@ namespace Chlorine.Futures
 
 		internal void Init(IEnumerable<IFuture> futures)
 		{
+			base.Init();
+
 			_futures = ListPool<IFuture>.Pull(futures);
 
 			FutureStatus status = FutureStatus.Resolved;

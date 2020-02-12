@@ -1,3 +1,4 @@
+using Chlorine.Exceptions;
 using Chlorine.Futures;
 using Chlorine.Pools;
 using NUnit.Framework;
@@ -303,6 +304,137 @@ namespace Chlorine.Tests
 					Assert.IsTrue(reusedFuture.IsPending);
 					Assert.IsTrue(reusedFuture == firstFuture || reusedFuture == secondFuture);
 				}
+			}
+		}
+
+		private class Handler : IFutureHandler
+		{
+			public void HandleFuture(IFuture future)
+			{
+			}
+		}
+
+		[TestFixture]
+		private class ReleaseTests
+		{
+			[Test]
+			public void CheckStatusAfterFutureRelease_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				IFuture future = FuturePool.Pull(promise);
+				FuturePool.Release(future);
+
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = future.IsPending; });
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = future.IsResolved; });
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = future.IsRejected; });
+			}
+
+			[Test]
+			public void CheckStatusAfterResultFutureRelease_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				IFuture<uint> future = FuturePool.Pull(promise);
+				FuturePool.Release(future);
+
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = future.IsPending; });
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = future.IsResolved; });
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = future.IsRejected; });
+			}
+
+			[Test]
+			public void ThenAfterFutureRelease_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				IFuture future = FuturePool.Pull(promise);
+				FuturePool.Release(future);
+
+				Assert.Throws<ForbiddenOperationException>(() => future.Then(() => {}, reason => {}));
+			}
+
+			[Test]
+			public void ThenAfterResultFutureRelease_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				IFuture<uint> future = FuturePool.Pull(promise);
+				FuturePool.Release(future);
+
+				Assert.Throws<ForbiddenOperationException>(() => future.Then(() => {}, reason => {}));
+			}
+
+			[Test]
+			public void FinallyAfterFutureRelease_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise promise = PromisePool.Pull();
+				IFuture future = FuturePool.Pull(promise);
+				FuturePool.Release(future);
+
+				Handler handler = new Handler();
+				Assert.Throws<ForbiddenOperationException>(() => future.Finally(handler));
+			}
+
+			[Test]
+			public void FinallyAfterResultFutureRelease_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise<uint> promise = PromisePool.Pull<uint>();
+				IFuture<uint> future = FuturePool.Pull(promise);
+				FuturePool.Release(future);
+
+				Handler handler = new Handler();
+				Assert.Throws<ForbiddenOperationException>(() => future.Finally(handler));
+			}
+
+			[Test]
+			public void ChainFutureToReleasedFuture_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise firstPromise = PromisePool.Pull();
+				IFuture future = FuturePool.Pull(firstPromise);
+				FuturePool.Release(future);
+
+				Promise secondPromise = PromisePool.Pull();
+				Assert.Throws<ForbiddenOperationException>(() => future.Then(() => FuturePool.Pull(secondPromise)));
+			}
+
+			[Test]
+			public void ChainFutureToReleasedResultFuture_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise<uint> firstPromise = PromisePool.Pull<uint>();
+				IFuture<uint> future = FuturePool.Pull(firstPromise);
+				FuturePool.Release(future);
+
+				Promise secondPromise = PromisePool.Pull();
+				Assert.Throws<ForbiddenOperationException>(() => future.Then(() => FuturePool.Pull(secondPromise)));
+			}
+
+			[Test]
+			public void ChainResultFutureToReleasedFuture_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise firstPromise = PromisePool.Pull();
+				IFuture future = FuturePool.Pull(firstPromise);
+				FuturePool.Release(future);
+
+				Promise<uint> secondPromise = PromisePool.Pull<uint>();
+				Assert.Throws<ForbiddenOperationException>(() => future.Then(() => FuturePool.Pull(secondPromise)));
+			}
+
+			[Test]
+			public void ChainResultFutureToReleasedResultFuture_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				Promise<uint> firstPromise = PromisePool.Pull<uint>();
+				IFuture<uint> future = FuturePool.Pull(firstPromise);
+				FuturePool.Release(future);
+
+				Promise<uint> secondPromise = PromisePool.Pull<uint>();
+				Assert.Throws<ForbiddenOperationException>(() => future.Then(() => FuturePool.Pull(secondPromise)));
 			}
 		}
 

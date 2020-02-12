@@ -27,6 +27,7 @@ namespace Chlorine.Futures
 			{
 				throw new ReuseException(this);
 			}
+			base.Init();
 			_promise = promise;
 			_promise.Fulfill(this);
 		}
@@ -68,6 +69,7 @@ namespace Chlorine.Futures
 			{
 				throw new ReuseException(this);
 			}
+			base.Init();
 			_promise = promise;
 			_promise.Fulfill(this);
 		}

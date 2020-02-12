@@ -14,11 +14,12 @@ namespace Chlorine.Futures.Internal
 
 		private WeakReferenceList<Future> _futures;
 
-		private PromiseStatus _status = PromiseStatus.Pending;
+		private PromiseStatus _status;
 		private Error _reason;
 
 		protected AbstractFalsePromise()
 		{
+			_status = PromiseStatus.Pending;
 		}
 
 		public bool IsPending => _status == PromiseStatus.Pending;
