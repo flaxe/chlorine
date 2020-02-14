@@ -220,6 +220,10 @@ namespace Chlorine.Futures.Internal
 
 		protected void Init()
 		{
+			if (_status != FutureStatus.Empty)
+			{
+				throw new ReuseException(this);
+			}
 			_status = FutureStatus.Pending;
 		}
 

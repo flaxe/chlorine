@@ -1,3 +1,4 @@
+using Chlorine.Exceptions;
 using Chlorine.Futures;
 using Chlorine.Pools;
 using NUnit.Framework;
@@ -84,6 +85,54 @@ namespace Chlorine.Tests
 				Promise<uint> reusedPromise = PromisePool.Pull<uint>();
 				Assert.IsTrue(reusedPromise.IsPending);
 				Assert.AreSame(promise, reusedPromise);
+			}
+		}
+
+		[TestFixture]
+		private class ReleaseTests
+		{
+			[Test]
+			public void CheckStatusReleasedPromise_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				IPromise promise = PromisePool.Pull();
+				PromisePool.Release(promise);
+
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = promise.IsPending; });
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = promise.IsResolved; });
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = promise.IsRejected; });
+			}
+
+			[Test]
+			public void CheckStatusReleasedResultPromise_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				IPromise<uint> promise = PromisePool.Pull<uint>();
+				PromisePool.Release(promise);
+
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = promise.IsPending; });
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = promise.IsResolved; });
+				Assert.Throws<ForbiddenOperationException>(() => { bool _ = promise.IsRejected; });
+			}
+
+			[Test]
+			public void FulfillReleasedPromise_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				IPromise promise = PromisePool.Pull();
+				PromisePool.Release(promise);
+
+				Assert.Throws<ForbiddenOperationException>(() => FuturePool.Pull(promise));
+			}
+
+			[Test]
+			public void FulfillReleasedResultPromise_ExceptionThrown()
+			{
+				SharedPool.Clear();
+				IPromise<uint> promise = PromisePool.Pull<uint>();
+				PromisePool.Release(promise);
+
+				Assert.Throws<ForbiddenOperationException>(() => FuturePool.Pull(promise));
 			}
 		}
 

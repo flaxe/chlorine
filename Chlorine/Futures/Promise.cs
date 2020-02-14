@@ -8,18 +8,23 @@ namespace Chlorine.Futures
 	{
 		internal Promise()
 		{
+			Init();
 		}
 
 		public void Resolve()
 		{
-			if (Status != PromiseStatus.Pending)
+			switch (Status)
 			{
-				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
-						"Promise already resolved or rejected.");
+				case PromiseStatus.Resolved:
+				case PromiseStatus.Rejected:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise already resolved or rejected.");
+				default:
+					Status = PromiseStatus.Resolved;
+					HandleResolve();
+					HandleClear();
+					break;
 			}
-			Status = PromiseStatus.Resolved;
-			HandleResolve();
-			HandleClear();
 		}
 	}
 
@@ -31,6 +36,7 @@ namespace Chlorine.Futures
 
 		internal Promise()
 		{
+			Init();
 		}
 
 		public TResult Result
@@ -67,6 +73,9 @@ namespace Chlorine.Futures
 		{
 			switch (Status)
 			{
+				case PromiseStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise is empty.");
 				case PromiseStatus.Pending:
 					if (_resultFutures == null)
 					{
@@ -90,15 +99,19 @@ namespace Chlorine.Futures
 
 		public void Resolve(TResult result)
 		{
-			if (Status != PromiseStatus.Pending)
+			switch (Status)
 			{
-				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
-						"Promise already resolved or rejected.");
+				case PromiseStatus.Resolved:
+				case PromiseStatus.Rejected:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise already resolved or rejected.");
+				default:
+					Status = PromiseStatus.Resolved;
+					_result = result;
+					HandleResolve();
+					HandleClear();
+					break;
 			}
-			Status = PromiseStatus.Resolved;
-			_result = result;
-			HandleResolve();
-			HandleClear();
 		}
 
 		protected override void HandleClear()

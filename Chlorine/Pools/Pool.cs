@@ -8,7 +8,7 @@ namespace Chlorine.Pools
 
 		public static void Clear()
 		{
-			SharedPool.ClearByType(Type);
+			SharedPool.Clear(Type);
 		}
 
 		public static T Pull()

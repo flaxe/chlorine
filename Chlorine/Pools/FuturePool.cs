@@ -12,7 +12,7 @@ namespace Chlorine.Pools
 		{
 			foreach (Type futureType in FutureTypes)
 			{
-				SharedPool.ClearByType(futureType);
+				SharedPool.Clear(futureType);
 			}
 			FutureTypes.Clear();
 		}

@@ -318,7 +318,7 @@ namespace Chlorine.Tests
 		private class ReleaseTests
 		{
 			[Test]
-			public void CheckStatusAfterFutureRelease_ExceptionThrown()
+			public void CheckStatusReleasedFuture_ExceptionThrown()
 			{
 				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
@@ -331,7 +331,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void CheckStatusAfterResultFutureRelease_ExceptionThrown()
+			public void CheckStatusReleasedResultFuture_ExceptionThrown()
 			{
 				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
@@ -344,7 +344,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ThenAfterFutureRelease_ExceptionThrown()
+			public void ThenReleasedFuture_ExceptionThrown()
 			{
 				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
@@ -355,7 +355,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void ThenAfterResultFutureRelease_ExceptionThrown()
+			public void ThenReleasedResultFuture_ExceptionThrown()
 			{
 				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();
@@ -366,7 +366,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void FinallyAfterFutureRelease_ExceptionThrown()
+			public void FinallyReleasedFuture_ExceptionThrown()
 			{
 				SharedPool.Clear();
 				Promise promise = PromisePool.Pull();
@@ -378,7 +378,7 @@ namespace Chlorine.Tests
 			}
 
 			[Test]
-			public void FinallyAfterResultFutureRelease_ExceptionThrown()
+			public void FinallyReleasedResultFuture_ExceptionThrown()
 			{
 				SharedPool.Clear();
 				Promise<uint> promise = PromisePool.Pull<uint>();

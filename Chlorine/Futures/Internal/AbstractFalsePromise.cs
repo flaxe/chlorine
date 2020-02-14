@@ -7,6 +7,7 @@ namespace Chlorine.Futures.Internal
 	{
 		protected enum PromiseStatus
 		{
+			Empty,
 			Pending,
 			Resolved,
 			Rejected
@@ -19,12 +20,47 @@ namespace Chlorine.Futures.Internal
 
 		protected AbstractFalsePromise()
 		{
-			_status = PromiseStatus.Pending;
+			_status = PromiseStatus.Empty;
 		}
 
-		public bool IsPending => _status == PromiseStatus.Pending;
-		public bool IsResolved => _status == PromiseStatus.Resolved;
-		public bool IsRejected => _status == PromiseStatus.Rejected;
+		public bool IsPending
+		{
+			get
+			{
+				if (_status == PromiseStatus.Empty)
+				{
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise is empty.");
+				}
+				return _status == PromiseStatus.Pending;
+			}
+		}
+
+		public bool IsResolved
+		{
+			get
+			{
+				if (_status == PromiseStatus.Empty)
+				{
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise is empty.");
+				}
+				return _status == PromiseStatus.Resolved;
+			}
+		}
+
+		public bool IsRejected
+		{
+			get
+			{
+				if (_status == PromiseStatus.Empty)
+				{
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise is empty.");
+				}
+				return _status == PromiseStatus.Rejected;
+			}
+		}
 
 		protected PromiseStatus Status
 		{
@@ -48,14 +84,26 @@ namespace Chlorine.Futures.Internal
 		public virtual void Reset()
 		{
 			HandleClear();
-			_status = PromiseStatus.Pending;
+			_status = PromiseStatus.Empty;
 			_reason = default;
+		}
+
+		public void Init()
+		{
+			if (_status != PromiseStatus.Empty)
+			{
+				throw new ReuseException(this);
+			}
+			_status = PromiseStatus.Pending;
 		}
 
 		public void Fulfill(Future future)
 		{
 			switch (_status)
 			{
+				case PromiseStatus.Empty:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise is empty.");
 				case PromiseStatus.Pending:
 					if (_futures == null)
 					{
@@ -79,15 +127,19 @@ namespace Chlorine.Futures.Internal
 
 		public void Reject(Error reason)
 		{
-			if (_status != PromiseStatus.Pending)
+			switch (_status)
 			{
-				throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
-						"Promise already resolved or rejected.");
+				case PromiseStatus.Resolved:
+				case PromiseStatus.Rejected:
+					throw new ForbiddenOperationException(ForbiddenOperationErrorCode.InvalidOperation,
+							"Promise already resolved or rejected.");
+				default:
+					_status = PromiseStatus.Rejected;
+					_reason = reason;
+					HandleReject();
+					HandleClear();
+					break;
 			}
-			_status = PromiseStatus.Rejected;
-			_reason = reason;
-			HandleReject();
-			HandleClear();
 		}
 
 		protected virtual void HandleClear()

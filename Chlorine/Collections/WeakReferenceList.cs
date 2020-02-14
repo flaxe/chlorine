@@ -45,7 +45,7 @@ namespace Chlorine.Collections
 		{
 			foreach (WeakReference<T> reference in _list)
 			{
-				WeakReferencePool<T>.Release(reference);
+				WeakReferencePool.Release(reference);
 			}
 			_overdueCache.Clear();
 			_list.Clear();
@@ -64,7 +64,7 @@ namespace Chlorine.Collections
 			}
 			if (!TryFind(target, out int _, out WeakReference<T> _))
 			{
-				_list.Add(WeakReferencePool<T>.Pull(target));
+				_list.Add(WeakReferencePool.Pull(target));
 			}
 			ReleaseOverdue();
 		}
@@ -79,7 +79,7 @@ namespace Chlorine.Collections
 			if (found)
 			{
 				_list.RemoveAt(index);
-				WeakReferencePool<T>.Release(reference);
+				WeakReferencePool.Release(reference);
 			}
 			ReleaseOverdue();
 			return found;
@@ -129,7 +129,7 @@ namespace Chlorine.Collections
 				foreach (WeakReference<T> overdueReference in _overdueCache)
 				{
 					_list.Remove(overdueReference);
-					WeakReferencePool<T>.Release(overdueReference);
+					WeakReferencePool.Release(overdueReference);
 				}
 				_overdueCache.Clear();
 			}

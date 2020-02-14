@@ -12,7 +12,7 @@ namespace Chlorine.Pools
 		{
 			foreach (Type promiseType in PromiseTypes)
 			{
-				SharedPool.ClearByType(promiseType);
+				SharedPool.Clear(promiseType);
 			}
 			PromiseTypes.Clear();
 		}
@@ -21,6 +21,7 @@ namespace Chlorine.Pools
 		{
 			if (SharedPool.Pull(typeof(Promise)) is Promise promise)
 			{
+				promise.Init();
 				return promise;
 			}
 			return new Promise();
@@ -30,6 +31,7 @@ namespace Chlorine.Pools
 		{
 			if (SharedPool.Pull(typeof(Promise<TResult>)) is Promise<TResult> promise)
 			{
+				promise.Init();
 				return promise;
 			}
 			return new Promise<TResult>();
