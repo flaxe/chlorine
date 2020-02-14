@@ -21,15 +21,15 @@ namespace Chlorine.Providers
 		{
 			if (_instance != null)
 			{
-				if (_instance is IDisposable disposableInstance)
+				if (_instance is IDisposable instance)
 				{
-					disposableInstance.Dispose();
+					instance.Dispose();
 				}
 				_instance = null;
 			}
-			if (_provider is IDisposable disposableProvider)
+			if (_provider is IDisposable provider)
 			{
-				disposableProvider.Dispose();
+				provider.Dispose();
 			}
 		}
 

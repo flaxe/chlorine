@@ -4,7 +4,7 @@ using Chlorine.Factories;
 
 namespace Chlorine.Providers
 {
-	public sealed class FromFactoryProvider<T> : IProvider
+	public sealed class FromFactoryProvider<T> : IProvider, IDisposable
 			where T : class
 	{
 		private readonly IFactory<T> _factory;
@@ -12,6 +12,19 @@ namespace Chlorine.Providers
 		public FromFactoryProvider(IFactory<T> factory)
 		{
 			_factory = factory;
+		}
+
+		~FromFactoryProvider()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			if (_factory is IDisposable disposable)
+			{
+				disposable.Dispose();
+			}
 		}
 
 		public object Provide()
