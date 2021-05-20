@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Carbone.Exceptions;
+
+#if !NOT_UNITY3D
 using UnityEngine;
+#endif
 
 namespace Carbone.Injection
 {
@@ -15,7 +18,9 @@ namespace Carbone.Injection
 
 	internal sealed class InjectAnalyzer
 	{
+#if !NOT_UNITY3D
 		private static readonly Type UnityComponentType = typeof(Component);
+#endif
 		private static readonly Type InjectAttributeType = typeof(InjectAttribute);
 
 		private readonly Dictionary<Type, AnalyzeResult> _resultByType = new Dictionary<Type, AnalyzeResult>();
@@ -54,15 +59,17 @@ namespace Carbone.Injection
 			}
 			if ((flags & InjectFlag.Construct) == InjectFlag.Construct)
 			{
+#if !NOT_UNITY3D
 				if (type.IsEqualOrDerivesFrom(UnityComponentType))
 				{
 					throw new InjectException(InjectErrorCode.UnityComponentConstruction,
-							$"Can\"t construct UnityEngine component \"{type.Name}\".");
+							$"Can't construct UnityEngine component \"{type.Name}\".");
 				}
+#endif
 				if (type.IsAbstract)
 				{
 					throw new InjectException(InjectErrorCode.AbstractClassConstruction,
-							$"Can\"t construct abstract class \"{type.Name}\".");
+							$"Can't construct abstract class \"{type.Name}\".");
 				}
 				info.Constructor = GetConstructorInfo(type);
 			}
