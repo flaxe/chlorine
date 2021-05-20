@@ -1,0 +1,17 @@
+{
+    "name": "Carbone.Controller",
+    "rootNamespace": "Carbone",
+    "references": [
+        "Carbone.Utilities",
+        "Carbone.Container"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
