@@ -51,7 +51,7 @@ namespace Carbone.Injection
 			if (constructorInfo == null)
 			{
 				throw new InjectException(InjectErrorCode.HasNoConstructor,
-						$"Can\"t instantiate \"{info.Type.Name}\". Has no constructor.");
+						$"Can't instantiate \"{info.Type.Name}\". Has no constructor.");
 			}
 			object instance;
 			object?[] parameters = ResolveParameters(info, constructorInfo.Parameters, arguments);
